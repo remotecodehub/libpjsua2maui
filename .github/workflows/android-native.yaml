@@ -61,15 +61,19 @@ jobs:
         cmdline-tools-version: 11076708 
         packages: platforms;android-21 tools platform-tools build-tools;34.0.0
     
-    - uses: nttld/setup-ndk@v1
+    - name: Install NDK r25c
+      uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
         ndk-version: r25c
         add-to-path: true
-        link-to-sdk: true 
       env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path 
+    
+    - name: Inspect NDK Installation
+      run: |
+        echo "Listing NDK structure..."
+        ls -R ${{ steps.setup-ndk.outputs.ndk-path }}
 
     - name: Install build tools
       run: |
@@ -78,12 +82,7 @@ jobs:
         sudo sh -c "dpkg --add-architecture i386; apt-get update && apt-get install -y ${DEPS}"
       shell: bash
 
-    - name: Inspect NDK Directory
-      run: |
-        echo "Listing NDK directories..."
-        ls -R /opt/hostedtoolcache/ndk/r25c/x64
-      shell: bash
-      
+     
     - name: Build OpenH264
       id: openh264
       run: |

@@ -560,7 +560,7 @@ jobs:
             export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
             echo "calling configure-iphone"
-            ARCH="-arch ${{ matrix.arch }}"./configure-iphone --host || cat *config.log
+            ./configure-iphone || cat *config.log
             #cat *config.log
             echo "running make dep"
             make dep

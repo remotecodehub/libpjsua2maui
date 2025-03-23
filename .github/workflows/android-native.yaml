@@ -91,28 +91,22 @@ jobs:
         echo "cmdline_tools_path=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_OUTPUT
         echo "platform_tools_path=$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_OUTPUT
 
-
-    - name: Create Symlink for /bin/sh
-      run: |
-        mkdir -p $HOME/bin
-        ln -sf /usr/bin/bash $HOME/bin/sh
-        echo "$HOME/bin" >> $GITHUB_PATH
-      
-
+ 
     - name: Verify Android SDK installation
+      shell: bash
       run: |
         echo "Android SDK Root: $ANDROID_SDK_ROOT"
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
-      shell: bash
 
     - name: Verify Android SDK installation
+      shell: bash
       run: |
         echo "Android SDK Root: $ANDROID_SDK_ROOT"
         sdkmanager --list
-      shell: bash
 
     - name: Download and Setup Android NDK
       id: setup-ndk
+      shell: bash
       run: |
         echo "Downloading Android NDK r25c..."
         curl -L -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
@@ -123,26 +117,26 @@ jobs:
         export ANDROID_NDK_HOME=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c
         echo "NDK_HOME=$ANDROID_NDK_HOME"
         echo "ndk-path=$ANDROID_NDK_HOME" >> $GITHUB_OUTPUT
-      shell: bash
  
     - name: Debug NDK Setup
+      shell: bash
       run: |
         echo "NDK Path: ${{ steps.setup-ndk.outputs.ndk-path }}"
         ls -R /opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/
-      shell: bash
 
     - name: Install build tools
+      shell: bash
       run: |
         DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev \
               libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig llvm clang"
         sudo sh -c "dpkg --add-architecture i386; apt-get update && apt-get install -y ${DEPS}"
-      shell: bash
 
      
     - name: Build OpenH264
       id: openh264
+      shell: bash
       run: |
-        
+      
         LIB_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/libs
         LOG_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/logs 
         if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
@@ -164,7 +158,7 @@ jobs:
         cp -r * ${{ env.OPENH264_TMP_DIR }}
         cd ${{ env.OPENH264_TMP_DIR }}
         mkdir -p ${{ env.BUILD_DIR }}
-        echo ˜"sedding makefile"
+        echo "sedding makefile"
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         #sed -i '/-gcc-toolchain.*GCC_TOOLCHAIN_PATH/d' ./build/platform-android.mk
         sed -e "/binaries: decdemo encdemo/ s/^#*/#/" -i ./build/platform-android.mk
@@ -211,7 +205,6 @@ jobs:
         mkdir -p ${LIB_PATH}/${{matrix.arch}}
         echo "make ${ARGS} install" 
         make ${ARGS} install 
-      shell: bash
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         

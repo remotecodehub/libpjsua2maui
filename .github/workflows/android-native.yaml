@@ -74,8 +74,7 @@ jobs:
         echo "NDK_HOME=$ANDROID_NDK_HOME"
         echo "ndk-path=$ANDROID_NDK_HOME" >> $GITHUB_OUTPUT
       shell: bash
-
-    
+ 
     - name: Debug NDK Setup
       run: |
         echo "NDK Path: ${{ steps.setup-ndk.outputs.ndk-path }}"
@@ -142,7 +141,7 @@ jobs:
         fi
         echo "make ${ARGS}" 
         
-        make ${ARGS} CFLAGS="-I/usr/include/x86_64-linux-gnu"
+        make ${ARGS} CFLAGS="--sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/"
 
 
         mkdir -p ${LIB_PATH}/${{matrix.arch}}

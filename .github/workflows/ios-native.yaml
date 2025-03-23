@@ -423,7 +423,8 @@ jobs:
         if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
           brew install llvm
         fi
-    
+        ls /opt/homebrew/opt/llvm/lib/
+
     - name: Verify C compiler path
       run: |
         if [ ! -f "/Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" ]; then
@@ -437,6 +438,7 @@ jobs:
     - name: Build pjsip
       id: build
       run: |
+        echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> /Users/runner/.bash_profile
         cp -v -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
         
         cd ${{ env.PJSIP_PATH }}
@@ -452,10 +454,10 @@ jobs:
             export CXX="/opt/homebrew/opt/llvm/bin/clang++ -isysroot $SDKROOT"
             export AR="/opt/homebrew/opt/llvm/bin/llvm-ar -isysroot $SDKROOT"
             export RANLIB="/opt/homebrew/opt/llvm/bin/llvm-ranlib -isysroot $SDKROOT"
-            export LD="/opt/homebrew/opt/llvm/bin/ld.lld -isysroot $SDKROOT"
+            #export LD="/opt/homebrew/opt/llvm/bin/ld.lld -isysroot $SDKROOT"
 
-            export CFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
-            export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
+            export CFLAGS="-I/opt/homebrew/opt/llvm/include -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
+            export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             echo "calling configure-iphone"
             ARCH="-arch ${{ matrix.arch }}" ./configure-iphone  --host=${{ matrix.arch }}-apple-darwin --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
@@ -464,18 +466,19 @@ jobs:
             echo "make"
             make  
         else
-            export CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) "
-            export LDFLAGS="-framework AudioUnit -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjlib-util/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjnath/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjmedia/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjsip/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/third_party/lib "
-
+              
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
             echo $DEVPATH
             export SDKROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
-
-            export CFLAGS+="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION  }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
-            export LDFLAGS+="-arch ${{ matrix.arch }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
-            export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"
             
-            export LDFLAGS="${LDFLAGS} -L$(find /Applications/Xcode_16.2.0.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs -name AudioUnit.framework -print0 | xargs -0 dirname) -framework AudioUnit"
+            export CFLAGS="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION  }} "
+            export LDFLAGS="-arch ${{ matrix.arch }} "
+            export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"    
+
+            export CFLAGS+=" -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
+            export LDFLAGS+=" -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
+             
+            export LDFLAGS="${LDFLAGS} -L$(find /Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs -name AudioUnit.framework -print0 | xargs -0 dirname) -framework AudioUnit"
 
             #export CC=`which clang`
             #export CXX=`which clang++`
@@ -504,7 +507,7 @@ jobs:
         cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
         cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
 
-        cp -v -f ./csharp/pjsua2maui/pjsua2maui/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+        cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 
         echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
 
@@ -544,7 +547,8 @@ jobs:
         if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
           brew install llvm
         fi
-
+        ls /opt/homebrew/opt/llvm/lib/
+        ls /opt/homebrew/opt/llvm/bin/
       shell: sh
            
 
@@ -574,19 +578,18 @@ jobs:
             export CXX="/opt/homebrew/opt/llvm/bin/clang++ -isysroot $SDKROOT"
             export AR="/opt/homebrew/opt/llvm/bin/llvm-ar -isysroot $SDKROOT"
             export RANLIB="/opt/homebrew/opt/llvm/bin/llvm-ranlib -isysroot $SDKROOT"
-            export LD="/opt/homebrew/opt/llvm/bin/ld.lld -isysroot $SDKROOT"
+            # export LD="/opt/homebrew/opt/llvm/bin/ld.lld -isysroot $SDKROOT"
 
             export CFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
-            export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
-            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-            export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+            export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
+            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
             echo "calling configure-iphone"
             ARCH="-arch ${{ matrix.arch }}"./configure-iphone || cat *config.log
             echo "running make dep"
             make dep
             echo "running make"
             make  
-            else
+        else
             
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
             echo $DEVPATH
@@ -614,9 +617,9 @@ jobs:
 
         mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
         mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
-        cd csharp/pjsua2maui
+        cd csharp
         ls
-        cp -v -f ./pjsua2maui/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+        cp -v -f ./pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 
         echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
 

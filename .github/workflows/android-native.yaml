@@ -113,21 +113,36 @@ jobs:
       id: setup-ndk
       shell: bash
       run: |
-        echo "Downloading Android NDK r25c..."
-        curl -L -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
-        echo "Creating directory for NDK..."
-        mkdir -p /opt/hostedtoolcache/ndk/r25c
+        # Define variables
+        ANDROID_SDK_ROOT=$HOME/android-sdk
+        ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/r25c
+        NDK_VERSION=r25c
+    
+        # Create directories
+        echo "Creating directories for SDK and NDK..."
+        mkdir -p "$ANDROID_SDK_ROOT"
+        mkdir -p "$ANDROID_NDK_ROOT"
+    
+        # Download and extract Android NDK
+        echo "Downloading Android NDK $NDK_VERSION..."
+        curl -L -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip
         echo "Extracting Android NDK..."
-        unzip android-ndk.zip -d /opt/hostedtoolcache/ndk/r25c
-        export ANDROID_NDK_HOME=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c
+        unzip android-ndk.zip -d "$ANDROID_NDK_ROOT"
+        rm android-ndk.zip
+    
+        # Set NDK paths and export them
+        export ANDROID_NDK_HOME=$ANDROID_NDK_ROOT/android-ndk-$NDK_VERSION
         echo "NDK_HOME=$ANDROID_NDK_HOME"
         echo "ndk-path=$ANDROID_NDK_HOME" >> $GITHUB_OUTPUT
+        echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+        echo "PATH=$ANDROID_NDK_HOME:\$PATH" >> $GITHUB_ENV
+      
  
     - name: Debug NDK Setup
       shell: bash
       run: |
         echo "NDK Path: ${{ steps.setup-ndk.outputs.ndk-path }}"
-        ls -R /opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/
+        ls -R ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/
 
     - name: Install build tools
       shell: bash
@@ -171,7 +186,7 @@ jobs:
         cat ./build/platform-android.mk
         export APP_STL="c++_static"
         ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
-        ARGS="${ARGS} TARGET=android-${{ env.TARGET_ANDROID_API }} APP_STL=c++_static ARCH="
+        ARGS="${ARGS} TARGET=android-${{ env.TARGET_ANDROID_API }} NDKROOT=${ANDROID_NDK_HOME} APP_STL=c++_static ARCH="
         # Add final architecture dependent info
         if [ "${{matrix.arch}}" == "armeabi" ]
         then
@@ -179,34 +194,34 @@ jobs:
         elif [ "${{matrix.arch}}" == "armeabi-v7a" ]
         then
             ARGS="${ARGS}arm"
-            export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi"
-            export LDFLAGS="${LDFLAGS} -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/ -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21/ -lc++ -lm -ldl -lc -ldl -lstdc++ -lgcc -lgcc_s"
+            export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi"
+            export LDFLAGS="${LDFLAGS} -L{{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/ -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21/ -lc++ -lm -ldl -lc -ldl -lstdc++  "
         elif [ "${{matrix.arch}}" == "x86" ]
         then
             ARGS="${ARGS}x86 ENABLEPIC=Yes"
-            export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/i686-linux-android"
-            export LDFLAGS="${LDFLAGS} -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/ -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/21/ -lc++ -lm -ldl -lc -ldl -lstdc++ -lgcc -lgcc_s"
+            export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/i686-linux-android"
+            export LDFLAGS="${LDFLAGS} -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/ -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/21/ -lc++ -lm -ldl -lc -ldl -lstdc++  "
         elif [ "${{matrix.arch}}" == "x86_64" ]
             then
             ARGS="${ARGS}x86_64"
-            export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/x86_64-linux-android"
-            export LDFLAGS="${LDFLAGS} -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/ -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/21/ -lc++ -lm -ldl -lc -ldl -lstdc++ -lgcc -lgcc_s"
+            export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/x86_64-linux-android"
+            export LDFLAGS="${LDFLAGS} -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/ -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/21/ -lc++ -lm -ldl -lc -ldl -lstdc++ "
         elif [ "${{matrix.arch}}" == "arm64-v8a" ]
         then
             ARGS="${ARGS}arm64"
-            export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android"
-            export LDFLAGS="${LDFLAGS} -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/ -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/21  -lc++ -lm -ldl -lc -ldl -lstdc++ -lgcc -lgcc_s "
+            export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android"
+            export LDFLAGS="${LDFLAGS} -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/ -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/21  -lc++ -lm -ldl -lc -ldl -lstdc++   "
         else
             echo "Unsupported target ABI: ${{matrix.arch}}"
             exit 1
         fi
         echo "make ${ARGS}"  
-        CFLAGS=" ${CFLAGS} --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"       
-        CFLAGS="${CFLAGS} -I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" 
+        CFLAGS=" ${CFLAGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"       
+        CFLAGS="${CFLAGS} -I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" 
         echo "CFLAGS -> ${CFLAGS}"
         echo "ARGS -> ${ARGS}"
-        export SYSROOT="/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
-        export NDKROOT="/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c"
+        export SYSROOT="${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+        export NDKROOT="${{ env.ANDROID_NDK_HOME }}"
         cat Makefile
         
         make ${ARGS} 

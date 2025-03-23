@@ -380,7 +380,7 @@ jobs:
     strategy:
       matrix:
         arch: [x86_64, arm64]
-    runs-on: macos-14
+    runs-on: self-hosted
     needs: [bcg729, openh264, openssl, opus]
     name: pjsip + h264 + bcg729 + opus + ssl 
     permissions:
@@ -517,7 +517,7 @@ jobs:
     strategy:
       matrix:
         arch: [x86_64, arm64]
-    runs-on: macos-latest
+    runs-on: self-hosted
     name: pjsip 
     permissions:
         contents: write

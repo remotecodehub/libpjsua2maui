@@ -67,7 +67,7 @@ jobs:
         ndk-version: r25c
         add-to-path: true
         link-to-sdk: true
-        local-cache: true
+        local-cache: false
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 

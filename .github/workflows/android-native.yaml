@@ -66,6 +66,8 @@ jobs:
       run: |
         echo "Downloading Android NDK r25c..."
         curl -L -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+        echo "Creating directory for NDK..."
+        mkdir -p /opt/hostedtoolcache/ndk/r25c
         echo "Extracting Android NDK..."
         unzip android-ndk.zip -d /opt/hostedtoolcache/ndk/r25c
         export ANDROID_NDK_HOME=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c
@@ -149,7 +151,7 @@ jobs:
       shell: bash
       env:
         ANDROID_NDK_HOME: ${{ steps.download-ndk.outputs.ndk-path }}
-        
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

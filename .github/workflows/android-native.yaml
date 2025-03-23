@@ -21,15 +21,7 @@ env:
     OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
     OPUS_PATH: ${{ github.workspace }}/lib/opus
     PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
-    NDK_DOWNLOAD_URL: "https://dl.google.com/android/repository/android-ndk-r28-linux.zip"
-    NDK_DIR_NAME: android-ndk-r28
-    DOWNLOAD_DIR: ${{ github.workspace }}/tools
     BUILD_DIR: ${{ github.workspace }}/outputs
-    CMD_TOOLS_DOWNLOAD_URL: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
-    CMD_TOOLS_VERSION: 11076708
-    SDK_DIR_NAME: android-sdk-linux
-    CMD_TOOLS: cmdline-tools
-    CMD_TOOLS_DIR_NAME: latest
     PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
     SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output
     OPENSSL_BUILD_OUT_PATH:  ${{ github.workspace }}/outputs/openssl-build-output
@@ -136,7 +128,9 @@ jobs:
         echo "make ${ARGS} install" 
         make ${ARGS} install 
       shell: bash
-        
+      env:
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

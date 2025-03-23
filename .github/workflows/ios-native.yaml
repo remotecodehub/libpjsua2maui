@@ -431,7 +431,7 @@ jobs:
         
         mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
 
-        cp ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
+        cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
         cd ~/pjsip_build/bundle/${{ matrix.arch }}
 
         if [ "${{ matrix.arch }}" == "x86_64" ]; then
@@ -557,7 +557,7 @@ jobs:
         
         mkdir -p ~/pjsip_build/${{ matrix.arch }}
 
-        cp ${{ env.PJSIP_PATH }} ~/pjsip_build/${{ matrix.arch }}
+        cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/${{ matrix.arch }}
         cd ~/pjsip_build/${{ matrix.arch }}
         
         if [ "${{ matrix.arch }}" == "x86_64" ]; then

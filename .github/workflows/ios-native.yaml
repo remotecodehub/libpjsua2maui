@@ -421,8 +421,7 @@ jobs:
       run: |
         brew install automake autoconf libtool pkg-config swig
         if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
-          brew install llvm lld
-          ls /opt/homebrew/opt/llvm/lib/
+          brew install llvm lld 
           echo `which lld`
         fi
 
@@ -445,52 +444,51 @@ jobs:
         cd ${{ env.PJSIP_PATH }}
 
         if [ "${{ matrix.arch }}" == "x86_64" ]; then
-            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
-            export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-            export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-            echo $DEVPATH
-            echo $ISYSROOT
-            export PATH="/opt/homebrew/opt/llvm/bin:$PATH" 
-            export CC="/opt/homebrew/opt/llvm/bin/clang -isysroot $SDKROOT" 
-            export CXX="/opt/homebrew/opt/llvm/bin/clang++ -isysroot $SDKROOT"
-            export AR="/opt/homebrew/opt/llvm/bin/llvm-ar -isysroot $SDKROOT"
-            export RANLIB="/opt/homebrew/opt/llvm/bin/llvm-ranlib -isysroot $SDKROOT"
-            #export LD="/opt/homebrew/opt/llvm/bin/ld.lld -isysroot $SDKROOT"
-            export LD=`which lld`
-            export CFLAGS="-I/opt/homebrew/opt/llvm/include -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
-            export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
-            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-            echo "calling configure-iphone"
-            ARCH="-arch ${{ matrix.arch }}" ./configure-iphone  --host=${{ matrix.arch }}-apple-darwin --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
-            echo "make dep"
-            make dep
-            echo "make"
-            make  
+          export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+          export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+          export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+          echo $DEVPATH
+          echo $ISYSROOT
+          export PATH="/opt/homebrew/opt/llvm/bin:$PATH" 
+          export CC="/opt/homebrew/opt/llvm/bin/clang -isysroot $SDKROOT" 
+          export CXX="/opt/homebrew/opt/llvm/bin/clang++ -isysroot $SDKROOT"
+          export AR="/opt/homebrew/opt/llvm/bin/llvm-ar -isysroot $SDKROOT"
+          export RANLIB="/opt/homebrew/opt/llvm/bin/llvm-ranlib -isysroot $SDKROOT"
+          #export LD="/opt/homebrew/opt/llvm/bin/ld.lld -isysroot $SDKROOT"
+          export LD=`which lld`
+          export CFLAGS="-I/opt/homebrew/opt/llvm/include -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
+          export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
+          export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+          echo "calling configure-iphone"
+          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone   --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
+          echo "running make dep"
+          make dep
+          echo "running make"
+          make  
         else
-              
-            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
-            echo $DEVPATH
-            export SDKROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
-            
-            export CFLAGS="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION  }} "
-            export LDFLAGS="-arch ${{ matrix.arch }} "
-            export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"    
+          export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
+          export SDKROOT="$(xcrun --sdk iphoneos --show-sdk-path)"
+          export CC="${DEVPATH}/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
+          export CXX="${DEVPATH}/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++"
+          export AR="${DEVPATH}/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/ar"
+          export RANLIB="${DEVPATH}/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib"
 
-            export CFLAGS+=" -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
-            export LDFLAGS+=" -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
-             
-            export LDFLAGS="${LDFLAGS} -L$(find /Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs -name AudioUnit.framework -print0 | xargs -0 dirname) -framework AudioUnit"
+          export CFLAGS="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -isysroot ${SDKROOT} \
+          -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include \
+          -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
 
-            #export CC=`which clang`
-            #export CXX=`which clang++`
-            echo $CC
-            echo $CXX
-             
-            ./configure-iphone  --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/   || cat *config.log
-            
-            make dep
+          export LDFLAGS="-arch ${{ matrix.arch }} -isysroot ${SDKROOT} \
+          -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib \
+          -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib -framework AudioUnit"
 
-            make 
+          ./configure-iphone --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
+          --with-ssl=${{ github.workspace }}/libs/ssl/ \
+          --with-opus=${{ github.workspace }}/libs/opus/ \
+          --with-openh264=${{ github.workspace }}/libs/h264/ || cat config.log
+          echo "running make dep"
+          make dep
+          echo "running make"
+          make
         fi
         
 
@@ -546,9 +544,7 @@ jobs:
       run: |
         brew install nasm autoconf automake libtool swig  
         if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
-          brew install llvm lld
-          ls /opt/homebrew/opt/llvm/lib/
-          ls /opt/homebrew/opt/llvm/bin/
+          brew install llvm lld 
         fi
       shell: sh
            

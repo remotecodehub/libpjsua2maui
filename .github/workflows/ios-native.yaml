@@ -190,7 +190,7 @@ jobs:
         fi
       shell: sh
       env:
-        SDKVERSION: 18.3
+        SDKVERSION: 18.2
         IOS_MIN_SDK_VERSION: 12.2  
         CONFIG_DISABLE_BITCODE: true
         DEVELOPER: $(xcode-select -print-path)
@@ -204,8 +204,8 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        SDKVERSION: 18.3
-        
+        SDKVERSION: 18.2
+
   opus:
     strategy:
       matrix:
@@ -291,7 +291,7 @@ jobs:
  
       shell: sh
       env:
-        SDKVERSION: 18.3
+        SDKVERSION: 18.2
         IOS_MIN_SDK_VERSION: 12.2  
         CONFIG_DISABLE_BITCODE: true
         DEVELOPER: $(xcode-select -print-path)
@@ -305,7 +305,7 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        SDKVERSION: 18.3
+        SDKVERSION: 18.2
     
   bcg729:
     strategy:
@@ -374,7 +374,7 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        SDKVERSION: 18.3
+        SDKVERSION: 18.2
 
 
   pjsip-h264-opus-bcg729-ssl:
@@ -507,7 +507,7 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        SDKVERSION: 18.3
+        SDKVERSION: 18.2
 
 
   pjsip:
@@ -618,4 +618,4 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        SDKVERSION: 18.3
+        SDKVERSION: 18.2

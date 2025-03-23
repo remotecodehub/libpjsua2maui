@@ -25,13 +25,13 @@ env:
     PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
     SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output
     OPENSSL_BUILD_OUT_PATH:  ${{ github.workspace }}/outputs/openssl-build-output
-    OPENSSL_TARGET_NDK_LEVEL: 25
+    OPENSSL_TARGET_NDK_LEVEL: 21
     OPENH264_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/openh264-build-output
-    OPENH264_TARGET_NDK_LEVEL: 25
+    OPENH264_TARGET_NDK_LEVEL: 21
     OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/opus-build-output
     BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
     ANDROID_BUILD_TOOLS: "34.0.0"
-    TARGET_ANDROID_API: 25
+    TARGET_ANDROID_API: 21
     OPENH264_TMP_DIR: /tmp/openh264
 jobs:
   third-part:
@@ -59,12 +59,12 @@ jobs:
       uses: android-actions/setup-android@v3
       with:
         cmdline-tools-version: 11076708 
-        packages: platforms;android-25 tools platform-tools build-tools;34.0.0
+        packages: platforms;android-21 tools platform-tools build-tools;34.0.0
     
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-        ndk-version: r25c
+        ndk-version: r21e
         add-to-path: true
         link-to-sdk: true
         local-cache: false

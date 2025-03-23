@@ -118,7 +118,7 @@ jobs:
         echo "finish sed Makefile" 
         export APP_STL=c++_static
         ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
-        ARGS="${ARGS} TARGET=android-${{ env.TARGET_ANDROID_API }} ARCH="
+        ARGS="${ARGS} TARGET=android-${{ env.TARGET_ANDROID_API }} APP_STL=c++_shared ARCH="
         # Add final architecture dependent info
         if [ "${{matrix.arch}}" == "armeabi" ]
         then
@@ -126,26 +126,27 @@ jobs:
         elif [ "${{matrix.arch}}" == "armeabi-v7a" ]
         then
             ARGS="${ARGS}arm"
-            export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi/asm --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+            #export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi/asm --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
         elif [ "${{matrix.arch}}" == "x86" ]
         then
             ARGS="${ARGS}x86 ENABLEPIC=Yes"
-            export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/i686-linux-android/asm --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+            #export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/i686-linux-android/asm --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
         elif [ "${{matrix.arch}}" == "x86_64" ]
             then
             ARGS="${ARGS}x86_64"
-            export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/x86_64-linux-android/asm --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+            #export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/x86_64-linux-android/asm --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
         elif [ "${{matrix.arch}}" == "arm64-v8a" ]
         then
             ARGS="${ARGS}arm64"
-            export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android/asm --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+            #export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android/asm --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
 
         else
             echo "Unsupported target ABI: ${{matrix.arch}}"
             exit 1
         fi
-        echo "make ${ARGS}" 
-        
+        echo "make ${ARGS}"  
+        export CFLAGS="--sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"       
+        CFLAGS="${CFLAGS} -I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys"
         make ${ARGS} 
 
 

@@ -432,24 +432,28 @@ jobs:
         cd ${{ env.PJSIP_PATH }}
 
         if [ "${{ matrix.arch }}" == "x86_64" ]; then
-            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
-            export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-            export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-            echo $DEVPATH
-            echo $ISYSROOT
-             
-            export CFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
-            export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
-            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-            echo "calling configure-iphone"
-            ARCH="-arch x86_64" ./configure-iphone --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
-            cat *config.log
-            echo "make dep"
-            make dep
-            echo "make"
-            make  
+          export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+          export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+          export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+          echo $DEVPATH
+          echo $ISYSROOT
+            
+          export CFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
+          export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
+          export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+          
+          make realclean
+
+          echo "calling configure-iphone"
+
+          ARCH="-arch x86_64" ./configure-iphone --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
+          cat *config.log
+          echo "make dep"
+          make dep
+          echo "make"
+          make  
         else
-              
+            
           export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
           echo $DEVPATH
           export SDKROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
@@ -467,10 +471,14 @@ jobs:
           #export CXX=`which clang++`
           echo $CC
           echo $CXX
-            
+          
+          make realclean
+
           ARCH="-arch arm64" ./configure-iphone --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/   || cat *config.log
           cat *config.log
           
+          
+
           make dep
 
           make 
@@ -562,7 +570,7 @@ jobs:
           export LDFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
           echo "calling configure-iphone"
-          ./configure-iphone || cat *config.log
+          ARCH="-arch x86_64" ./configure-iphone || cat *config.log
           cat *config.log
           echo "running make dep"
           make dep
@@ -579,7 +587,7 @@ jobs:
           export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"    
           
           echo "calling configure-iphone"
-          ./configure-iphone || cat *config.log
+          ARCH="-arch arm64" ./configure-iphone || cat *config.log
           cat *config.log
           
           echo "running make dep"

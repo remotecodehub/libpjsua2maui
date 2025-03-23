@@ -537,10 +537,7 @@ jobs:
     
     - name: Install deps
       run: |
-        brew install nasm autoconf automake libtool swig 
-        if [ "${{ matrix.arch }}" == "x86_64" ]; then
-          brew install llvm
-        fi
+        brew install nasm autoconf automake libtool swig  
       shell: sh
            
 
@@ -573,7 +570,7 @@ jobs:
             export LD="/opt/homebrew/opt/llvm/bin/ld.lld -isysroot $SDKROOT"
 
             export CFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
-            export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L/opt/homebrew/opt/llvm/lib"
+            export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
             ARCH="-arch ${{ matrix.arch }}"./configure-iphone || cat *config.log

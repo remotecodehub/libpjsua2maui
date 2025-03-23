@@ -128,9 +128,9 @@ jobs:
             echo "Unsupported target ABI: ${{matrix.arch}}"
             exit 1
         fi
-        echo "make ${ARGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+        echo "make ${ARGS}"
         #make ${ARGS}  
-        make ${ARGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot VERBOSE=1
+        make ${ARGS}  VERBOSE=1
         mkdir -p ${LIB_PATH}/${{matrix.arch}}
         echo "make ${ARGS} install" 
         make ${ARGS} install 

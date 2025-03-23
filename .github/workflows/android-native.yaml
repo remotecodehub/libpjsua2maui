@@ -24,12 +24,12 @@ env:
     PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
     SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output
     OPENSSL_BUILD_OUT_PATH:  ${{ github.workspace }}/outputs/openssl-build-output
-    OPENSSL_TARGET_NDK_LEVEL: 25
+    OPENSSL_TARGET_NDK_LEVEL: 21
    
     OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/opus-build-output
     BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
     ANDROID_BUILD_TOOLS: "34.0.0"
-    TARGET_ANDROID_API: 25
+    TARGET_ANDROID_API: 21
     OPENH264_TMP_DIR: /tmp/openh264
 jobs:
   pj-plus-third-party:
@@ -72,7 +72,7 @@ jobs:
         # Define variables
         ANDROID_SDK_ROOT=$HOME/android-sdk
         CMDLINE_TOOLS_VERSION=11076708
-        API_LEVEL=25
+        API_LEVEL=21
         BUILD_TOOLS_VERSION=34.0.0
 
         # Create directories
@@ -180,28 +180,29 @@ jobs:
         then
             ARGS="${ARGS}arm"
             export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi"
-            #export LDFLAGS=""
+            export LDFLAGS="${LDFLAGS} -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/ -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21/ -lc++ -lm -ldl -lc -ldl -lstdc++ -lgcc -lgcc_s"
         elif [ "${{matrix.arch}}" == "x86" ]
         then
             ARGS="${ARGS}x86 ENABLEPIC=Yes"
             export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/i686-linux-android"
+            export LDFLAGS="${LDFLAGS} -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/ -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/21/ -lc++ -lm -ldl -lc -ldl -lstdc++ -lgcc -lgcc_s"
         elif [ "${{matrix.arch}}" == "x86_64" ]
             then
             ARGS="${ARGS}x86_64"
             export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/x86_64-linux-android"
+            export LDFLAGS="${LDFLAGS} -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/ -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/21/ -lc++ -lm -ldl -lc -ldl -lstdc++ -lgcc -lgcc_s"
         elif [ "${{matrix.arch}}" == "arm64-v8a" ]
         then
             ARGS="${ARGS}arm64"
             export CFLAGS="-I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android"
-
+            export LDFLAGS="${LDFLAGS} -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/ -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/21  -lc++ -lm -ldl -lc -ldl -lstdc++ -lgcc -lgcc_s "
         else
             echo "Unsupported target ABI: ${{matrix.arch}}"
             exit 1
         fi
         echo "make ${ARGS}"  
         CFLAGS=" ${CFLAGS} --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"       
-        CFLAGS="${CFLAGS} -I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include"
-        #export LDFLAGS=" -target $(TARGET_NAME) -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android -lc -lm -lstdc++ -lgcc -lgcc_s"
+        CFLAGS="${CFLAGS} -I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" 
         echo "CFLAGS -> ${CFLAGS}"
         echo "ARGS -> ${ARGS}"
         export SYSROOT="/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"

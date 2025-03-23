@@ -338,7 +338,7 @@ jobs:
       shell: sh
             
     - name: Build bcg729 for iOS
-      id: build_bcg729
+      id: build
       run: |
           echo "Building BCG729 for iOS"
           xcode_dev_path=$(xcode-select -print-path)

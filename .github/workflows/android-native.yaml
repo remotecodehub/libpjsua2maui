@@ -55,6 +55,13 @@ jobs:
         java-version: '17'
         check-latest: true
     
+    - name: Install build tools
+      run: |
+        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev which \
+              libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig llvm clang"
+        sudo sh -c "dpkg --add-architecture i386; apt-get update && apt-get install -y ${DEPS}"
+      shell: bash
+    
     - name: Set up Android SDK
       id: setup-sdk
       run: |

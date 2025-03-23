@@ -106,7 +106,7 @@ jobs:
         mkdir -p ${{ env.BUILD_DIR }}
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         sed -i 's/stlport_shared/c++_static/g' Makefile
-        grep "APP_STL=" Makefile
+        cat Makefile | grep APP_STL 
         echo "finish sed Makefile" 
         export APP_STL=c++_static
         ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "

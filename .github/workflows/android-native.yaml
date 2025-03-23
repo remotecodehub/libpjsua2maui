@@ -40,10 +40,7 @@ env:
     BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
     SETUP_ANDROID_APIS: 28
     ANDROID_BUILD_TOOLS: "34.0.0"
-    TARGET_ANDROID_API: 28
-    ANDROID_HOME: ${{ github.workspace }}/tools/android-sdk-linux
-    ANDROID_NDK_HOME:  ${{ github.workspace }}/tools/android-ndk-r28
-    SDK_TOOLS_PATH: ${{ github.workspace }}/tools/android-sdk-linux/
+    TARGET_ANDROID_API: 28 
     OPENH264_TMP_DIR: /tmp/openh264
 jobs:
   third-party:
@@ -61,90 +58,33 @@ jobs:
       with:
          submodules: 'true'
            
-    - name: Download NDK
-      run: |
-        echo ""
-        echo "Downloading Android NDK ${NDK_VERSION} ..."
-        echo ""
-        mkdir -p ${{ env.DOWNLOAD_DIR }}
-        cd ${{ env.DOWNLOAD_DIR }}
-        curl -L -# -o ndk.zip ${{ env.NDK_DOWNLOAD_URL }} 2>&1
-        if [ -d "${{ env.NDK_DIR_NAME }}" ]; then
-          echo "Directory ${{ env.NDK_DIR_NAME }} exists. Removing..."
-          rm -rf ${{ env.NDK_DIR_NAME }}
-        else
-            echo "Directory ${{ env.NDK_DIR_NAME }} does not exist. Skipping removal."
-        fi
-        echo ""
-        echo "Android NDK downloaded!"
-        echo ""
-        echo "Extracting Android NDK ..."
-        echo ""
-        unzip ndk.zip -d ndk
-        mv ndk/${{ env.NDK_DIR_NAME }} .
-        rm -rf ndk
-        rm -rf ndk.zip
-      shell: bash
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        check-latest: true
+      
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: 11076708 
+        packages: platforms;android-21 tools platform-tools build-tools;34.0.0
     
-    - name: Download SDK
-      run: |
-        CMD_ZIP_FILE="${{ env.CMD_TOOLS }}.zip"
-
-        echo ""
-        echo "Downloading Android CMD Line Tools version ${CMD_TOOLS_VERSION} ..."
-        cd ${{ env.DOWNLOAD_DIR }}
-        curl -L -# -o $CMD_ZIP_FILE $CMD_TOOLS_DOWNLOAD_URL 2>&1
-        echo ""
-        echo "Android CMD Tools downloaded!"
-        echo "Extracting Android CMD Tools ..."
-        
-        if [ -d "${{ env.SDK_DIR_NAME }}" ]; then
-          echo "Directory ${{ env.SDK_DIR_NAME }} exists. Removing..."
-          rm -rf ${{ env.SDK_DIR_NAME }}
-        else
-            echo "Directory ${{ env.SDK_DIR_NAME }} does not exist. Skipping removal."
-        fi
-        
-         
-        unzip -d ${{ env.SDK_DIR_NAME }} $CMD_ZIP_FILE
-
-        # Create empty repositories.cfg file to avoid warning
-        mkdir -p ~/.android
-        touch ~/.android/repositories.cfg
-
-        # Since new updates, there are some changes that are not mentioned in the documentation.
-        # After unzipping the command line tools package, the top-most directory you'll get is $CMD_TOOLS.
-        # Rename the unpacked directory from $CMD_TOOLS to $CMD_TOOLS_DIR_NAME, and place it under $ANDROID_HOME/$CMD_TOOLS
-        # which will then look like $ANDROID_HOME/$CMD_TOOLS/$CMD_TOOLS_DIR_NAME
-        cd ${{ env.SDK_DIR_NAME }}/${{ env.CMD_TOOLS }}
-        mkdir -p ${{ env.CMD_TOOLS_DIR_NAME }}
-        mv `ls | grep -w -v ${{ env.CMD_TOOLS_DIR_NAME }}` ${{ env.CMD_TOOLS_DIR_NAME }}
-      shell: bash
-
-    - name: Download API's
-      run: |
-        SDK_MANAGER=$(which sdkmanager)
-        echo "Downloading Android Platforms"
-         
-        echo yes | $SDK_MANAGER "platforms;android-${{ env.SETUP_ANDROID_APIS }}"
-        
-        echo "Downloading Android Platform-Tools"
-        echo yes | $SDK_MANAGER "platform-tools"
-        echo "Exporting TOOLS & PLATFORM_TOOLS"
-        export PATH=${{ env.ANDROID_HOME }}/platform-tools/:${{ env.ANDROID_HOME }}/tools:$PATH
-
-        echo "Downloading Android Build-Tools"
-        echo yes | $SDK_MANAGER "build-tools;${{ env.ANDROID_BUILD_TOOLS }}"
-
-      shell: bash
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r21e
+        add-to-path: true
+        link-to-sdk: true
+      env:
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
     - name: Build OpenH264
       id: openh264
       run: |
         
         LIB_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/libs
-        LOG_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/logs
-        export PATH=${{ env.SDK_TOOLS_PATH }}:$PATH
+        LOG_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/logs 
         if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
           echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} exists. Removing..."
           rm -rf ${{ env.OPENH264_BUILD_OUT_PATH }}

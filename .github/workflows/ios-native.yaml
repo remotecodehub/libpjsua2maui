@@ -424,16 +424,6 @@ jobs:
           brew install llvm lld 
           echo `which lld`
         fi
-
-    - name: Verify C compiler path
-      run: |
-        if [ ! -f "/Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" ]; then
-          echo "Error: clang not found at expected path"
-          exit 1
-        fi
-    
-    - name: Select  Xcode
-      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
   
     - name: Build pjsip
       id: build
@@ -460,7 +450,7 @@ jobs:
           export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
           echo "calling configure-iphone"
-          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone --host=${{ matrix.arch }}-apple-darwin  --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
+          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
           echo "running make dep"
           make dep
           echo "running make"
@@ -473,10 +463,10 @@ jobs:
           export AR="${DEVPATH}/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/ar"
           export RANLIB="${DEVPATH}/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib"
 
-          export CFLAGS="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -isysroot ${SDKROOT} \
+          export CFLAGS="-O3 -arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -isysroot ${SDKROOT} \
           -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include \
           -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
-          export CXXFLAGS="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -isysroot ${SDKROOT} \
+          export CXXFLAGS="-O3 -arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -isysroot ${SDKROOT} \
           -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include \
           -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
           export LDFLAGS="-arch ${{ matrix.arch }} -isysroot ${SDKROOT} \
@@ -583,7 +573,7 @@ jobs:
             export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
             echo "calling configure-iphone"
-            ARCH="-arch ${{ matrix.arch }}"./configure-iphone --host=${{ matrix.arch }}-apple-darwin || cat *config.log
+            ARCH="-arch ${{ matrix.arch }}"./configure-iphone || cat *config.log
             echo "running make dep"
             make dep
             echo "running make"

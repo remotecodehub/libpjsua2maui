@@ -79,7 +79,7 @@ jobs:
         echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/tools/cmdline-tools/bin:$ANDROID_SDK_ROOT/platform-tools:\$PATH" >> $GITHUB_ENV
 
         # Accept licenses
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/tools/cmdline-tools/bin/sdkmanager --licenses
+        echo "yes" | $ANDROID_SDK_ROOT/cmdline-tools/tools/cmdline-tools/bin/sdkmanager --licenses
 
         # Install platform-tools, platforms, and build-tools
         $ANDROID_SDK_ROOT/cmdline-tools/tools/cmdline-tools/bin/sdkmanager \

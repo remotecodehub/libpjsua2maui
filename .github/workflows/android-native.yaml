@@ -104,9 +104,10 @@ jobs:
         cp -r * ${{ env.OPENH264_TMP_DIR }}
         cd ${{ env.OPENH264_TMP_DIR }}
         mkdir -p ${{ env.BUILD_DIR }}
+        echo ˜"sedding makefile""
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         sed -i 's/stlport_shared/c++_static/g' Makefile
-        cat Makefile | grep APP_STL 
+        cat Makefile  
         echo "finish sed Makefile" 
         export APP_STL=c++_static
         ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "

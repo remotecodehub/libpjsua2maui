@@ -421,6 +421,8 @@ jobs:
       run: |
         brew install automake autoconf libtool pkg-config 
         if [ "${{ matrix.ARCH }}" == "x86_64" ];
+          brew install swig
+        fi
     - name: Verify C compiler path
       run: |
         if [ ! -f "/Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" ]; then
@@ -575,7 +577,7 @@ jobs:
             export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L/opt/homebrew/opt/llvm/lib"
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
-            ./configure-iphone || cat *config.log
+            ARCH="-arch ${{ matrix.arch }}"./configure-iphone || cat *config.log
             make dep
             make  
         else

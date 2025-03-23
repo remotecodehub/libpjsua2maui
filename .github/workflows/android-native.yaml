@@ -115,7 +115,7 @@ jobs:
         mkdir -p ${{ env.BUILD_DIR }}
         echo ˜"sedding makefile"
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
-        sed -i '/-gcc-toolchain.*GCC_TOOLCHAIN_PATH/d' ./build/platform-android.mk
+        #sed -i '/-gcc-toolchain.*GCC_TOOLCHAIN_PATH/d' ./build/platform-android.mk
         echo "finish sed Makefile" 
         export APP_STL=c++_static
         ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
@@ -152,6 +152,7 @@ jobs:
         #export LDFLAGS=" -target $(TARGET_NAME) -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android -lc -lm -lstdc++ -lgcc -lgcc_s"
         
         export SYSROOT="/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+        export NDKROOT="/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c"
         make ${ARGS} 
 
 
@@ -161,8 +162,8 @@ jobs:
       shell: bash
       env:
         ANDROID_NDK_HOME: ${{ steps.download-ndk.outputs.ndk-path }}
-        NDKROOT: /opt/hostedtoolcache/ndk/r25c/android-ndk-r25c
-        
+     
+
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

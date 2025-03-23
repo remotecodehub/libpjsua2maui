@@ -61,18 +61,22 @@ jobs:
         cmdline-tools-version: 11076708 
         packages: platforms;android-21 tools platform-tools build-tools;34.0.0
     
-    - name: Install NDK r25c
-      uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: r25c
-        add-to-path: true
-      env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-    
-    - name: Inspect NDK Installation
+    - name: Download and Setup Android NDK
+      id: download-ndk
       run: |
-        echo "Listing NDK structure..."
+        echo "Downloading Android NDK r25c..."
+        curl -L -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+        echo "Extracting Android NDK..."
+        unzip android-ndk.zip -d /opt/hostedtoolcache/ndk/r25c
+        export ANDROID_NDK_HOME=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c
+        echo "NDK_HOME=$ANDROID_NDK_HOME"
+        echo "ndk-path=$ANDROID_NDK_HOME" >> $GITHUB_OUTPUT
+      shell: bash
+
+    
+    - name: Debug NDK Setup
+      run: |
+        echo "NDK Path: ${{ steps.setup-ndk.outputs.ndk-path }}"
         ls -R ${{ steps.setup-ndk.outputs.ndk-path }}
 
     - name: Install build tools
@@ -144,8 +148,8 @@ jobs:
         make ${ARGS} install 
       shell: bash
       env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-
+        ANDROID_NDK_HOME: ${{ steps.download-ndk.outputs.ndk-path }}
+        
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

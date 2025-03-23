@@ -1,0 +1,314 @@
+name: build native android libraries
+on:
+  push:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.gitignore'
+      - '**/*.gitattributes'
+      
+  pull_request:
+    types: [opened, synchronize, reopened]  
+    
+  workflow_dispatch:
+  
+permissions:
+  contents: read
+
+env:
+    BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
+    OPENH264_PATH: ${{ github.workspace }}/lib/openh264
+    OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
+    OPUS_PATH: ${{ github.workspace }}/lib/opus
+    PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
+    NDK_DOWNLOAD_URL: "https://dl.google.com/android/repository/android-ndk-r28-linux.zip"
+    NDK_DIR_NAME: android-ndk-r28
+    DOWNLOAD_DIR: ${{ github.workspace }}/tools
+    BUILD_DIR: ${{ github.workspace }}/outputs
+    CMD_TOOLS_DOWNLOAD_URL: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+    CMD_TOOLS_VERSION: 11076708
+    SDK_DIR_NAME: android-sdk-linux
+    CMD_TOOLS: cmdline-tools
+    CMD_TOOLS_DIR_NAME: latest
+    PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
+    SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output
+    OPENSSL_BUILD_OUT_PATH:  ${{ github.workspace }}/outputs/openssl-build-output
+    OPENSSL_TARGET_NDK_LEVEL: 28
+    OPENH264_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/openh264-build-output
+    OPENH264_TARGET_NDK_LEVEL: 28
+    OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/opus-build-output
+    BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
+    SETUP_ANDROID_APIS: 28
+    ANDROID_BUILD_TOOLS: "34.0.0"
+    TARGET_ANDROID_API: 28
+    ANDROID_HOME: ${{ github.workspace }}/tools/android-sdk-linux
+    ANDROID_NDK_HOME:  ${{ github.workspace }}/tools/android-ndk-r28
+    SDK_TOOLS_PATH: ${{ github.workspace }}/tools/android-sdk-linux/
+    OPENH264_TMP_DIR: /tmp/openh264
+jobs:
+  third-party:
+    strategy:
+      matrix:
+        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
+    runs-on: ubuntu-latest
+    name: openh264 + openssl + opus + bcg927
+    permissions:
+      contents: write
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+         submodules: 'true'
+           
+    - name: Download NDK
+      run: |
+        echo ""
+        echo "Downloading Android NDK ${NDK_VERSION} ..."
+        echo ""
+        mkdir -p ${{ env.DOWNLOAD_DIR }}
+        cd ${{ env.DOWNLOAD_DIR }}
+        curl -L -# -o ndk.zip ${{ env.NDK_DOWNLOAD_URL }} 2>&1
+        if [ -d "${{ env.NDK_DIR_NAME }}" ]; then
+          echo "Directory ${{ env.NDK_DIR_NAME }} exists. Removing..."
+          rm -rf ${{ env.NDK_DIR_NAME }}
+        else
+            echo "Directory ${{ env.NDK_DIR_NAME }} does not exist. Skipping removal."
+        fi
+        echo ""
+        echo "Android NDK downloaded!"
+        echo ""
+        echo "Extracting Android NDK ..."
+        echo ""
+        unzip ndk.zip -d ndk
+        mv ndk/${{ env.NDK_DIR_NAME }} .
+        rm -rf ndk
+        rm -rf ndk.zip
+      shell: bash
+    
+    - name: Download SDK
+      run: |
+        CMD_ZIP_FILE="${{ env.CMD_TOOLS }}.zip"
+
+        echo ""
+        echo "Downloading Android CMD Line Tools version ${CMD_TOOLS_VERSION} ..."
+        cd ${{ env.DOWNLOAD_DIR }}
+        curl -L -# -o $CMD_ZIP_FILE $CMD_TOOLS_DOWNLOAD_URL 2>&1
+        echo ""
+        echo "Android CMD Tools downloaded!"
+        echo "Extracting Android CMD Tools ..."
+        
+        if [ -d "${{ env.SDK_DIR_NAME }}" ]; then
+          echo "Directory ${{ env.SDK_DIR_NAME }} exists. Removing..."
+          rm -rf ${{ env.SDK_DIR_NAME }}
+        else
+            echo "Directory ${{ env.SDK_DIR_NAME }} does not exist. Skipping removal."
+        fi
+        
+         
+        unzip -d ${{ env.SDK_DIR_NAME }} $CMD_ZIP_FILE
+
+        # Create empty repositories.cfg file to avoid warning
+        mkdir -p ~/.android
+        touch ~/.android/repositories.cfg
+
+        # Since new updates, there are some changes that are not mentioned in the documentation.
+        # After unzipping the command line tools package, the top-most directory you'll get is $CMD_TOOLS.
+        # Rename the unpacked directory from $CMD_TOOLS to $CMD_TOOLS_DIR_NAME, and place it under $ANDROID_HOME/$CMD_TOOLS
+        # which will then look like $ANDROID_HOME/$CMD_TOOLS/$CMD_TOOLS_DIR_NAME
+        cd ${{ env.SDK_DIR_NAME }}/${{ env.CMD_TOOLS }}
+        mkdir -p ${{ env.CMD_TOOLS_DIR_NAME }}
+        mv `ls | grep -w -v ${{ env.CMD_TOOLS_DIR_NAME }}` ${{ env.CMD_TOOLS_DIR_NAME }}
+      shell: bash
+
+    - name: Download API's
+      run: |
+        SDK_MANAGER=$(which sdkmanager)
+        echo "Downloading Android Platforms"
+         
+        echo yes | $SDK_MANAGER "platforms;android-${{ env.SETUP_ANDROID_APIS }}"
+        
+        echo "Downloading Android Platform-Tools"
+        echo yes | $SDK_MANAGER "platform-tools"
+        echo "Exporting TOOLS & PLATFORM_TOOLS"
+        export PATH=${{ env.ANDROID_HOME }}/platform-tools/:${{ env.ANDROID_HOME }}/tools:$PATH
+
+        echo "Downloading Android Build-Tools"
+        echo yes | $SDK_MANAGER "build-tools;${{ env.ANDROID_BUILD_TOOLS }}"
+
+      shell: bash
+
+    - name: Build OpenH264
+      id: openh264
+      run: |
+        
+        LIB_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/libs
+        LOG_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/logs
+        export PATH=${{ env.SDK_TOOLS_PATH }}:$PATH
+        if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
+          echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} exists. Removing..."
+          rm -rf ${{ env.OPENH264_BUILD_OUT_PATH }}
+        else
+            echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} does not exist. Skipping removal."
+        fi
+        mkdir -p "${LIB_PATH}"
+        mkdir -p "${LOG_PATH}"
+        if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
+          echo "Directory ${{ env.OPENH264_TMP_DIR }} exists. Removing..."
+          rm -rf ${{ env.OPENH264_TMP_DIR }}
+        else
+            echo "Directory ${{ env.OPENH264_TMP_DIR }} does not exist. Skipping removal."
+        fi
+        mkdir -p ${{ env.OPENH264_TMP_DIR }}
+        cd ${{ env.OPENH264_PATH }}
+        cp -r -v * ${{ env.OPENH264_TMP_DIR }}
+        cd ${{ env.OPENH264_TMP_DIR }}
+        mkdir -p ${{ env.BUILD_DIR }}
+        sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
+        echo "finish sed Makefile"
+        #ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
+        ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ github.workspace }}/tools/android-ndk-r28/x64 NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
+        ARGS="${ARGS}TARGET=android-${{ env.TARGET_ANDROID_API }} ARCH="
+        # Add final architecture dependent info
+        if [ "${{matrix.arch}}" == "armeabi" ]
+        then
+            ARGS="${ARGS}arm APP_ABI=armeabi"
+        elif [ "${{matrix.arch}}" == "armeabi-v7a" ]
+        then
+            ARGS="${ARGS}arm"
+        elif [ "${{matrix.arch}}" == "x86" ]
+        then
+            ARGS="${ARGS}x86 ENABLEPIC=Yes"
+        elif [ "${{matrix.arch}}" == "x86_64" ]
+        then
+            ARGS="${ARGS}x86_64"
+        elif [ "${{matrix.arch}}" == "arm64-v8a" ]
+        then
+            ARGS="${ARGS}arm64"
+        else
+            echo "Unsupported target ABI: ${{matrix.arch}}"
+            exit 1
+        fi
+        echo "make ${ARGS}"
+        make ${ARGS} 
+        #make ${ARGS} >> "${LOG_PATH}/${arch}.log" 2>&1
+        mkdir -p ${LIB_PATH}/${{matrix.arch}}
+        echo "make ${ARGS} install" 
+        make ${ARGS} install 
+      shell: bash
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openh264-${{ matrix.arch }}
+        path: ${{ env.OPENH264_BUILD_OUT_PATH }}
+        overwrite: true
+ 
+    strategy:
+      matrix:
+        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
+    runs-on: self-hosted
+    name: pjsip 
+    permissions:
+        contents: write
+    steps:
+        
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+                
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Install deps
+      run: |
+        brew install nasm autoconf automake libtool swig  
+        if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
+          brew install llvm
+        fi
+
+      shell: sh
+           
+
+    - name: Build pjsip
+      id: build
+      run: |
+        cp -v -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+        
+        sed -i'' -e 's/PJMEDIA_HAS_VIDEO 1/PJMEDIA_HAS_VIDEO 0/g' ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+        sed -i'' -e 's/PJMEDIA_HAS_OPENH264_CODEC 1/PJMEDIA_HAS_OPENH264_CODEC 0/g' ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+        sed -i'' -e 's/PJMEDIA_VIDEO_DEV_HAS_OPENGL 1/PJMEDIA_VIDEO_DEV_HAS_OPENGL 0/g' ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+        sed -i'' -e 's/PJMEDIA_VIDEO_DEV_HAS_OPENGL_ES 1/PJMEDIA_VIDEO_DEV_HAS_OPENGL_ES 0/g' ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+        sed -i'' -e 's/PJMEDIA_HAS_OPUS_CODEC 1/PJMEDIA_HAS_OPUS_CODEC 0/g' ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+        sed -i'' -e 's/PJMEDIA_HAS_BCG729 1/PJMEDIA_HAS_BCG729 0/g' ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+        
+        mkdir -p ~/pjsip_build/${{ matrix.arch }}
+
+        cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/${{ matrix.arch }}
+        cd ~/pjsip_build/${{ matrix.arch }}/pjsip
+        
+        if [ "${{ matrix.arch }}" == "x86_64" ]; then
+          export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+          export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+          export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+          export ARCH="x86_64"  
+            
+          echo $DEVPATH
+          echo $ISYSROOT
+            
+          export CFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
+          export LDFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
+          export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
+          echo "calling configure-iphone"
+          ARCH="-arch x86_64" ./configure-iphone 
+           
+          echo "running make dep"
+          make dep
+          echo "running make"
+          make  
+        else
+          export ARCH="arm64"  
+          export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
+          echo $DEVPATH
+          export SDKROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
+          
+          export CFLAGS="-arch arm64 -miphoneos-version-min=${{ env.MIN_IOS_VERSION  }} "
+          export LDFLAGS="-arch arm64"
+          export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"    
+          
+          echo "calling configure-iphone"
+          ARCH="-arch arm64" ./configure-iphone || cat *config.log
+          cat *config.log
+          
+          echo "running make dep"
+          make dep
+          
+          echo "running make"
+          make 
+        fi
+         
+        cd ./pjsip-apps/src/swig 
+
+        sed -i'' -e 's/xamarin/maui/g' ./csharp/Makefile
+        
+        make 
+
+        mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+        mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+        cd csharp
+        ls
+        cp -v -f ./pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+
+        echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
+
+    - name: Upload artifactss
+      uses: actions/upload-artifact@v4
+      with:
+        name: pjsip-${{ matrix.arch }}
+        path: ${{ steps.build.outputs.artifact }}
+        overwrite: true
+      env:
+        SDKVERSION: 18.2

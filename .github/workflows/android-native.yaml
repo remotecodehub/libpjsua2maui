@@ -94,7 +94,8 @@ jobs:
     - name: Verify Android SDK installation
       run: |
         echo "Android SDK Root: $ANDROID_SDK_ROOT"
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
+        echo "$(`which sdkmanager`)"
+        # $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
         
     - name: Download and Setup Android NDK
       id: setup-ndk

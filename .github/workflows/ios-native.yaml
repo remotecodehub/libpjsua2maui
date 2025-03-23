@@ -563,38 +563,26 @@ jobs:
 
         if [ "${{ matrix.arch }}" == "x86_64" ]; then
           export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-          #export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
-          #export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-          #export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
           export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
-          export CC="$(xcrun --find clang)"
-          export CXX="$(xcrun --find clang++)"
-          export AR="$(xcrun --find ar)"
-          export RANLIB="$(xcrun --find ranlib)"
-          export LD="$(xcrun --find ld)"
-          export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch x86_64 -platform_version ios-simulator 12.2 16.0 -syslibroot $SDKROOT -lstdc++ -ld_classic"
-          export CFLAGS="-arch x86_64 -isysroot $SDKROOT"
-          export SDKROOT=$(xcrun --sdk iphonesimulator --show-sdk-path)
+          export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+          export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+          #export SDKROOT=$(xcrun --sdk iphonesimulator --show-sdk-path)
           echo $DEVPATH
           echo $ISYSROOT
-          #export PATH="/opt/homebrew/opt/llvm/bin:$PATH" 
-          #export CC="/opt/homebrew/opt/llvm/bin/clang -isysroot $SDKROOT" 
-          #export CXX="/opt/homebrew/opt/llvm/bin/clang++ -isysroot $SDKROOT"
-          #export AR="/opt/homebrew/opt/llvm/bin/llvm-ar -isysroot $SDKROOT"
-          #export RANLIB="/opt/homebrew/opt/llvm/bin/llvm-ranlib -isysroot $SDKROOT"
+          export PATH="/opt/homebrew/opt/llvm/bin:$PATH" 
+          export CC="/opt/homebrew/opt/llvm/bin/clang -isysroot $SDKROOT" 
+          export CXX="/opt/homebrew/opt/llvm/bin/clang++ -isysroot $SDKROOT"
+          export AR="/opt/homebrew/opt/llvm/bin/llvm-ar -isysroot $SDKROOT"
+          export RANLIB="/opt/homebrew/opt/llvm/bin/llvm-ranlib -isysroot $SDKROOT"
           # export LD="/opt/homebrew/opt/llvm/bin/ld.lld -isysroot $SDKROOT"
-          export CC="$(xcrun --find clang)"
-          export CXX="$(xcrun --find clang++)"
-          export AR="$(xcrun --find ar)"
-          export RANLIB="$(xcrun --find ranlib)"
-          export LD="$(xcrun --find ld)"
-          #export LD=`which ld64.lld`
+          export LD=`which ld64.lld`
           echo "ld is -> "
           echo $LD
           export CFLAGS="-I/opt/homebrew/opt/llvm/include -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
           #export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -lstdc++ -ld_classic"
-          #export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -L/opt/homebrew/opt/llvm/lib -arch x86_64 -O2 -m64 -mios-simulator-version-min=12.2 -lstdc++ -ld_classic"
-          #export LDFLAGS="${LDFLAGS} -syslibroot $SDKROOT"
+          export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -L/opt/homebrew/opt/llvm/lib -arch x86_64 -O2 -m64"
+         
+          export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch x86_64 -platform_version ios-simulator 12.2 18.2 -syslibroot $SDKROOT -lstdc++ -ld_classic"
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
           echo "calling configure-iphone"
           ARCH="-arch ${{ matrix.arch }}" ./configure-iphone || cat *config.log

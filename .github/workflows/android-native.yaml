@@ -92,9 +92,12 @@ jobs:
         echo "platform_tools_path=$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_OUTPUT
 
 
-    - name: Ensure /bin/sh exists
+    - name: Create Symlink for /bin/sh
       run: |
-        sudo ln -sf /usr/bin/bash /bin/sh
+        mkdir -p $HOME/bin
+        ln -sf /usr/bin/bash $HOME/bin/sh
+        echo "$HOME/bin" >> $GITHUB_PATH
+      
 
     - name: Verify Android SDK installation
       run: |

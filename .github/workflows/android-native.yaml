@@ -101,7 +101,7 @@ jobs:
         fi
         mkdir -p ${{ env.OPENH264_TMP_DIR }}
         cd ${{ env.OPENH264_PATH }}
-        cp -r -v * ${{ env.OPENH264_TMP_DIR }}
+        cp -r * ${{ env.OPENH264_TMP_DIR }}
         cd ${{ env.OPENH264_TMP_DIR }}
         mkdir -p ${{ env.BUILD_DIR }}
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile

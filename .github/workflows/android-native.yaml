@@ -68,6 +68,7 @@ jobs:
         ndk-version: r25c
         add-to-path: true
         link-to-sdk: true
+        local-cache: true
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
@@ -107,7 +108,7 @@ jobs:
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         echo "finish sed Makefile"
         #ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
-        ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=/opt/hostedtoolcache/ndk/r21e/x64 NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
+        ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=/opt/hostedtoolcache/ndk/r25c/x64 NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
         ARGS="${ARGS}TARGET=android-${{ env.TARGET_ANDROID_API }} ARCH="
         # Add final architecture dependent info
         if [ "${{matrix.arch}}" == "armeabi" ]

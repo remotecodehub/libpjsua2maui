@@ -74,7 +74,7 @@ jobs:
     - name: Install build tools
       run: |
         DEPS="unzip git curl bzip2 binutils make autoconf openssl \
-          libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python2 swig" 
+          libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig" 
         sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
       shell: bash
 

@@ -16,18 +16,16 @@ permissions:
   contents: read
 
 env:
-    BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
-    OPENH264_PATH: ${{ github.workspace }}/lib/openh264
-    OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
-    OPUS_PATH: ${{ github.workspace }}/lib/opus
-    PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
-    BUILD_DIR: ${{ github.workspace }}/outputs
+    BASEDIR: /__w/libpjsua2maui/libpjsua2maui
+    #BCG729_PATH:  ${{ env.BASEDIR }}/lib/bcg729
+    #OPENSSL_PATH: ${{ env.BASEDIR }}/lib/openssl
+    #OPUS_PATH: ${{ env.BASEDIR }}/lib/opus
+    #PJSIP_PATH: ${{ env.BASEDIR }}/lib/pjsip
     PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
     SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output
     OPENSSL_BUILD_OUT_PATH:  ${{ github.workspace }}/outputs/openssl-build-output
     OPENSSL_TARGET_NDK_LEVEL: 21
-    OPENH264_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/openh264-build-output
-    OPENH264_TARGET_NDK_LEVEL: 21
+   
     OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/opus-build-output
     BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
     ANDROID_BUILD_TOOLS: "34.0.0"
@@ -138,8 +136,7 @@ jobs:
               libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig llvm clang"
         dpkg --add-architecture i386
         apt-get update && apt-get install -y ${DEPS}
-
-     
+  
     - name: Build OpenH264
       id: openh264
       shell: bash
@@ -215,8 +212,10 @@ jobs:
         make ${ARGS} install 
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        
-
+        OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264
+        BUILD_DIR: ${{ env.BASEDIR }}/outputs
+        OPENH264_BUILD_OUT_PATH: ${{ env.BASEDIR }}/outputs/openh264-build-output
+        OPENH264_TARGET_NDK_LEVEL: 21
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -224,4 +223,5 @@ jobs:
         name: openh264-${{ matrix.arch }}
         path: ${{ env.OPENH264_BUILD_OUT_PATH }}
         overwrite: true
-      
+      env:
+        OPENH264_BUILD_OUT_PATH: ${{ env.BASEDIR }}/outputs/openh264-build-output

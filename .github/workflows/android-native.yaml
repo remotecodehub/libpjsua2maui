@@ -142,7 +142,7 @@ jobs:
         fi
         echo "make ${ARGS}" 
         
-        make ${ARGS} CFLAGS="--sysroot=/opt/hostedtoolcache/ndk/r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+        make ${ARGS} CFLAGS="-I/usr/include/x86_64-linux-gnu"
 
 
         mkdir -p ${LIB_PATH}/${{matrix.arch}}

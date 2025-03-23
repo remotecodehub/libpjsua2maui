@@ -195,12 +195,12 @@ jobs:
         then
             ARGS="${ARGS}arm"
             export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi"
-            export LDFLAGS="${LDFLAGS} -L{{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/ -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21/ -lc++ -lm -ldl -lc -ldl -lstdc++  "
+            export LDFLAGS="${LDFLAGS} -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/ -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21/ -lc++ -lm -ldl -lc -ldl -lstdc++  "
         elif [ "${{matrix.arch}}" == "x86" ]
         then
             ARGS="${ARGS}x86 ENABLEPIC=Yes"
             export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/i686-linux-android"
-            export LDFLAGS="${LDFLAGS} -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/ -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/21/ -lc++ -lm -ldl -lc -ldl -lstdc++  "
+            export LDFLAGS="${LDFLAGS} -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/ -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/21/  -lc++ -lm -ldl -lc -ldl -lstdc++  "
         elif [ "${{matrix.arch}}" == "x86_64" ]
             then
             ARGS="${ARGS}x86_64"
@@ -218,8 +218,13 @@ jobs:
         echo "make ${ARGS}"  
         CFLAGS=" ${CFLAGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"       
         CFLAGS="${CFLAGS} -I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" 
+        echo ""
         echo "CFLAGS -> ${CFLAGS}"
+        echo ""
         echo "ARGS -> ${ARGS}"
+        echo ""
+        echo "LDFLAGS -> ${LDFLAGS}"
+        echo ""
         export SYSROOT="${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
         export NDKROOT="${{ env.ANDROID_NDK_HOME }}"
         cat Makefile

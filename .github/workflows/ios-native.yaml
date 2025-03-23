@@ -455,7 +455,7 @@ jobs:
           export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib -lstdc++ -ld_classic"
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
           echo "calling configure-iphone"
-          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
+          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone --host=${{ matrix.arch }}-apple-darwin --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
           echo "running make dep"
           make dep
           echo "running make"
@@ -583,7 +583,7 @@ jobs:
           export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch x86_64 -platform_version ios-simulator 12.2 18.2 -syslibroot $SDKROOT -lstdc++ -ld_classic"
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
           echo "calling configure-iphone"
-          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone || cat *config.log
+          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone  --host=${{ matrix.arch }}-apple-darwin || cat *config.log
           echo "running make dep"
           make dep
           echo "running make"

@@ -80,6 +80,10 @@ jobs:
         sudo sh -c "dpkg --add-architecture i386; apt-get update && apt-get install -y ${DEPS}"
       shell: bash
 
+    - name: Test path
+      run: |
+        ls /opt/hostedtoolcache/ndk/r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+      shell: bash
 
     - name: Build OpenH264
       id: openh264
@@ -133,6 +137,7 @@ jobs:
             exit 1
         fi
         echo "make ${ARGS}" 
+        
         make ${ARGS} CFLAGS="--sysroot=/opt/hostedtoolcache/ndk/r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
 
 

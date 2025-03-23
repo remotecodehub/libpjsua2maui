@@ -455,15 +455,16 @@ jobs:
             export CFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
             export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-         
-            ARCH="-arch ${{ matrix.arch }}" ./configure  --host=${{ matrix.arch }}-apple-darwin --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
+            echo "calling configure-iphone"
+            ARCH="-arch ${{ matrix.arch }}" ./configure-iphone  --host=${{ matrix.arch }}-apple-darwin --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
+            echo "make dep"
             make dep
-
+            echo "make"
             make  
         else
             export CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) "
             export LDFLAGS="-framework AudioUnit -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjlib-util/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjnath/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjmedia/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjsip/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/third_party/lib "
-          
+            
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
             echo $DEVPATH
             export SDKROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk

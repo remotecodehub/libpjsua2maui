@@ -418,15 +418,20 @@ jobs:
       with:
         xcode-version: latest-stable
     
-    - name: Install deps
+    - name: Install dependencies
       run: |
-        brew install nasm autoconf automake libtool swig 
-        if [ "${{ matrix.arch }}" == "x86_64" ]; then
-          brew install llvm
-        fi
-      shell: sh
+        brew install automake autoconf libtool
+        xcode-select --install
 
-      
+    - name: Verify C compiler path
+      run: |
+        if [ ! -f "/Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" ]; then
+          echo "Error: clang not found at expected path"
+          exit 1
+        fi
+
+     
+    
     - name: Build pjsip
       id: build
       run: |

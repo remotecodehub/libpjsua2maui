@@ -80,8 +80,8 @@ jobs:
       - name: Pack
         run: nuget pack src/libpjsua2maui.nuspec  -version "${VERSION}"
       
-      - name: Push to nuget
-        run: dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${API_KEY} --skip-duplicate
-        env:
-          API_KEY: ${{ secrets.API_KEY }}
+      # - name: Push to nuget
+      #   run: dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${API_KEY} --skip-duplicate
+      #   env:
+      #     API_KEY: ${{ secrets.API_KEY }}
  

@@ -65,15 +65,16 @@ jobs:
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-        ndk-version: r21e
+        ndk-version: r25c
         add-to-path: true
         link-to-sdk: true
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
+
     - name: Install build tools
       run: |
-        DEPS="unzip git curl bzip2 binutils make autoconf openssl \
+        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev \
           libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig" 
         sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
       shell: bash

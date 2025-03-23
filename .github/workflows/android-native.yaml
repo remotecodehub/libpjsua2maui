@@ -79,7 +79,7 @@ jobs:
     - name: Debug NDK Setup
       run: |
         echo "NDK Path: ${{ steps.setup-ndk.outputs.ndk-path }}"
-        ls -R ${{ steps.setup-ndk.outputs.ndk-path }}
+        ls -R /opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/
 
     - name: Install build tools
       run: |

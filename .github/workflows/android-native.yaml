@@ -68,6 +68,7 @@ jobs:
         add-to-path: true
         link-to-sdk: true
         local-cache: false
+        tool-cache: false
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
@@ -132,7 +133,8 @@ jobs:
             exit 1
         fi
         echo "make ${ARGS}"
-        make ${ARGS} CFLAGS="--sysroot=/opt/hostedtoolcache/ndk/r21e/x64/sysroot"
+        ls ${{ env.ANDROID_NDK_HOME }}/sysroot
+        make ${ARGS} CFLAGS="--sysroot=${{ env.ANDROID_NDK_HOME }}/sysroot"
 
         mkdir -p ${LIB_PATH}/${{matrix.arch}}
         echo "make ${ARGS} install" 

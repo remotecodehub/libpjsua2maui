@@ -375,8 +375,7 @@ jobs:
         overwrite: true
       env:
         SDKVERSION: 18.2
-
-
+ 
   pjsip-h264-opus-bcg729-ssl:
     strategy:
       matrix:
@@ -421,10 +420,7 @@ jobs:
     - name: Install dependencies
       run: |
         brew install automake autoconf libtool pkg-config 
-        if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
-          brew install llvm
-        fi
-        
+        if [ "${{ matrix.ARCH }}" == "x86_64" ];
     - name: Verify C compiler path
       run: |
         if [ ! -f "/Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" ]; then
@@ -579,7 +575,7 @@ jobs:
             export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L/opt/homebrew/opt/llvm/lib"
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
-            ARCH="-arch ${{ matrix.arch }}" ./configure || cat *config.log
+            ./configure-iphone || cat *config.log
             make dep
             make  
         else
@@ -593,11 +589,11 @@ jobs:
             export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"    
             
              
-            ARCH="-arch ${{ matrix.arch }} " ./configure || cat *config.log
+            ./configure-iphone || cat *config.log
             
-            make dep |
+            make dep || cat *.log
 
-            make 
+            make || cat *.log
         fi
         
 

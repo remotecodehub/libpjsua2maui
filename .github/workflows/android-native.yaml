@@ -78,7 +78,7 @@ jobs:
 
         # Download and set up cmdline-tools
         curl -o sdk-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_VERSION}_latest.zip"
-        unzip sdk-tools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
+        unzip sdk-tools.zip -d "$ANDROID_SDK_ROOT/"
         mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
         rm sdk-tools.zip
 
@@ -101,8 +101,7 @@ jobs:
     - name: Verify Android SDK installation
       run: |
         echo "Android SDK Root: $ANDROID_SDK_ROOT"
-        echo "$(`which sdkmanager`)"
-        # $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
         
     - name: Download and Setup Android NDK
       id: setup-ndk
@@ -116,7 +115,7 @@ jobs:
         export ANDROID_NDK_HOME=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c
         echo "NDK_HOME=$ANDROID_NDK_HOME"
         echo "ndk-path=$ANDROID_NDK_HOME" >> $GITHUB_OUTPUT
-      shell: bash
+       
  
     - name: Debug NDK Setup
       run: |

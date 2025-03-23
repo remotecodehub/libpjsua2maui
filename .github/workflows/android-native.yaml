@@ -132,9 +132,9 @@ jobs:
             echo "Unsupported target ABI: ${{matrix.arch}}"
             exit 1
         fi
-        echo "make ${ARGS}"
-        ls ${{ env.ANDROID_NDK_HOME }}/sysroot
-        make ${ARGS} CFLAGS="--sysroot=${{ env.ANDROID_NDK_HOME }}/sysroot"
+        echo "make ${ARGS}" 
+        make ${ARGS} CFLAGS="--sysroot=/opt/hostedtoolcache/ndk/r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+
 
         mkdir -p ${LIB_PATH}/${{matrix.arch}}
         echo "make ${ARGS} install" 

@@ -428,8 +428,8 @@ jobs:
           echo "Error: clang not found at expected path"
           exit 1
         fi
-        - name: Set up Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+    - name: Select  Xcode
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
   
     - name: Build pjsip
       id: build

@@ -13,7 +13,7 @@
             Min Android version : 9.0 (API 28)
             Max Android version : 14.0 (API 34)
             Min iOS version     : 12.2
-            Max iOS version     : 18.3
+            Max iOS version     : 18.2
 
             This library enables working with the pjsip SIP stack implementation for make voip
             calls.
@@ -25,7 +25,7 @@
             Add BCG729 to third party libs; 
             Upgrade .NET to 9.0
             Upgrade Android API to 34.0
-            Upgrade iOS SDK to 18.3
+            Upgrade iOS SDK to 18.2
         </releaseNotes>
         <!--<icon>icon.png</icon>-->
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -98,7 +98,7 @@
         <file src="libpjsua2.so\org\pjsip\*.java" target="content" />
  
         <file src="libpjsua2.maui.ios\bin\Release\net9.0-ios\"
-            target="ref\net9.0-ios18.3" />
+            target="ref\net9.0-ios18.2" />
         <file src="libpjsua2.maui.android\bin\Release\net9.0-android\"
             target="ref\net9.0-android34.0" /> 
     </files>

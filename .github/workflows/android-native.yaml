@@ -144,12 +144,12 @@ jobs:
       
         LIB_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/libs
         LOG_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/logs 
-        if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
-          echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} exists. Removing..."
-          rm -rf ${{ env.OPENH264_BUILD_OUT_PATH }}
-        else
-            echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} does not exist. Skipping removal."
-        fi
+        # if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
+        #   echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} exists. Removing..."
+        #   rm -rf ${{ env.OPENH264_BUILD_OUT_PATH }}
+        # else
+        #     echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} does not exist. Skipping removal."
+        # fi
         mkdir -p "${LIB_PATH}"
         mkdir -p "${LOG_PATH}"
         if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
@@ -199,7 +199,7 @@ jobs:
         fi
         echo "make ${ARGS}"  
         #CFLAGS=" ${CFLAGS} --sysroot=/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"       
-        #CFLAGS="${CFLAGS} -I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include"
+        CFLAGS="${CFLAGS} -I/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include"
         #export LDFLAGS=" -target $(TARGET_NAME) -L/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android -lc -lm -lstdc++ -lgcc -lgcc_s"
         
         export SYSROOT="/opt/hostedtoolcache/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"

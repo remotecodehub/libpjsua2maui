@@ -81,7 +81,7 @@ jobs:
         # Accept licenses
         $SDKMANAGER=`which sdkmanager`
 
-        echo "yes" | #SDKMANAGER --licenses
+        echo "yes" | $SDKMANAGER --licenses
 
         # Install platform-tools, platforms, and build-tools
         $ANDROID_SDK_ROOT/cmdline-tools/tools/bin/sdkmanager \

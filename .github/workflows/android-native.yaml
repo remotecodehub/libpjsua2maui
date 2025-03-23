@@ -136,7 +136,8 @@ jobs:
       run: |
         DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev \
               libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig llvm clang"
-        sudo sh -c "dpkg --add-architecture i386; apt-get update && apt-get install -y ${DEPS}"
+        dpkg --add-architecture i386
+        apt-get update && apt-get install -y ${DEPS}
 
      
     - name: Build OpenH264

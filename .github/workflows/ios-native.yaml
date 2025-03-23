@@ -420,7 +420,9 @@ jobs:
     - name: Install dependencies
       run: |
         brew install automake autoconf libtool pkg-config swig
-        
+        if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
+          brew install llvm
+        fi
     
     - name: Verify C compiler path
       run: |
@@ -464,7 +466,7 @@ jobs:
         else
             export CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) "
             export LDFLAGS="-framework AudioUnit -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjlib-util/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjnath/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjmedia/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjsip/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/third_party/lib "
-            
+
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
             echo $DEVPATH
             export SDKROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
@@ -539,6 +541,10 @@ jobs:
     - name: Install deps
       run: |
         brew install nasm autoconf automake libtool swig  
+        if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
+          brew install llvm
+        fi
+
       shell: sh
            
 
@@ -574,28 +580,32 @@ jobs:
             export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+            echo "calling configure-iphone"
             ARCH="-arch ${{ matrix.arch }}"./configure-iphone || cat *config.log
+            echo "running make dep"
             make dep
+            echo "running make"
             make  
-        else
-
+            else
+            
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
             echo $DEVPATH
             export SDKROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
-
+            
             export CFLAGS="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION  }} "
             export LDFLAGS="-arch ${{ matrix.arch }}"
             export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"    
             
-             
+            echo "calling configure-iphone"
             ./configure-iphone || cat *config.log
             
-            make dep || cat *.log
-
-            make || cat *.log
+            echo "running make dep"
+            make dep
+            
+            echo "running make"
+            make 
         fi
-        
-
+         
         cd ./pjsip-apps/src/swig 
 
         sed -i'' -e 's/xamarin/maui/g' ./csharp/Makefile
@@ -604,8 +614,9 @@ jobs:
 
         mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
         mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
- 
-        cp -v -f ./csharp/pjsua2maui/pjsua2maui/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+        cd csharp
+        ls
+        cp -v -f ./pjsua2maui/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 
         echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
 

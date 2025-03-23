@@ -420,8 +420,11 @@ jobs:
     
     - name: Install dependencies
       run: |
-        brew install automake autoconf libtool pkg-config
-
+        brew install automake autoconf libtool pkg-config 
+        if [ "${{ matrix.ARCH }}" == "x86_64" ]; then
+          brew install llvm
+        fi
+        
     - name: Verify C compiler path
       run: |
         if [ ! -f "/Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" ]; then
@@ -576,7 +579,7 @@ jobs:
             export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L/opt/homebrew/opt/llvm/lib"
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
-            ARCH="-arch ${{ matrix.arch }}" ./configure  --host=${{ matrix.arch }}-apple-darwin || cat *config.log
+            ARCH="-arch ${{ matrix.arch }}" ./configure || cat *config.log
             make dep
             make  
         else
@@ -590,9 +593,9 @@ jobs:
             export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"    
             
              
-            ARCH="-arch ${{ matrix.arch }} " ./configure --host=arm64-apple-darwin || cat *config.log
+            ARCH="-arch ${{ matrix.arch }} " ./configure || cat *config.log
             
-            make dep
+            make dep |
 
             make 
         fi

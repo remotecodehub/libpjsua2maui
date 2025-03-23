@@ -453,6 +453,7 @@ jobs:
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             echo "calling configure-iphone"
             ARCH="-arch ${{ matrix.arch }}" ./configure-iphone --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
+            cat *config.log
             echo "make dep"
             make dep
             echo "make"
@@ -570,6 +571,7 @@ jobs:
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
             echo "calling configure-iphone"
             ARCH="-arch ${{ matrix.arch }}"./configure-iphone || cat *config.log
+            cat *config.log
             echo "running make dep"
             make dep
             echo "running make"

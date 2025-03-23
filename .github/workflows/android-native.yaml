@@ -108,8 +108,9 @@ jobs:
       shell: bash
       run: |
         echo "Android SDK Root: $ANDROID_SDK_ROOT"
-        sdkmanager --list
-
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
+        ls -R $ANDROID_SDK_ROOT
+      
     - name: Download and Setup Android NDK
       id: setup-ndk
       shell: bash

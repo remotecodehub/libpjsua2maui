@@ -453,6 +453,11 @@ jobs:
           export LD=`which ld64.lld`
           echo "ld is -> "
           echo $LD
+          export CC="/opt/homebrew/opt/llvm/bin/clang"
+          export CXX="/opt/homebrew/opt/llvm/bin/clang++"
+          export AR="/opt/homebrew/opt/llvm/bin/llvm-ar"
+          export RANLIB="/opt/homebrew/opt/llvm/bin/llvm-ranlib"
+          #export LD="/opt/homebrew/opt/llvm/bin/ld.lld"
           export CFLAGS="-I/opt/homebrew/opt/llvm/include -arch ${{ matrix.arch }} -O2 -m64 -platform_version ios-simulator 12.2 18.2 -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
           export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -platform_version ios-simulator 12.2 18.2 -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
@@ -572,6 +577,10 @@ jobs:
           export LD=`which ld64.lld`
           echo "ld is -> "
           echo $LD
+          export CC="/opt/homebrew/opt/llvm/bin/clang"
+          export CXX="/opt/homebrew/opt/llvm/bin/clang++"
+          export AR="/opt/homebrew/opt/llvm/bin/llvm-ar"
+          export RANLIB="/opt/homebrew/opt/llvm/bin/llvm-ranlib"
           export CFLAGS="-I/opt/homebrew/opt/llvm/include -arch ${{ matrix.arch }} -O2 -m64 -platform_version ios-simulator 12.2 18.2 "
           #export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -L/opt/homebrew/opt/llvm/lib -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -lstdc++ -ld_classic"
           #export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -L/opt/homebrew/opt/llvm/lib -arch x86_64 -O2 -m64"

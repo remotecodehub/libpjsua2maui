@@ -62,7 +62,7 @@ jobs:
         packages: platforms;android-21 tools platform-tools build-tools;34.0.0
     
     - name: Download and Setup Android NDK
-      id: download-ndk
+      id: setup-ndk
       run: |
         echo "Downloading Android NDK r25c..."
         curl -L -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
@@ -116,6 +116,7 @@ jobs:
         echo ˜"sedding makefile"
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         #sed -i '/-gcc-toolchain.*GCC_TOOLCHAIN_PATH/d' ./build/platform-android.mk
+        sed -e "/binaries: decdemo encdemo/ s/^#*/#/" -i ./build/platform-android.mk
         echo "finish sed Makefile" 
         export APP_STL=c++_static
         ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
@@ -161,8 +162,8 @@ jobs:
         make ${ARGS} install 
       shell: bash
       env:
-        ANDROID_NDK_HOME: ${{ steps.download-ndk.outputs.ndk-path }}
-     
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        
 
 
     - name: Upload artifacts

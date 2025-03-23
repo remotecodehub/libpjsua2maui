@@ -66,9 +66,7 @@ jobs:
       with:
         ndk-version: r25c
         add-to-path: true
-        link-to-sdk: true
-        local-cache: false
-        tool-cache: false
+        link-to-sdk: true 
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
@@ -80,11 +78,12 @@ jobs:
         sudo sh -c "dpkg --add-architecture i386; apt-get update && apt-get install -y ${DEPS}"
       shell: bash
 
-    - name: Test path
+    - name: Inspect NDK Directory
       run: |
-        ls /opt/hostedtoolcache/ndk/r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+        echo "Listing NDK directories..."
+        ls -R /opt/hostedtoolcache/ndk/r25c/x64
       shell: bash
-
+      
     - name: Build OpenH264
       id: openh264
       run: |

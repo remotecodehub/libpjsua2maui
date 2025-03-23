@@ -104,7 +104,7 @@ jobs:
         cp -r * ${{ env.OPENH264_TMP_DIR }}
         cd ${{ env.OPENH264_TMP_DIR }}
         mkdir -p ${{ env.BUILD_DIR }}
-        echo ˜"sedding makefile""
+        echo ˜"sedding makefile"
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         sed -i 's/stlport_shared/c++_static/g' Makefile
         cat Makefile  

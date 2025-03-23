@@ -420,15 +420,15 @@ jobs:
     - name: Install dependencies
       run: |
         brew install automake autoconf libtool pkg-config swig
-        if [ "${{ matrix.arch }}" == "x86_64" ]; then
-          brew install llvm
-        fi
+        
+    
     - name: Verify C compiler path
       run: |
         if [ ! -f "/Applications/Xcode_16.2.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/../../../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" ]; then
           echo "Error: clang not found at expected path"
           exit 1
         fi
+    
     - name: Select  Xcode
       run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
   
@@ -443,7 +443,6 @@ jobs:
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
             export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
             export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-            sudo softwareupdate --install-rosetta --agree-to-license
             echo $DEVPATH
             echo $ISYSROOT
             export PATH="/opt/homebrew/opt/llvm/bin:$PATH" 
@@ -457,7 +456,7 @@ jobs:
             export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
          
-            ARCH="-arch ${{ matrix.arch }}" ./configure  --host=${{ matrix.arch }}-apple-darwin --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  || cat *config.log
+            ARCH="-arch ${{ matrix.arch }}" ./configure  --host=${{ matrix.arch }}-apple-darwin --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
             make dep
 
             make  
@@ -480,7 +479,7 @@ jobs:
             echo $CC
             echo $CXX
              
-            ARCH="-arch ${{ matrix.arch }} " ./configure-iphone  --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/   || cat *config.log
+            ./configure-iphone  --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/   || cat *config.log
             
             make dep
 
@@ -607,12 +606,7 @@ jobs:
 
         mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
         mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
-
-        cp -v -f ${{ github.workspace }}/libs/ssl/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-        cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-        cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-        cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-
+ 
         cp -v -f ./csharp/pjsua2maui/pjsua2maui/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 
         echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"

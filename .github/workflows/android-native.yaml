@@ -79,7 +79,7 @@ jobs:
         # Download and set up cmdline-tools
         curl -o sdk-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_VERSION}_latest.zip"
         unzip sdk-tools.zip -d "$ANDROID_SDK_ROOT/"
-        mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+        mv "$ANDROID_SDK_ROOT/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
         rm sdk-tools.zip
 
         # Update and install platform-tools and build-tools

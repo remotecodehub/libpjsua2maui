@@ -56,7 +56,7 @@ jobs:
         check-latest: true
     
     - name: Set up Android SDK
-      id: setup-android-sdk
+      id: setup-sdk
       run: |
         # Define variables
         ANDROID_SDK_ROOT=$HOME/android-sdk
@@ -95,8 +95,7 @@ jobs:
       run: |
         echo "Android SDK Root: $ANDROID_SDK_ROOT"
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
-        ls $ANDROID_SDK_ROOT
-
+        
     - name: Download and Setup Android NDK
       id: setup-ndk
       run: |

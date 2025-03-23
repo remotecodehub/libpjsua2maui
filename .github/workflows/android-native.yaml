@@ -161,6 +161,8 @@ jobs:
       shell: bash
       env:
         ANDROID_NDK_HOME: ${{ steps.download-ndk.outputs.ndk-path }}
+        NDKROOT: /opt/hostedtoolcache/ndk/r25c/android-ndk-r25c
+        
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

@@ -31,7 +31,7 @@ env:
     OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/opus-build-output
     BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
     ANDROID_BUILD_TOOLS: "34.0.0"
-    TARGET_ANDROID_API: 24 
+    TARGET_ANDROID_API: 25
     OPENH264_TMP_DIR: /tmp/openh264
 jobs:
   third-part:
@@ -59,7 +59,7 @@ jobs:
       uses: android-actions/setup-android@v3
       with:
         cmdline-tools-version: 11076708 
-        packages: platforms;android-24 tools platform-tools build-tools;34.0.0
+        packages: platforms;android-25 tools platform-tools build-tools;34.0.0
     
     - uses: nttld/setup-ndk@v1
       id: setup-ndk

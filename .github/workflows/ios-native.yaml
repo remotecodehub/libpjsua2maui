@@ -420,8 +420,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        brew install automake autoconf libtool
-        xcode-select --install
+        brew install automake autoconf libtool pkg-config
 
     - name: Verify C compiler path
       run: |
@@ -429,9 +428,9 @@ jobs:
           echo "Error: clang not found at expected path"
           exit 1
         fi
-
-     
-    
+        - name: Set up Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+  
     - name: Build pjsip
       id: build
       run: |
@@ -444,7 +443,6 @@ jobs:
             export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
             export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
             sudo softwareupdate --install-rosetta --agree-to-license
-
             echo $DEVPATH
             echo $ISYSROOT
             export PATH="/opt/homebrew/opt/llvm/bin:$PATH" 
@@ -463,13 +461,15 @@ jobs:
 
             make  
         else
-
+            export CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) "
+            export LDFLAGS="-framework AudioUnit -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjlib-util/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjnath/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjmedia/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/pjsip/lib -L/Users/runner/work/libpjsua2maui/libpjsua2maui/lib/pjsip/third_party/lib "
+          
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
             echo $DEVPATH
             export SDKROOT=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
 
-            export CFLAGS="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION  }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
-            export LDFLAGS="-arch ${{ matrix.arch }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
+            export CFLAGS+="-arch ${{ matrix.arch }} -miphoneos-version-min=${{ env.MIN_IOS_VERSION  }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
+            export LDFLAGS+="-arch ${{ matrix.arch }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
             export MIN_IOS="-miphoneos-version-min=${{ env.MIN_IOS_VERSION  }}"
             
             export LDFLAGS="${LDFLAGS} -L$(find /Applications/Xcode_16.2.0.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs -name AudioUnit.framework -print0 | xargs -0 dirname) -framework AudioUnit"

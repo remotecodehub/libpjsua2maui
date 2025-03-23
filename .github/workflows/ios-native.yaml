@@ -432,7 +432,7 @@ jobs:
         mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
 
         cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
-        cd ~/pjsip_build/bundle/${{ matrix.arch }}
+        cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
 
         if [ "${{ matrix.arch }}" == "x86_64" ]; then
           export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
@@ -444,7 +444,6 @@ jobs:
           export CFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
           export LDFLAGS="-arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib"
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-          
            
           echo "calling configure-iphone"
 
@@ -558,7 +557,7 @@ jobs:
         mkdir -p ~/pjsip_build/${{ matrix.arch }}
 
         cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/${{ matrix.arch }}
-        cd ~/pjsip_build/${{ matrix.arch }}
+        cd ~/pjsip_build/${{ matrix.arch }}/pjsip
         
         if [ "${{ matrix.arch }}" == "x86_64" ]; then
           export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
@@ -573,8 +572,8 @@ jobs:
           export LDFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
           echo "calling configure-iphone"
-          ARCH="-arch x86_64" ./configure-iphone || cat *config.log
-          cat *config.log
+          ARCH="-arch x86_64" ./configure-iphone 
+           
           echo "running make dep"
           make dep
           echo "running make"

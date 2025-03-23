@@ -78,8 +78,8 @@ jobs:
 
         # Download and set up cmdline-tools
         curl -o sdk-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_VERSION}_latest.zip"
-        unzip sdk-tools.zip -d "$ANDROID_SDK_ROOT/"
-        mv "$ANDROID_SDK_ROOT/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+        unzip sdk-tools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
+        mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
         rm sdk-tools.zip
 
         # Update and install platform-tools and build-tools
@@ -97,6 +97,11 @@ jobs:
         echo "android_sdk_root=$ANDROID_SDK_ROOT" >> $GITHUB_OUTPUT
         echo "cmdline_tools_path=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_OUTPUT
         echo "platform_tools_path=$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_OUTPUT
+
+    - name: Verify Android SDK installation
+      run: |
+        echo "Android SDK Root: $ANDROID_SDK_ROOT"
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
 
     - name: Verify Android SDK installation
       run: |

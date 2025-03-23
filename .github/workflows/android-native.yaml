@@ -65,10 +65,10 @@ jobs:
         BUILD_TOOLS_VERSION=34.0.0
 
         # Create directories
-        mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
-        mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/tools"
-        mkdir -p "$ANDROID_SDK_ROOT/platforms"
-        mkdir -p "$ANDROID_SDK_ROOT/build-tools"
+        # mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+        # mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/tools"
+        # mkdir -p "$ANDROID_SDK_ROOT/platforms"
+        # mkdir -p "$ANDROID_SDK_ROOT/build-tools"
 
         # Download and set up cmdline-tools
         curl -o sdk-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_VERSION}_latest.zip"

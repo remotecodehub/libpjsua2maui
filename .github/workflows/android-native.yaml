@@ -30,17 +30,16 @@ env:
     OPENH264_TARGET_NDK_LEVEL: 25
     OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/opus-build-output
     BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
-    SETUP_ANDROID_APIS: 25
     ANDROID_BUILD_TOOLS: "34.0.0"
-    TARGET_ANDROID_API: 25 
+    TARGET_ANDROID_API: 24 
     OPENH264_TMP_DIR: /tmp/openh264
 jobs:
-  third-party:
+  third-part:
     strategy:
       matrix:
         arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
     runs-on: ubuntu-latest
-    name: openh264 + openssl + opus + bcg927
+    name: third part libs
     permissions:
       contents: write
     steps:
@@ -60,7 +59,7 @@ jobs:
       uses: android-actions/setup-android@v3
       with:
         cmdline-tools-version: 11076708 
-        packages: platforms;android-25 tools platform-tools build-tools;34.0.0
+        packages: platforms;android-24 tools platform-tools build-tools;34.0.0
     
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
@@ -75,7 +74,7 @@ jobs:
 
     - name: Install build tools
       run: |
-        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev \
+        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev libc6-dev\
           libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig" 
         sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
       shell: bash
@@ -106,9 +105,8 @@ jobs:
         cd ${{ env.OPENH264_TMP_DIR }}
         mkdir -p ${{ env.BUILD_DIR }}
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
-        echo "finish sed Makefile"
-        #ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
-        ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=/opt/hostedtoolcache/ndk/r25c/x64 NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
+        echo "finish sed Makefile" 
+        ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }}/x64 NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
         ARGS="${ARGS}TARGET=android-${{ env.TARGET_ANDROID_API }} ARCH="
         # Add final architecture dependent info
         if [ "${{matrix.arch}}" == "armeabi" ]
@@ -130,9 +128,9 @@ jobs:
             echo "Unsupported target ABI: ${{matrix.arch}}"
             exit 1
         fi
-        echo "make ${ARGS}"
-        make ${ARGS} 
-        #make ${ARGS} >> "${LOG_PATH}/${arch}.log" 2>&1
+        echo "make ${ARGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+        #make ${ARGS}  
+        make ${ARGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot VERBOSE=1
         mkdir -p ${LIB_PATH}/${{matrix.arch}}
         echo "make ${ARGS} install" 
         make ${ARGS} install 

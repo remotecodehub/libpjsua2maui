@@ -34,12 +34,14 @@ env:
     TARGET_ANDROID_API: 21
     OPENH264_TMP_DIR: /tmp/openh264
 jobs:
-  third-part:
+  pj-plus-third-party:
     strategy:
       matrix:
         arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
     runs-on: ubuntu-latest
-    name: third part libs
+    container:
+      image: debian:bullseye
+    name: pjsip + third party libs 
     permissions:
       contents: write
     steps:
@@ -48,7 +50,12 @@ jobs:
       uses: actions/checkout@v3
       with:
          submodules: 'true'
-           
+       
+    - name: Instalar pacotes essenciais
+      run: |
+        apt-get update
+        apt-get install -y build-essential curl unzip git
+ 
     - uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
@@ -90,22 +97,12 @@ jobs:
         echo "android_sdk_root=$ANDROID_SDK_ROOT" >> $GITHUB_OUTPUT
         echo "cmdline_tools_path=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_OUTPUT
         echo "platform_tools_path=$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_OUTPUT
-
-    - name: Install sh shell
-      run: |
-        sudo sh apt-get update
-        sudo sh apt-get install -y dash
-    - name: Create symlink for sh
-      run: |
-        mkdir -p $HOME/bin
-        ln -sf /usr/bin/bash $HOME/bin/sh
-        echo "$HOME/bin" >> $GITHUB_PATH
-      
+ 
     - name: Verify Android SDK installation
       shell: bash
       run: |
         echo "Android SDK Root: $ANDROID_SDK_ROOT"
-        sudo sh sdkmanager --list
+        sdkmanager --list
 
     - name: Download and Setup Android NDK
       id: setup-ndk

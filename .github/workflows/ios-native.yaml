@@ -614,7 +614,7 @@ jobs:
 
         mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
         mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
-        cd csharp
+        cd csharp/pjsua2maui
         ls
         cp -v -f ./pjsua2maui/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 

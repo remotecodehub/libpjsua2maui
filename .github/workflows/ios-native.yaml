@@ -337,36 +337,45 @@ jobs:
         brew install nasm autoconf automake libtool 
       shell: sh
             
-    - name: Build bcg729
-      id: build
+    - name: Build bcg729 for iOS
+      id: build_bcg729
       run: |
-        echo "Use BCG729"
-        xcode_dev_path=`xcode-select -print-path`
-        
-        cd ${{ env.BCG729_PATH }}
-    
-        echo "-- BCG729: Compiling ${{ matrix.arch }}" 
-        if [ "${{ matrix.arch }}" == "x86_64" ]; then
-            os_platform="iPhoneSimulator" 
-            C_FLAGS="$C_FLAGS -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION  }} -isysroot ${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk "
-        else 
-            os_platform="iPhoneOS"  
-        fi
+          echo "Building BCG729 for iOS"
+          xcode_dev_path=$(xcode-select -print-path)
 
-        if [ -d "${{ env.BCG729_PATH }}/${os_platform}${{ env.MIN_IOS_VERSION  }}-${{ matrix.arch }}.sdk"] ]; then
-            rm -rf "${{ env.BCG729_PATH }}/${os_platform}${{ env.MIN_IOS_VERSION  }}-${{ matrix.arch }}.sdk" 
-        fi
+          cd ${{ env.BCG729_PATH }}
 
-        if [ -d "${{ env.BCG729_PATH }}/CMakeFiles" ]; then
-            rm -rf "${{ env.BCG729_PATH }}/CMakeFiles"
-            rm -rf "${{ env.BCG729_PATH }}/CMakeCache.txt"
-        fi
-        mkdir -p "${os_platform}${{ env.MIN_IOS_VERSION  }}-${{ matrix.arch }}.sdk"        
-        cmake -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${os_platform}${{ env.MIN_IOS_VERSION  }}-${{ matrix.arch }}.sdk" -DCMAKE_SKIP_INSTALL_RPATH="ON" -DCMAKE_MAKE_PROGRAM:PATH=$(which make) -D CMAKE_C_COMPILER=`which gcc` .
-        make  || exit 
-        make install 
-        echo "artifact=${{ env.BCG729_PATH }}/${os_platform}${{ env.MIN_IOS_VERSION  }}-${{ matrix.arch }}.sdk/" >> "$GITHUB_OUTPUT"
-    
+          echo "-- Compiling for ${{ matrix.arch }}"
+          if [ "${{ matrix.arch }}" == "x86_64" ]; then
+              os_platform="iPhoneSimulator"
+              C_FLAGS="$C_FLAGS -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -isysroot ${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk"
+          else
+              os_platform="iPhoneOS"
+              C_FLAGS="$C_FLAGS -O2 -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -isysroot ${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk"
+          fi
+ 
+          rm -rf "${{ env.BCG729_PATH }}/${os_platform}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk" 
+          rm -rf "${{ env.BCG729_PATH }}/CMakeFiles" "${{ env.BCG729_PATH }}/CMakeCache.txt"
+
+          # Criar diretório de instalação
+          mkdir -p "${os_platform}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk"
+
+          # Executar o CMake com configurações específicas para iOS
+          cmake -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX="${os_platform}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk" \
+                -DCMAKE_SKIP_INSTALL_RPATH="ON" \
+                -DCMAKE_MAKE_PROGRAM:PATH=$(which make) \
+                -DCMAKE_C_COMPILER=$(which clang) \
+                -DCMAKE_OSX_SYSROOT="${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk" \
+                .
+
+          # Compilar e instalar
+          make || exit 1
+          make install
+
+          echo "artifact=${{ env.BCG729_PATH }}/${os_platform}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk/" >> "$GITHUB_OUTPUT"
+
     - name: Upload artifactss
       uses: actions/upload-artifact@v4
       with:

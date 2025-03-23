@@ -99,7 +99,7 @@ jobs:
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         echo "finish sed Makefile"
         #ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
-        ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ github.workspace }}/tools/android-ndk-r28/x64 NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
+        ARGS="APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=/opt/hostedtoolcache/ndk/r21e/x64 NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
         ARGS="${ARGS}TARGET=android-${{ env.TARGET_ANDROID_API }} ARCH="
         # Add final architecture dependent info
         if [ "${{matrix.arch}}" == "armeabi" ]

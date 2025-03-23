@@ -453,7 +453,7 @@ jobs:
           echo "ld is -> "
           echo $LD
           export CFLAGS="-I/opt/homebrew/opt/llvm/include -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include -I${{ github.workspace }}/libs/ssl/include -I${{ github.workspace }}/libs/opus/include -I${{ github.workspace }}/libs/h264/include"
-          export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -O2 -platform_version ios-simulator 12.2 18.2 -arch x86_64 -syslibroot $SDKROOT -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib "
+          export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -O2 -Xlinker -platform_version -Xlinker ios-simulator -Xlinker 12.2 -Xlinker 18.2 -Xlinker -syslibroot -Xlinker $SDKROOT -L${{ github.workspace }}/libs/bcg729/lib -L${{ github.workspace }}/libs/ssl/lib -L${{ github.workspace }}/libs/opus/lib -L${{ github.workspace }}/libs/h264/lib "
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
           echo "calling configure-iphone"
           ARCH="-arch ${{ matrix.arch }}" ./configure-iphone --with-bcg729=${{ github.workspace }}/libs/bcg729/ --with-ssl=${{ github.workspace }}/libs/ssl/ --with-opus=${{ github.workspace }}/libs/opus/ --with-openh264=${{ github.workspace }}/libs/h264/  
@@ -571,7 +571,6 @@ jobs:
           export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
           export ISYSROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
           export SDKROOT=$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-          
           echo $DEVPATH
           echo $ISYSROOT
           export PATH="/opt/homebrew/opt/llvm/bin:$PATH" 
@@ -584,10 +583,11 @@ jobs:
           echo "ld is -> "
           echo $LD
           export CFLAGS="-I/opt/homebrew/opt/llvm/include -arch ${{ matrix.arch }} -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} "
-          export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -L/opt/homebrew/opt/llvm/lib -O2 -platform_version ios-simulator 12.2 18.2 -arch x86_64 -syslibroot $SDKROOT"      
+          export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -O2 -arch  ${{ matrix.arch }} -Xlinker -platform_version -Xlinker ios-simulator -Xlinker 12.2 -Xlinker 18.2 -Xlinker -syslibroot -Xlinker -syslibroot $SDKROOT"      
           export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}" 
           echo "calling configure-iphone"
-          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone || cat *config.log
+          ARCH="-arch ${{ matrix.arch }}" ./configure-iphone  
+          cat *config.log
           echo "running make dep"
           make dep
           echo "running make"

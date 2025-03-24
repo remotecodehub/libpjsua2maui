@@ -182,6 +182,7 @@ jobs:
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         sed -i 's/-gcc-toolchain $(GCC_TOOLCHAIN_PATH)//' ./build/platform-android.mk
         #sed -i 's/stlport_shared/c++_shared/' ./codec/build/android/dec/jni/Application.mk
+        sed -i 's*$(NDKROOT)/platforms/android-$(NDKLEVEL)/arch-$(ARCH)/c++_shared/*/github/home/android-sdk/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot*g' ./build/platform-android.mk
         sed -e "/binaries: decdemo encdemo/ s/^#*/#/" -i ./build/platform-android.mk
         echo "finish sed Makefile" 
         cat ./build/platform-android.mk

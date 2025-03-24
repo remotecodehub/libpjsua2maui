@@ -35,7 +35,7 @@ jobs:
   pj-plus-third-party:
     strategy:
       matrix:
-        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
+        arch: [x86, x86_64, arm, arm64]
     runs-on: ubuntu-latest
     container:
       image: debian:bullseye
@@ -182,12 +182,12 @@ jobs:
         sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
         sed -i 's/-gcc-toolchain $(GCC_TOOLCHAIN_PATH)//' ./build/platform-android.mk
         #sed -i 's/stlport_shared/c++_shared/' ./codec/build/android/dec/jni/Application.mk
-        sed -i 's*$(NDKROOT)/platforms/android-$(NDKLEVEL)/arch-$(ARCH)/c++_shared/*/github/home/android-sdk/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot*g' ./build/platform-android.mk
+        sed -i 's*$(NDKROOT)/platforms/android-$(NDKLEVEL)/arch-$(ARCH)/c++_shared/*/github/home/android-sdk/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot*' ./build/platform-android.mk
         sed -e "/binaries: decdemo encdemo/ s/^#*/#/" -i ./build/platform-android.mk
         echo "finish sed Makefile" 
         cat ./build/platform-android.mk
         export APP_STL="c++_shared"
-        ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=${{ env.ANDROID_NDK_HOME }} NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
+        ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=$ANDROID_SDK_ROOT NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
         ARGS="${ARGS} TARGET=android-${{ env.TARGET_ANDROID_API }} APP_STL=c++_shared ARCH="
         # Add final architecture dependent info
         if [ "${{matrix.arch}}" == "armeabi" ]
@@ -228,7 +228,7 @@ jobs:
         echo "LDFLAGS -> ${LDFLAGS}"
         echo ""
         export SYSROOT="/github/home/android-sdk/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
-        export NDKROOT="${{ env.ANDROID_NDK_HOME }}"
+        export NDKROOT=$ANDROID_SDK_ROOT
         cat Makefile
         
         make ${ARGS} 
@@ -242,7 +242,7 @@ jobs:
         OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264
         BUILD_DIR: ${{ env.BASEDIR }}/outputs
         OPENH264_BUILD_OUT_PATH: ${{ env.BASEDIR }}/outputs/openh264-build-output
-        OPENH264_TARGET_NDK_LEVEL: 21
+        OPENH264_TARGET_NDK_LEVEL: 21 
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

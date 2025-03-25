@@ -137,7 +137,6 @@ jobs:
         echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
         echo "PATH=$ANDROID_NDK_HOME:\$PATH" >> $GITHUB_ENV
       
- 
     - name: Debug NDK Setup
       shell: bash
       run: |
@@ -156,99 +155,34 @@ jobs:
       id: openh264
       shell: bash
       run: |
-      
-        LIB_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/libs
-        LOG_PATH=${{ env.OPENH264_BUILD_OUT_PATH }}/logs 
-        # if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
-        #   echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} exists. Removing..."
-        #   rm -rf ${{ env.OPENH264_BUILD_OUT_PATH }}
-        # else
-        #     echo "Directory ${{ env.OPENH264_BUILD_OUT_PATH }} does not exist. Skipping removal."
-        # fi
-        mkdir -p "${LIB_PATH}"
-        mkdir -p "${LOG_PATH}"
-        if [ -d "${{ env.OPENH264_TMP_DIR }}" ]; then
-          echo "Directory ${{ env.OPENH264_TMP_DIR }} exists. Removing..."
-          rm -rf ${{ env.OPENH264_TMP_DIR }}
-        else
-            echo "Directory ${{ env.OPENH264_TMP_DIR }} does not exist. Skipping removal."
-        fi
-        mkdir -p ${{ env.OPENH264_TMP_DIR }}
+        TARGET=android-21
+
+        # Diretório de build
         cd ${{ env.OPENH264_PATH }}
-        cp -r * ${{ env.OPENH264_TMP_DIR }}
-        cd ${{ env.OPENH264_TMP_DIR }}
-        mkdir -p ${{ env.BUILD_DIR }}
-        echo "sedding makefile"
-        sed -i "s*PREFIX=/usr/local*PREFIX=${LIB_PATH}/${{matrix.arch}}*g" Makefile
-        #sed -i 's/-gcc-toolchain $(GCC_TOOLCHAIN_PATH)//' ./build/platform-android.mk
-        #sed -i 's/stlport_shared/c++_shared/' ./codec/build/android/dec/jni/Application.mk
-        #sed -i 's*$(NDKROOT)/platforms/android-$(NDKLEVEL)/arch-$(ARCH)/c++_shared/*/github/home/android-sdk/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot*' ./build/platform-android.mk
-        sed -e "/binaries: decdemo encdemo/ s/^#*/#/" -i ./build/platform-android.mk
-        echo "finish sed Makefile" 
-        cat ./build/platform-android.mk
-        export APP_STL="c++_shared"
-        ARGS="VERBOSE=1 APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} OS=android NDKROOT=$ANDROID_SDK_ROOT NDK_TOOLCHAIN_VERSION=clang NDKLEVEL=${{ env.OPENH264_TARGET_NDK_LEVEL }} "
-        ARGS="${ARGS} TARGET=android-${{ env.TARGET_ANDROID_API }} APP_STL=c++_shared ARCH="
-        # Add final architecture dependent info
-        if [ "${{matrix.arch}}" == "armeabi" ]
-        then
-            ARGS="${ARGS}arm APP_ABI=armeabi"
-        elif [ "${{matrix.arch}}" == "armeabi-v7a" ]
-        then
-            ARGS="${ARGS}arm"
-            export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi"
-            export LDFLAGS="${LDFLAGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/21/ -lc++ -lm -ldl -lc -ldl -lstdc++  "
-        elif [ "${{matrix.arch}}" == "x86" ]
-        then
-            ARGS="${ARGS}x86 ENABLEPIC=Yes"
-            export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/i686-linux-android"
-            export LDFLAGS="${LDFLAGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/21/  -lc++ -lm -ldl -lc -ldl -lstdc++  "
-        elif [ "${{matrix.arch}}" == "x86_64" ]
-            then
-            ARGS="${ARGS}x86_64"
-            export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/x86_64-linux-android"
-          export LDFLAGS="${LDFLAGS}  --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/21/ -lc++ -lm -ldl -lc -ldl -lstdc++ "
-        elif [ "${{matrix.arch}}" == "arm64-v8a" ]
-        then
-            ARGS="${ARGS}arm64"
-            export CFLAGS="-I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android"
-            export LDFLAGS="${LDFLAGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot -L${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/21  -lc++ -lm -ldl -lc -ldl -lstdc++   "
-        else
-            echo "Unsupported target ABI: ${{matrix.arch}}"
-            exit 1
-        fi
-        echo "make ${ARGS}"  
-        CFLAGS=" ${CFLAGS} --sysroot=${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"       
-        CFLAGS="${CFLAGS} -I${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" 
-        echo ""
-        echo "CFLAGS -> ${CFLAGS}"
-        echo ""
-        echo "ARGS -> ${ARGS}"
-        echo ""
-        echo "LDFLAGS -> ${LDFLAGS}"
-        echo ""
-        export SYSROOT="/github/home/android-sdk/ndk/r25c/android-ndk-r25c/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
-        export NDKROOT=$ANDROID_SDK_ROOT
-        cat Makefile
+        mkdir -p build_android
+        cd build_android
         
-        make ${ARGS} 
+        cmake -G"Unix Makefiles" ../openh264 \
+        -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+        -DANDROID_ABI=${{ matrix.arch }} \
+        -DANDROID_PLATFORM=$TARGET
+        make -j$(nproc)
+        make clean
 
-
-        mkdir -p ${LIB_PATH}/${{matrix.arch}}
-        echo "make ${ARGS} install" 
-        make ${ARGS} install 
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264
         BUILD_DIR: ${{ env.BASEDIR }}/outputs
         OPENH264_BUILD_OUT_PATH: ${{ env.BASEDIR }}/outputs/openh264-build-output
         OPENH264_TARGET_NDK_LEVEL: 21 
-
+ 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: openh264-${{ matrix.arch }}
-        path: ${{ env.OPENH264_BUILD_OUT_PATH }}
+        path: |
+          ${{ env.OPENH264_PATH }}/build_android
+          ${{ env.OPENH264_PATH }}/include
         overwrite: true
       env:
-        OPENH264_BUILD_OUT_PATH: ${{ env.BASEDIR }}/outputs/openh264-build-output
+        OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264

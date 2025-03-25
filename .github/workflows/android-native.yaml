@@ -170,8 +170,7 @@ jobs:
           armeabi-v7a)
             make OS=android ARCH=arm TARGET=android \
             APP_STL=c++_shared CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
-            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-            LD=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld \
+            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \ 
             CFLAGS="--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot -target armv7-none-linux-androideabi -I$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi" \
             LDFLAGS="${LDFLAGS} -L$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/arm-linux-androideabi/4.9.x" \
             NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
@@ -179,8 +178,7 @@ jobs:
           arm64-v8a)
             make OS=android ARCH=arm64 TARGET=android \
             APP_STL=c++_shared CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
-            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-            LD=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld \
+            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \ 
             CFLAGS="--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot -I$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android" \
             LDFLAGS="${LDFLAGS} -L$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/aarch64-linux-android/4.9.x" \
             NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
@@ -188,17 +186,15 @@ jobs:
           x86)
             make OS=android ARCH=x86 TARGET=android \
             APP_STL=c++_shared CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
-            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-            LD=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld \
-            CFLAGS="--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot -march=i686 -m32" \
+            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \ 
+            CFLAGS="--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot -march=i686 -m32 -I$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/i686-linux-android" \
             LDFLAGS="${LDFLAGS} -L$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/i686-linux-android/4.9.x" \
             NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           x86_64)
             make OS=android ARCH=x86_64 TARGET=android \
             APP_STL=c++_shared CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
-            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-            LD=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld \
+            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \ 
             CFLAGS="--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot -march=x86-64 -D__ANDROID_API__=21 -fPIC -U__overloadable -I$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/x86_64-linux-android" \
             LDFLAGS="${LDFLAGS} -L$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/x86_64-linux-android/4.9.x" \
             NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME

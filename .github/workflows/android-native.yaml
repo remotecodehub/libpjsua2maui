@@ -161,25 +161,25 @@ jobs:
         # Diretório de build
         cd ${{ env.OPENH264_PATH }}
 
-        # Escolha da arquitetura e compilação
         case $ARCH in
           armeabi-v7a)
-            make OS=android ARCH=arm NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            make OS=android ARCH=arm TARGET=android NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
             ;;
           arm64-v8a)
-            make OS=android ARCH=arm64 NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            make OS=android ARCH=arm64 TARGET=android NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
             ;;
           x86)
-            make OS=android ARCH=x86 NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            make OS=android ARCH=x86 TARGET=android NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
             ;;
           x86_64)
-            make OS=android ARCH=x86_64 NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            make OS=android ARCH=x86_64 TARGET=android NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
             ;;
           *)
             echo "Unsupported architecture: $ARCH"
             exit 1
             ;;
         esac
+
 
 
       env:

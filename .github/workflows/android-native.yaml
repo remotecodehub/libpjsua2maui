@@ -162,7 +162,7 @@ jobs:
         mkdir -p build_android
         cd build_android
         
-        cmake -G"Unix Makefiles" ../openh264 \
+        cmake -G"Unix Makefiles" .. \
         -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
         -DANDROID_ABI=${{ matrix.arch }} \
         -DANDROID_PLATFORM=$TARGET

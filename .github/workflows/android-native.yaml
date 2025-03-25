@@ -141,7 +141,7 @@ jobs:
       shell: bash
       run: |
         echo "NDK Path: ${{ steps.setup-ndk.outputs.ndk-path }}"
-        ls -R ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/
+        ls -R ${{ steps.setup-ndk.outputs.ndk-path }} 
 
     - name: Install build tools
       shell: bash

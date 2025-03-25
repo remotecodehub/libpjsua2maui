@@ -146,7 +146,7 @@ jobs:
     - name: Install build tools
       shell: bash
       run: |
-        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev cmake \
+        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev \
               libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig llvm clang"
         dpkg --add-architecture i386
         apt-get update && apt-get install -y ${DEPS}
@@ -156,18 +156,31 @@ jobs:
       shell: bash
       run: |
         TARGET=android-21
+        ARCH=${{ matrix.arch }}
 
         # Diretório de build
         cd ${{ env.OPENH264_PATH }}
-        mkdir -p build_android
-        cd build_android
-        
-        cmake -G"Unix Makefiles" .. \
-        -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
-        -DANDROID_ABI=${{ matrix.arch }} \
-        -DANDROID_PLATFORM=$TARGET
-        make -j$(nproc)
-        make clean
+
+        # Escolha da arquitetura e compilação
+        case $ARCH in
+          armeabi-v7a)
+            make OS=android ARCH=arm NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            ;;
+          arm64-v8a)
+            make OS=android ARCH=arm64 NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            ;;
+          x86)
+            make OS=android ARCH=x86 NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            ;;
+          x86_64)
+            make OS=android ARCH=x86_64 NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            ;;
+          *)
+            echo "Unsupported architecture: $ARCH"
+            exit 1
+            ;;
+        esac
+
 
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}

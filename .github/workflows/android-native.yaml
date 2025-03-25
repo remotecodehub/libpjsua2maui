@@ -146,7 +146,7 @@ jobs:
     - name: Install build tools
       shell: bash
       run: |
-        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev \
+        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev cmake \
               libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig llvm clang"
         dpkg --add-architecture i386
         apt-get update && apt-get install -y ${DEPS}

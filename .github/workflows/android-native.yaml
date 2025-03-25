@@ -164,22 +164,22 @@ jobs:
         case $ARCH in
           armeabi-v7a)
             make OS=android ARCH=arm TARGET=android \
-            APP_STL=c++_shared EXTRA_CFLAGS="-march=armv7-a" \
+            APP_STL=c++_shared EXTRA_CFLAGS="-march=armv7-a  -I$ANDROID_NDK_HOME/sysroot/usr/include/arm-linux-androideabi" \
             NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           arm64-v8a)
             make OS=android ARCH=arm64 TARGET=android \
-            APP_STL=c++_shared EXTRA_CFLAGS="-march=armv8-a" \
+            APP_STL=c++_shared EXTRA_CFLAGS="-march=armv8-a  -I$ANDROID_NDK_HOME/sysroot/usr/include/aarch64-linux-android/" \
             NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           x86)
             make OS=android ARCH=x86 TARGET=android \
-            APP_STL=c++_shared EXTRA_CFLAGS="-march=i686" \
+            APP_STL=c++_shared EXTRA_CFLAGS="-march=i686  -I$ANDROID_NDK_HOME/sysroot/usr/include/i686-linux-android" \
             NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           x86_64)
             make OS=android ARCH=x86_64 TARGET=android \
-            APP_STL=c++_shared EXTRA_CFLAGS="-march=x86-64" \
+            APP_STL=c++_shared EXTRA_CFLAGS="-march=x86-64  -I$ANDROID_NDK_HOME/sysroot/usr/include/x86_64-linux-android" \
             NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           *)

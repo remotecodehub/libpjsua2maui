@@ -194,8 +194,9 @@ jobs:
       with:
         name: openh264-${{ matrix.arch }}
         path: |
-          ${{ env.OPENH264_PATH }}/build_android
+          ${{ env.OPENH264_PATH }}/lib
           ${{ env.OPENH264_PATH }}/include
+
         overwrite: true
       env:
         OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264

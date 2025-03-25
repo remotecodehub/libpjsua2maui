@@ -163,22 +163,23 @@ jobs:
 
         case $ARCH in
           armeabi-v7a)
-            make OS=android ARCH=arm TARGET=android NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            make OS=android ARCH=arm TARGET=android APP_STL=c++_static EXTRA_CFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16" NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           arm64-v8a)
-            make OS=android ARCH=arm64 TARGET=android NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            make OS=android ARCH=arm64 TARGET=android APP_STL=c++_static EXTRA_CFLAGS="-march=armv8-a" NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           x86)
-            make OS=android ARCH=x86 TARGET=android NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            make OS=android ARCH=x86 TARGET=android APP_STL=c++_static EXTRA_CFLAGS="-march=i686" NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           x86_64)
-            make OS=android ARCH=x86_64 TARGET=android NDKLEVEL=$TARGET NDKROOT=$ANDROID_NDK_HOME
+            make OS=android ARCH=x86_64 TARGET=android APP_STL=c++_static EXTRA_CFLAGS="-march=x86-64" NDKLEVEL=21 NDKROOT=$ANDROID_NDK_HOME
             ;;
           *)
             echo "Unsupported architecture: $ARCH"
             exit 1
             ;;
         esac
+
 
 
 

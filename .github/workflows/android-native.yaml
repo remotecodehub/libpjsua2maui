@@ -53,7 +53,7 @@ jobs:
 
        
       - name: Upload OpenH264 Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: openh264-android
           path: ./output

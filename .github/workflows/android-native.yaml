@@ -200,7 +200,7 @@ jobs:
     
         make VERBOSE=1 APP_PLATFORM=android-28 OS=android ARCH=$ARCH TARGET=android \
         APP_STL=c++_shared CC=$NDK_CC CXX=$NDK_CXX LD=$LD  \
-        PREFIX=build/$ARCH  CFLAGS="${CFLAGS}" LDFLAGS="-nostdlib ${LDFLAGS}" \
+        PREFIX=build/$ARCH  CFLAGS="${CFLAGS}" \ #LDFLAGS="-nostdlib ${LDFLAGS}" \
         NDKROOT=$ANDROID_NDK_HOME
 
       env:

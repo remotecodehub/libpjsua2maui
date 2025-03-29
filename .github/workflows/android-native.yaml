@@ -170,22 +170,22 @@ jobs:
           armeabi-v7a)
             ARCH=arm
             CFLAGS="--sysroot=${SYSROOT} -target armv7-none-linux-androideabi28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/arm-linux-androideabi   -lc -lm -ldl "
+            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/arm-linux-androideabi    "
             ;;
           arm64-v8a)
             ARCH=arm64
             CFLAGS="--sysroot=${SYSROOT} -target aarch64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/aarch64-linux-android  -lc -lm -ldl "
+            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/aarch64-linux-android   "
             ;;
           x86)
             ARCH=${{ matrix.arch }}
             CFLAGS="--sysroot=${SYSROOT} -target i686-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/i686-linux-android   -lc -lm -ldl "
+            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/i686-linux-android    "
             ;;
           x86_64)
             ARCH=${{ matrix.arch }}
             CFLAGS="--sysroot=${SYSROOT} -target x86_64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/x86_64-linux-android   -lc -lm -ldl "
+            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/x86_64-linux-android    "
             ;;
           *)
             echo "Unsupported architecture: $ARCH"

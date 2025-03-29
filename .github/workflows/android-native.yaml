@@ -166,6 +166,7 @@ jobs:
         export NDK_CC=$NDK_TOOLCHAIN/bin/clang
         export NDK_CXX=$NDK_TOOLCHAIN/bin/clang++
         export LDFLAGS="--sysroot=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot ${LDFLAGS}"
+        export SYSROOT="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
         case $ARCH in
           armeabi-v7a)
             make OS=android ARCH=arm TARGET=android \

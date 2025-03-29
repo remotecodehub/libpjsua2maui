@@ -165,7 +165,7 @@ jobs:
         export SYSROOT="${NDK_TOOLCHAIN}/sysroot"
         export NDK_CC=$NDK_TOOLCHAIN/bin/clang
         export NDK_CXX=$NDK_TOOLCHAIN/bin/clang++
-        export LD=$NDK_TOOLCHAIN/bin/ld64.lld
+        export LD=$NDK_TOOLCHAIN/bin/ld.lld
     
         case ${{ matrix.arch }} in
           armeabi-v7a)
@@ -200,8 +200,9 @@ jobs:
     
         make APP_PLATFORM=android-28 OS=android ARCH=$ARCH TARGET=android \
         APP_STL=c++_shared CC=$NDK_CC CXX=$NDK_CXX LD=$LD  \
-          CFLAGS="${CFLAGS}" LDFLAGS="-nostdlib ${LDFLAGS}" \
-          NDKROOT=$ANDROID_NDK_HOME
+        PREFIX=build/$ARCH  CFLAGS="${CFLAGS}" LDFLAGS="-nostdlib ${LDFLAGS}" \
+        NDKROOT=$ANDROID_NDK_HOME
+
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264

@@ -169,19 +169,19 @@ jobs:
         case $ARCH in
           armeabi-v7a)
             CFLAGS="--sysroot=${SYSROOT} -target armv7-none-linux-androideabi28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/arm-linux-androideabi -lc -lm -L${SYSROOT}/usr/lib/arm-linux-androideabi/28"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/arm-linux-androideabi -lc -lm"
             ;;
           arm64-v8a)
             CFLAGS="--sysroot=${SYSROOT} -target aarch64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/aarch64-linux-android -lc -lm -L${SYSROOT}/usr/lib/aarch64-linux-android/28"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/aarch64-linux-android -lc -lm"
             ;;
           x86)
             CFLAGS="--sysroot=${SYSROOT} -target i686-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/i686-linux-android -lc -lm -L${SYSROOT}/usr/lib/i686-linux-android/28"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/i686-linux-android -lc -lm"
             ;;
           x86_64)
             CFLAGS="--sysroot=${SYSROOT} -target x86_64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/x86_64-linux-android -lc -lm -L${SYSROOT}/usr/lib/x86_64-linux-android/28"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/x86_64-linux-android -lc -lm"
             ;;
           *)
             echo "Unsupported architecture: $ARCH"

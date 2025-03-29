@@ -156,8 +156,8 @@ jobs:
       id: openh264
       shell: bash
       run: |
-        ARCH=${{ matrix.arch }}
-    
+        
+        
         # Diretório de build
         cd ${{ env.OPENH264_PATH }}
         
@@ -166,22 +166,26 @@ jobs:
         export NDK_CC=$NDK_TOOLCHAIN/bin/clang
         export NDK_CXX=$NDK_TOOLCHAIN/bin/clang++
     
-        case $ARCH in
+        case ${{ matrix.arch }} in
           armeabi-v7a)
+            ARCH=arm
             CFLAGS="--sysroot=${SYSROOT} -target armv7-none-linux-androideabi28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/arm-linux-androideabi -lc -lm"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/arm-linux-androideabi -L${SYSROOT}/usr/lib/arm-linux-androideabi/28 -lc -lm"
             ;;
           arm64-v8a)
+            ARCH=arm64
             CFLAGS="--sysroot=${SYSROOT} -target aarch64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/aarch64-linux-android -lc -lm"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/aarch64-linux-android -L${SYSROOT}/usr/lib/aarch64-linux-android/28 -lc -lm"
             ;;
           x86)
+            ARCH=${{ matrix.arch }}
             CFLAGS="--sysroot=${SYSROOT} -target i686-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/i686-linux-android -lc -lm"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/i686-linux-android -L${SYSROOT}/usr/lib/i686-linux-android/28 -lc -lm"
             ;;
           x86_64)
+            ARCH=${{ matrix.arch }}
             CFLAGS="--sysroot=${SYSROOT} -target x86_64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/x86_64-linux-android -lc -lm"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/x86_64-linux-android -L${SYSROOT}/usr/lib/x86_64-linux-android/28 -lc -lm"
             ;;
           *)
             echo "Unsupported architecture: $ARCH"

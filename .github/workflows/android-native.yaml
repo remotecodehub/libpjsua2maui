@@ -48,7 +48,7 @@ jobs:
        
       - name: Run Docker Container and Extract Artifacts
         run: |
-          mkdir ${{ github.workspace }}/output/outputs
+          mkdir -p ${{ github.workspace }}/output/outputs
           docker run --name openh264-build -v ${{ github.workspace }}/output:/root/outputs openh264-builder
           docker cp openh264-build:/root/outputs ./output
 
@@ -57,5 +57,32 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: openh264-android
+          path: ./output
+  
+  openssl:
+    runs-on: ubuntu-latest
+    
+    steps:
+       
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+       
+      - name: Build Docker Image
+        run: |
+          docker build -t openssl-builder ${{ github.workspace }}/res/docker/openssl
+
+       
+      - name: Run Docker Container and Extract Artifacts
+        run: |
+          mkdir -p ${{ github.workspace }}/output/outputs
+          docker run --name openssl-build -v ${{ github.workspace }}/output:/root/outputs openssl-builder
+          docker cp openssl-build:/root/outputs ./output
+
+       
+      - name: Upload openssl Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: openssl-android
           path: ./output
  

@@ -152,12 +152,12 @@ jobs:
         dpkg --add-architecture i386
         apt-get update && apt-get install -y ${DEPS}
   
+    
     - name: Build OpenH264
       id: openh264
       shell: bash
       run: |
-        
-        
+    
         # Diretório de build
         cd ${{ env.OPENH264_PATH }}
         
@@ -165,27 +165,32 @@ jobs:
         export SYSROOT="${NDK_TOOLCHAIN}/sysroot"
         export NDK_CC=$NDK_TOOLCHAIN/bin/clang
         export NDK_CXX=$NDK_TOOLCHAIN/bin/clang++
+        export LD=$NDK_TOOLCHAIN/bin/ld.lld
     
         case ${{ matrix.arch }} in
           armeabi-v7a)
             ARCH=arm
-            CFLAGS="--sysroot=${SYSROOT} -target armv7-none-linux-androideabi28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/arm-linux-androideabi    "
+            TARGET_ARCH="arm-linux-androideabi"
+            CFLAGS="--sysroot=${SYSROOT} -target armv7-none-linux-androideabi28 -D__ANDROID_API__=28 -fPIC -fuse-ld=lld"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${TARGET_ARCH} -lc -lm -ldl -llog"
             ;;
           arm64-v8a)
             ARCH=arm64
-            CFLAGS="--sysroot=${SYSROOT} -target aarch64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/aarch64-linux-android   "
+            TARGET_ARCH="aarch64-linux-android"
+            CFLAGS="--sysroot=${SYSROOT} -target aarch64-none-linux-android28 -D__ANDROID_API__=28 -fPIC -fuse-ld=lld"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${TARGET_ARCH} -lc -lm -ldl -llog"
             ;;
           x86)
             ARCH=${{ matrix.arch }}
-            CFLAGS="--sysroot=${SYSROOT} -target i686-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/i686-linux-android    "
+            TARGET_ARCH="i686-linux-android"
+            CFLAGS="--sysroot=${SYSROOT} -target i686-none-linux-android28 -D__ANDROID_API__=28 -fPIC -fuse-ld=lld"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${TARGET_ARCH} -lc -lm -ldl -llog"
             ;;
           x86_64)
             ARCH=${{ matrix.arch }}
-            CFLAGS="--sysroot=${SYSROOT} -target x86_64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
-            LDFLAGS="-nostdlib --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/x86_64-linux-android    "
+            TARGET_ARCH="x86_64-linux-android"
+            CFLAGS="--sysroot=${SYSROOT} -target x86_64-none-linux-android28 -D__ANDROID_API__=28 -fPIC -fuse-ld=lld"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${TARGET_ARCH} -lc -lm -ldl -llog"
             ;;
           *)
             echo "Unsupported architecture: $ARCH"
@@ -193,14 +198,15 @@ jobs:
             ;;
         esac
     
-        make APP_PLATFORM=android-28 OS=android ARCH=$ARCH TARGET=android NDK_TOOLCHAIN_VERSION=clang \
-          APP_STL=c++_shared CC=$NDK_CC CXX=$NDK_CXX LD=$NDK_TOOLCHAIN/bin/ld.lld \
+        make APP_PLATFORM=android-28 OS=android ARCH=$ARCH TARGET=android \
+          APP_STL=c++_shared CC=$NDK_CC CXX=$NDK_CXX LD=$LD \
           CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" \
           NDKROOT=$ANDROID_NDK_HOME
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264
     
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

@@ -156,67 +156,47 @@ jobs:
       id: openh264
       shell: bash
       run: |
-        TARGET=android-28
         ARCH=${{ matrix.arch }}
-
+    
         # Diretório de build
         cd ${{ env.OPENH264_PATH }}
         
         export NDK_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
+        export SYSROOT="${NDK_TOOLCHAIN}/sysroot"
         export NDK_CC=$NDK_TOOLCHAIN/bin/clang
-        export NDK_CXX=$NDK_TOOLCHAIN/bin/clang++ 
-        export SYSROOT="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+        export NDK_CXX=$NDK_TOOLCHAIN/bin/clang++
+    
         case $ARCH in
           armeabi-v7a)
-            make OS=android ARCH=arm TARGET=android \
-            APP_STL=c++_shared CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
-            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
-            LD=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld \
-            CFLAGS="--sysroot=${SYSROOT} -target armv7-none-linux-androideabi -I${SYSROOT}/usr/include/arm-linux-androideabi -D__ANDROID_API__=28 -fuse-ld=lld" \
-            LDFLAGS="${LDFLAGS} --sysroot=${SYSROOT} -L$ANDROID_NDK_HOME/platforms/android-28/arch-arm/usr/lib -L$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/arm-linux-androideabi/4.9.x -L$ANDROID_NDK_HOME/platforms/android-28/arch-arm/usr/lib -L$SYSROOT/usr/lib/arm-linux-androideabi -lc -lgcc -lgcc_s" \
-            NDKLEVEL=28 NDKROOT=$ANDROID_NDK_HOME
+            CFLAGS="--sysroot=${SYSROOT} -target armv7-none-linux-androideabi28 -D__ANDROID_API__=28 -fuse-ld=lld"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/arm-linux-androideabi -lc -lm"
             ;;
           arm64-v8a)
-            make OS=android ARCH=arm64 TARGET=android \
-            APP_STL=c++_shared CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang NDKLEVEL=28 NDKROOT=$ANDROID_NDK_HOME \
-            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \ 
-            LD=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld \
-            CFLAGS="--sysroot=${SYSROOT}  -target aarch64-none-linux-android -I${SYSROOT}/usr/include/aarch64-linux-android -D__ANDROID_API__=28 -fuse-ld=lld" \
-            LDFLAGS="${LDFLAGS} --sysroot=${SYSROOT} -L$ANDROID_NDK_HOME/platforms/android-28/arch-arm64/usr/lib -L$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/aarch64-linux-android/4.9.x -L$ANDROID_NDK_HOME/platforms/android-28/arch-arm64/usr/lib -L$SYSROOT/usr/lib/aarch64-linux-android -lc -lgcc -lgcc_s" 
+            CFLAGS="--sysroot=${SYSROOT} -target aarch64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/aarch64-linux-android -lc -lm"
             ;;
           x86)
-            make OS=android ARCH=x86 TARGET=android \
-            APP_STL=c++_shared CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang NDKLEVEL=28 NDKROOT=$ANDROID_NDK_HOME \
-            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \ 
-            LD=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld \
-            CFLAGS="--sysroot=${SYSROOT} -target i686-none-linux-android -march=i686 -m32 -I${SYSROOT}/usr/include/i686-linux-android -D__ANDROID_API__=28 -fuse-ld=lld" \
-            LDFLAGS="${LDFLAGS} --sysroot=${SYSROOT} -L$ANDROID_NDK_HOME/platforms/android-28/arch-x86/usr/lib -L$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/i686-linux-android/4.9.x -L$ANDROID_NDK_HOME/platforms/android-28/arch-x86/usr/lib -L$SYSROOT/usr/lib/i686-linux-android -lc -lgcc -lgcc_s"  
+            CFLAGS="--sysroot=${SYSROOT} -target i686-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/i686-linux-android -lc -lm"
             ;;
           x86_64)
-            make OS=android ARCH=x86_64 TARGET=android \
-            APP_STL=c++_shared CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang NDKLEVEL=28 NDKROOT=$ANDROID_NDK_HOME \
-            CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \ 
-            LD=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld \
-            CFLAGS="--sysroot=${SYSROOT} -target x86_64-none-linux-android -march=x86-64 -D__ANDROID_API__=28 -fPIC -U__overloadable -I${SYSROOT}/usr/include/x86_64-linux-android" \
-            LDFLAGS="${LDFLAGS} --sysroot=${SYSROOT} -L$ANDROID_NDK_HOME/platforms/android-28/arch-x86_64/usr/lib -L$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib/gcc/x86_64-linux-android/4.9.x -L$ANDROID_NDK_HOME/platforms/android-28/arch-x86_64/usr/lib -L$SYSROOT/usr/lib/x86_64-linux-android -lc -lgcc -lgcc_s" \
-            NDKLEVEL=28 NDKROOT=$ANDROID_NDK_HOME
+            CFLAGS="--sysroot=${SYSROOT} -target x86_64-none-linux-android28 -D__ANDROID_API__=28 -fuse-ld=lld"
+            LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/x86_64-linux-android -lc -lm"
             ;;
           *)
             echo "Unsupported architecture: $ARCH"
             exit 1
             ;;
         esac
-
-
-
-
+    
+        make OS=android ARCH=$ARCH TARGET=android \
+          APP_STL=c++_shared CC=$NDK_CC CXX=$NDK_CXX LD=$NDK_TOOLCHAIN/bin/ld.lld \
+          CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" \
+          NDKROOT=$ANDROID_NDK_HOME
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264
-        BUILD_DIR: ${{ env.BASEDIR }}/outputs
-        OPENH264_BUILD_OUT_PATH: ${{ env.BASEDIR }}/outputs/openh264-build-output
-        OPENH264_TARGET_NDK_LEVEL: 28 
- 
+    
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

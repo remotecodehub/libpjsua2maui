@@ -32,190 +32,29 @@ env:
     TARGET_ANDROID_API: 28
     OPENH264_TMP_DIR: /tmp/openh264
 jobs:
-  pj-plus-third-party:
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
+  openh264:
     runs-on: ubuntu-latest
-    container:
-      image: debian:bullseye
-    name: pjsip + third party libs 
-    permissions:
-      contents: write
+    
     steps:
-    
-    - name: Install Git
-      run: |
-        apt-get update
-        apt-get install -y git
-        git --version 
-   
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-         submodules: 'true'
        
-    - name: Instalar pacotes essenciais
-      run: |
-        apt-get update
-        apt-get install -y build-essential curl unzip git
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+       
+      - name: Build Docker Image
+        run: |
+          docker build -t openh264-builder ${{ github.workspace }}/res/docker/openh264
+
+       
+      - name: Run Docker Container and Extract Artifacts
+        run: |
+          docker run --name openh264-build -v ${{ github.workspace }}/output:/root/outputs openh264-builder
+          docker cp openh264-build:/root/outputs ./output
+
+       
+      - name: Upload OpenH264 Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: openh264-android
+          path: ./output
  
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        check-latest: true
-    
-    - name: Set up Android SDK
-      id: setup-sdk
-      run: |
-        # Define variables
-        ANDROID_SDK_ROOT=$HOME/android-sdk
-        CMDLINE_TOOLS_VERSION=11076708
-        API_LEVEL=28
-        BUILD_TOOLS_VERSION=34.0.0
-
-        # Create directories
-        mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
-        mkdir -p "$ANDROID_SDK_ROOT/platforms"
-        mkdir -p "$ANDROID_SDK_ROOT/build-tools"
-
-        # Download and set up cmdline-tools
-        curl -o sdk-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_VERSION}_latest.zip"
-        unzip sdk-tools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
-        mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
-        rm sdk-tools.zip
-
-        # Update and install platform-tools and build-tools
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-          "platform-tools" \
-          "platforms;android-${API_LEVEL}" \
-          "build-tools;${BUILD_TOOLS_VERSION}"
-
-        # Export paths
-        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-        echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:\$PATH" >> $GITHUB_ENV
-        
-        # Output paths
-        echo "android_sdk_root=$ANDROID_SDK_ROOT" >> $GITHUB_OUTPUT
-        echo "cmdline_tools_path=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_OUTPUT
-        echo "platform_tools_path=$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_OUTPUT
- 
-    - name: Verify Android SDK installation
-      shell: bash
-      run: |
-        echo "Android SDK Root: $ANDROID_SDK_ROOT"
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
-        ls -R $ANDROID_SDK_ROOT
-      
-    - name: Download and Setup Android NDK
-      id: setup-ndk
-      shell: bash
-      run: |
-        # Define variables
-        ANDROID_SDK_ROOT=$HOME/android-sdk
-        ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/r28
-        NDK_VERSION=r28
-    
-        # Create directories
-        echo "Creating directories for SDK and NDK..."
-        mkdir -p "$ANDROID_SDK_ROOT"
-        mkdir -p "$ANDROID_NDK_ROOT"
-    
-        # Download and extract Android NDK
-        echo "Downloading Android NDK $NDK_VERSION..."
-        curl -L -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip
-        echo "Extracting Android NDK..."
-        unzip android-ndk.zip -d "$ANDROID_NDK_ROOT"
-        rm android-ndk.zip
-    
-        # Set NDK paths and export them
-        export ANDROID_NDK_HOME=$ANDROID_NDK_ROOT/android-ndk-$NDK_VERSION
-        echo "NDK_HOME=$ANDROID_NDK_HOME"
-        echo "ndk-path=$ANDROID_NDK_HOME" >> $GITHUB_OUTPUT
-        echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-        echo "PATH=$ANDROID_NDK_HOME:\$PATH" >> $GITHUB_ENV
-      
-    - name: Debug NDK Setup
-      shell: bash
-      run: |
-        echo "NDK Path: ${{ steps.setup-ndk.outputs.ndk-path }}"
-        ls -R ${{ steps.setup-ndk.outputs.ndk-path }} 
-
-    - name: Install build tools
-      shell: bash
-      run: |
-        DEPS="unzip git curl bzip2 binutils make autoconf openssl linux-libc-dev \
-              libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig llvm clang"
-        dpkg --add-architecture i386
-        apt-get update && apt-get install -y ${DEPS}
-  
-    
-    - name: Build OpenH264
-      id: openh264
-      shell: bash
-      run: |
-    
-        # Diretório de build
-        cd ${{ env.OPENH264_PATH }}
-        
-        export NDK_TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
-        export SYSROOT="${NDK_TOOLCHAIN}/sysroot"
-        export NDK_CC=$NDK_TOOLCHAIN/bin/clang
-        export NDK_CXX=$NDK_TOOLCHAIN/bin/clang++
-        export LD=$NDK_TOOLCHAIN/bin/ld.lld
-    
-        case ${{ matrix.arch }} in
-          armeabi-v7a)
-            ARCH=arm
-            TARGET_ARCH="arm-linux-androideabi"
-            CFLAGS="--sysroot=${SYSROOT} -target armv7-none-linux-androideabi28 -D__ANDROID_API__=28 -fPIC "
-            #LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${TARGET_ARCH} -lc -lm -lc++_shared -ldl -llog"
-            ;;
-          arm64-v8a)
-            ARCH=arm64
-            TARGET_ARCH="aarch64-linux-android"
-            CFLAGS="--sysroot=${SYSROOT} -target aarch64-none-linux-android28 -D__ANDROID_API__=28 -fPIC "
-            #LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${TARGET_ARCH} -lc -lm -lc++_shared -ldl -llog"
-            ;;
-          x86)
-            ARCH=${{ matrix.arch }}
-            TARGET_ARCH="i686-linux-android"
-            CFLAGS="--sysroot=${SYSROOT} -target i686-none-linux-android28 -D__ANDROID_API__=28 -fPIC "
-            #LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${TARGET_ARCH} -lc -lm -lc++_shared -ldl -llog"
-            ;;
-          x86_64)
-            ARCH=${{ matrix.arch }}
-            TARGET_ARCH="x86_64-linux-android"
-            CFLAGS="--sysroot=${SYSROOT} -target x86_64-none-linux-android28 -D__ANDROID_API__=28 -fPIC "
-            #LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${TARGET_ARCH} -lc -lm -lc++_shared -ldl -llog"
-            ;;
-          *)
-            echo "Unsupported architecture: $ARCH"
-            exit 1
-            ;;
-        esac
-    
-        make VERBOSE=1 APP_PLATFORM=android-28 OS=android ARCH=$ARCH TARGET=android \
-        APP_STL=c++_shared CC=$NDK_CC CXX=$NDK_CXX LD=$LD  \
-        PREFIX=build/$ARCH  CFLAGS="${CFLAGS}" \
-        NDKROOT=$ANDROID_NDK_HOME
-
-      env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264
-    
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: openh264-${{ matrix.arch }}
-        path: |
-          ${{ env.OPENH264_PATH }}/lib
-          ${{ env.OPENH264_PATH }}/include
-
-        overwrite: true
-      env:
-        OPENH264_PATH: ${{ env.BASEDIR }}/lib/openh264

@@ -48,6 +48,7 @@ jobs:
        
       - name: Run Docker Container and Extract Artifacts
         run: |
+          mkdir ${{ github.workspace }}/output/outputs
           docker run --name openh264-build -v ${{ github.workspace }}/output:/root/outputs openh264-builder
           docker cp openh264-build:/root/outputs ./output
 

@@ -77,12 +77,12 @@ RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \
         APP_PLATFORM=android-28 APP_STL=c++_shared \
         CC=$TOOLCHAIN/bin/clang CXX=$TOOLCHAIN/bin/clang++ LD=$TOOLCHAIN/bin/ld.lld \
         CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"; \
-      make install PREFIX=/lib/$ARCH; \
+      make install PREFIX=/libs/$ARCH; \
     done
 
 # Set outputs directory
 RUN mkdir -p /root/outputs \
-    && cp -r /lib /root/outputs
+    && cp -r /libs /root/outputs
 
 # Working directory
-WORKDIR /root
+WORKDIR /root 

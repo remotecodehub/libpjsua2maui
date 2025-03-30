@@ -37,10 +37,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create Output Directory
-        run: mkdir -p ${{ github.workspace }}/output
+        run: mkdir -p ${{ github.workspace }}/libopenh264-output
 
       - name: Set Permissions for Output Directory
-        run: chmod -R 777 ${{ github.workspace }}/output
+        run: chmod -R 777 ${{ github.workspace }}/libopenh264-output
 
       - name: Build Docker Image
         run: |
@@ -48,9 +48,10 @@ jobs:
 
       - name: Run Docker Container and Extract Artifacts
         run: | 
-          docker run --name openh264-build -v ./output:/root/outputs/libs openh264-builder
-          docker cp openh264-build:/root/outputs/libs ./output
-          ls -l -R ./output
+          cd ${{ github.workspace }}/libopenh264-output
+          docker run --name openh264-build -v ./:/root/outputs/libs openh264-builder
+          docker cp openh264-build:/root/outputs/libs .
+          ls -l -R .
 
       - name: Upload OpenH264 Artifacts
         uses: actions/upload-artifact@v4
@@ -67,10 +68,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create Output Directory
-        run: mkdir -p ${{ github.workspace }}/output
+        run: mkdir -p ${{ github.workspace }}/openssl-output
 
       - name: Set Permissions for Output Directory
-        run: chmod -R 777 ${{ github.workspace }}/output
+        run: chmod -R 777 ${{ github.workspace }}/openssl-output
 
       - name: Build Docker Image
         run: |
@@ -78,15 +79,16 @@ jobs:
         
       - name: Run Docker Container and Extract Artifacts
         run: | 
-          docker run --name openssl-build -v ./output:/root/outputs/libs openssl-builder
-          docker cp openssl-build:/root/outputs/libs ./output
-          ls -l -R ./output
+          cd ${{ github.workspace }}/openssl-output
+          docker run --name openssl-build -v .:/root/outputs/libs openssl-builder
+          docker cp openssl-build:/root/outputs/libs .
+          ls -l -R .
 
       - name: Upload openssl Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: openssl-android
-          path: ./output
+          path: ./openssl-output
 
   bcg729:
     runs-on: ubuntu-latest
@@ -97,10 +99,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create Output Directory
-        run: mkdir -p ${{ github.workspace }}/output
+        run: mkdir -p ${{ github.workspace }}/bcg729-output
 
       - name: Set Permissions for Output Directory
-        run: chmod -R 777 ${{ github.workspace }}/output
+        run: chmod -R 777 ${{ github.workspace }}/bcg729-output
 
       - name: Build Docker Image
         run: |
@@ -108,15 +110,16 @@ jobs:
         
       - name: Run Docker Container and Extract Artifacts
         run: |
-          docker run --name bcg729-build -v ./output:/root/outputs/libs bcg729-builder
-          docker cp bcg729-build:/root/outputs/libs ./output
-          ls -l -R ./output
+          cd ${{ github.workspace }}/bcg729-output
+          docker run --name bcg729-build -v ./:/root/outputs/libs bcg729-builder
+          docker cp bcg729-build:/root/outputs/libs .
+          ls -l -R .
  
       - name: Upload bcg729 Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: bcg729-android
-          path: ./output 
+          path: ./bcg729-output 
 
   opus:
     runs-on: ubuntu-latest
@@ -127,10 +130,10 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Create Output Directory
-        run: mkdir -p ${{ github.workspace }}/output
+        run: mkdir -p ${{ github.workspace }}/opus-output
 
       - name: Set Permissions for Output Directory
-        run: chmod -R 777 ${{ github.workspace }}/output
+        run: chmod -R 777 ${{ github.workspace }}/opus-output
 
       - name: Build Docker Image
         run: |
@@ -138,14 +141,15 @@ jobs:
           
       - name: Run Docker Container and Extract Artifacts
         run: | 
-          docker run --name opus-build -v ./output:/root/outputs/libs opus-builder
-          docker cp opus-build:/root/outputs/libs ./output
-          ls -l -R ./output
+          cd ${{ github.workspace }}/opus-output
+          docker run --name opus-build -v ./:/root/outputs/libs opus-builder
+          docker cp opus-build:/root/outputs/libs .
+          ls -l -R .
  
       - name: Upload opus Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: opus-android
-          path: ./output 
+          path: ./opus-output 
 
   

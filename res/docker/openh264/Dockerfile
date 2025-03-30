@@ -76,14 +76,9 @@ RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \
         APP_PLATFORM=android-28 APP_STL=c++_shared \
         CC=$TOOLCHAIN/bin/clang CXX=$TOOLCHAIN/bin/clang++ LD=$TOOLCHAIN/bin/ld.lld \
         CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"; \
+      echo "Modifying Makefile to prevent symbolic links..."; \
+      sed -i 's/ln -s/cp/' Makefile; \
       make install PREFIX=/libs/$ARCH; \
-      echo "Replacing symbolic links with actual files for $ARCH..."; \
-      for LIB in /libs/$ARCH/lib/*.so*; do \
-          if [ -L "$LIB" ]; then \
-              REAL_FILE=$(readlink -f "$LIB"); \
-              mv "$REAL_FILE" "$LIB"; \
-          fi; \
-      done; \
     done
 
 # Set outputs directory

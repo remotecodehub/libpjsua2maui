@@ -22,10 +22,10 @@
             https://github.com/weslleymurdock/libpjsua2maui/blob/main/CHANGELOG.md
         </description>
         <releaseNotes>
-            Add BCG729 to third party libs; 
-            Upgrade .NET to 9.0
-            Upgrade Android API to 34.0
-            Upgrade iOS SDK to 18.2
+            - Fixed bad linking with bcg729 and pjsip on ios platforms
+            - upgraded pjsip to version 2.15.1
+            - unified third party libraries versions 
+            - drop support to Android below 9.0 (API's below 28)
         </releaseNotes>
         <!--<icon>icon.png</icon>-->
         <requireLicenseAcceptance>false</requireLicenseAcceptance>

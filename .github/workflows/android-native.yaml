@@ -16,21 +16,17 @@ permissions:
   contents: read
 
 env:
-    BASEDIR: /__w/libpjsua2maui/libpjsua2maui
-    #BCG729_PATH:  ${{ env.BASEDIR }}/lib/bcg729
-    #OPENSSL_PATH: ${{ env.BASEDIR }}/lib/openssl
-    #OPUS_PATH: ${{ env.BASEDIR }}/lib/opus
-    #PJSIP_PATH: ${{ env.BASEDIR }}/lib/pjsip
+    #BASEDIR: /__w/libpjsua2maui/libpjsua2maui
+    BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
+    OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
+    OPUS_PATH: ${{ github.workspace }}/lib/opus
+    PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
     PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
     SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output
-    OPENSSL_BUILD_OUT_PATH:  ${{ github.workspace }}/outputs/openssl-build-output
-    OPENSSL_TARGET_NDK_LEVEL: 28
-   
     OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/opus-build-output
     BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
     ANDROID_BUILD_TOOLS: "34.0.0"
-    TARGET_ANDROID_API: 28
-    OPENH264_TMP_DIR: /tmp/openh264
+    TARGET_ANDROID_API: 28 
 jobs:
   openh264:
     runs-on: ubuntu-latest
@@ -48,9 +44,9 @@ jobs:
        
       - name: Run Docker Container and Extract Artifacts
         run: |
-          mkdir -p ${{ github.workspace }}/output/outputs
-          docker run --name openh264-build -v ${{ github.workspace }}/output:/root/outputs openh264-builder
-          docker cp openh264-build:/root/outputs ./output
+          mkdir -p ./output
+          docker run --name openh264-build -v ./output:/root/outputs/libs openh264-builder
+          docker cp openh264-build:/root/outputs/libs ./output
 
        
       - name: Upload OpenH264 Artifacts
@@ -63,26 +59,79 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-       
+        
       - name: Checkout repository
         uses: actions/checkout@v3
 
-       
+        
       - name: Build Docker Image
         run: |
           docker build -t openssl-builder ${{ github.workspace }}/res/docker/openssl
 
-       
+        
       - name: Run Docker Container and Extract Artifacts
         run: |
-          mkdir -p ${{ github.workspace }}/output/outputs
-          docker run --name openssl-build -v ${{ github.workspace }}/output:/root/outputs openssl-builder
-          docker cp openssl-build:/root/outputs ./output
+          mkdir -p ./output
+          docker run --name openssl-build -v ${{ github.workspace }}/output:/root/outputs/libs openssl-builder
+          docker cp openssl-build:/root/outputs/libs ./output
 
-       
+        
       - name: Upload openssl Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: openssl-android
           path: ./output
- 
+
+  bcg729:
+    runs-on: ubuntu-latest
+    
+    steps:
+        
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+        
+      - name: Build Docker Image
+        run: |
+          docker build -t bcg729-builder ${{ github.workspace }}/res/docker/bcg729
+
+        
+      - name: Run Docker Container and Extract Artifacts
+        run: |
+          mkdir -p ./output
+          docker run --name bcg729-build -v ${{ github.workspace }}/output:/root/outputs/libs bcg729-builder
+          docker cp bcg729-build:/root/outputs/libs ./output
+
+        
+      - name: Upload bcg729 Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bcg729-android
+          path: ./output 
+
+  opus:
+    runs-on: ubuntu-latest
+      
+    steps:
+          
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+          
+      - name: Build Docker Image
+        run: |
+          docker build -t opus-builder ${{ github.workspace }}/res/docker/opus
+
+          
+      - name: Run Docker Container and Extract Artifacts
+        run: |
+          mkdir -p ./output
+          docker run --name opus-build -v ${{ github.workspace }}/output:/root/outputs/libs opus-builder
+          docker cp opus-build:/root/outputs/libs ./output
+
+          
+      - name: Upload opus Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: opus-android
+          path: ./output 

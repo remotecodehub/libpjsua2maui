@@ -16,7 +16,6 @@ permissions:
   contents: read
 
 env:
-    #BASEDIR: /__w/libpjsua2maui/libpjsua2maui
     BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
     OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
     OPUS_PATH: ${{ github.workspace }}/lib/opus
@@ -53,13 +52,12 @@ jobs:
       - name: Extract Artifacts from Container
         run: | 
           docker cp openh264-build:/root/outputs/libs ${{ github.workspace }}/libopenh264-output
-          ls -l -R ${{ github.workspace }}/libopenh264-output
-
+           
       - name: Upload OpenH264 Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: openh264-android
-          path: ./output
+          path: ${{ github.workspace }}/libopenh264-output
   
   openssl:
     runs-on: ubuntu-latest
@@ -86,7 +84,7 @@ jobs:
       - name: Extract Artifacts from Container
         run: |  
           docker cp openssl-build:/root/outputs/libs ${{ github.workspace }}/openssl-output
-          ls -l -R ${{ github.workspace }}/openssl-output
+          
 
       - name: Upload openssl Artifacts
         uses: actions/upload-artifact@v4
@@ -119,7 +117,6 @@ jobs:
       - name: Extract Artifacts from Container
         run: |
           docker cp bcg729-build:/root/outputs/libs ${{ github.workspace }}/bcg729-output
-          ls -l -R ${{ github.workspace }}/bcg729-output
  
       - name: Upload bcg729 Artifacts
         uses: actions/upload-artifact@v4
@@ -151,7 +148,6 @@ jobs:
       - name: Extract Artifacts from Container
         run: | 
           docker cp opus-build:/root/outputs/libs ${{ github.workspace }}/opus-output
-          ls -l -R ${{ github.workspace }}/opus-output
 
       - name: Upload opus Artifacts
         uses: actions/upload-artifact@v4

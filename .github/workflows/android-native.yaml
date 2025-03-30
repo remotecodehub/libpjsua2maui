@@ -16,16 +16,9 @@ permissions:
   contents: read
 
 env:
-    BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
-    OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
-    OPUS_PATH: ${{ github.workspace }}/lib/opus
     PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
     PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
-    SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output
-    OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/opus-build-output
-    BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/bcg729-build-output
-    ANDROID_BUILD_TOOLS: "34.0.0"
-    TARGET_ANDROID_API: 28 
+    SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output  
 jobs:
   openh264:
     runs-on: ubuntu-latest
@@ -58,6 +51,7 @@ jobs:
         with:
           name: openh264-android
           path: ${{ github.workspace }}/libopenh264-output
+          overwrite: true
   
   openssl:
     runs-on: ubuntu-latest
@@ -91,6 +85,7 @@ jobs:
         with:
           name: openssl-android
           path: ./openssl-output
+          overwrite: true
 
   bcg729:
     runs-on: ubuntu-latest
@@ -123,6 +118,7 @@ jobs:
         with:
           name: bcg729-android
           path: ./bcg729-output 
+          overwrite: true
 
   opus:
     runs-on: ubuntu-latest
@@ -154,5 +150,143 @@ jobs:
         with:
           name: opus-android
           path: ./opus-output 
+          overwrite: true
 
-  
+  pjsip:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
+    needs: [bcg729, openh264, openssl, opus]
+    name: pjsip + h264 + bcg729 + opus + ssl
+    permissions:
+        contents: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        check-latest: true
+      
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: 11076708 
+        packages: platforms;android-28 tools platform-tools build-tools;34.0.0
+    
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r28
+        add-to-path: true
+        link-to-sdk: true
+      
+    - name: Debug NDK
+      shell: bash
+      run: |
+        ls -R $ANDROID_NDK_HOME
+      env: 
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+    - name: Prepare Environment
+      run: |
+        cd ${{ github.workspace }}
+        sudo mkdir -p /home/runner/libpjsua2 
+        
+        DEPS="unzip git curl bzip2 binutils make autoconf openssl \
+          libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig" 
+        sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
+    
+    - uses: actions/download-artifact@v4
+      with:
+        name: openssl-output
+        path: ${{ github.workspace }}/output/openssl
+      
+    - uses: actions/download-artifact@v4
+      with:
+        name: openh264-output
+        path: ${{ github.workspace }}/output/openh264/
+        
+    - uses: actions/download-artifact@v4
+      with:
+        name: opus-output
+        path: ${{ github.workspace }}/output/opus/
+        
+    - uses: actions/download-artifact@v4
+      with:
+        name: bcg729-output
+        path: ${{ github.workspace }}/output/bcg729/
+       
+    - name: Create config_site.h
+      run: |
+        echo "Creating config site file for Android ..."
+        echo "#define PJ_CONFIG_ANDROID 1" > ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_HAS_G7221_CODEC 1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_AUDIO_DEV_HAS_ANDROID_JNI 0" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_AUDIO_DEV_HAS_OPENSL 1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJSIP_AUTH_AUTO_SEND_NEXT 0" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_HAS_OPUS_CODEC 1" >> ${{ env.CONFIG_SITE_PATH }} 
+        echo "Changing PJSIP_MAX_PKT_LEN to 6000"
+        echo "#define PJSIP_MAX_PKT_LEN 6000" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "Enabling BCG729 in config_site"
+        echo "#define PJMEDIA_HAS_BCG729 1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "Enabling Video support in config_site"
+        echo "#define PJMEDIA_HAS_VIDEO 1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#include <pj/config_site_sample.h>" >> ${{ env.CONFIG_SITE_PATH }}
+        sed -i'' -e 's/xamarin/maui/g' ${{ env.PJSIP_PATH }}/pjsip-apps/src/swig/csharp/Makefile
+
+    - name: Build
+      id: build-pj
+      run: |
+        cd ${{ env.PJSIP_PATH }}
+        cp -r * ${{ env.PJSIP_TMP_PATH }}
+        cd  ${{ env.PJSIP_TMP_PATH }}
+        echo "Configuring for ${{ matrix.arch }}"
+        APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} TARGET_ABI=${{ matrix.arch }} ./configure-android --use-ndk-cflags --with-ssl=${{ env.OPENSSL_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-openh264=${{ env.OPENH264_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-opus=${{ env.OPUS_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-bcg729=${{ env.BCG729_BUILD_OUT_PATH }}/libs/${{ matrix.arch}}
+        echo "Make dep"
+        make dep
+        echo ""
+        echo "make"
+        make
+        cd ${{ env.PJSUA_BASE_DIR }}
+        make
+        mv ${{ env.PJSUA_GENERATED_SO_PATH }}/*/* ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp -r -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*  ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp -r -v ${{ env.PJSUA_GENERATED_JAVA_SRC_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}
+        cp -r -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}
+        echo "artifact=${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}" >> "$GITHUB_OUTPUT"
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+    - name: Upload pjsip Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pjsip-android
+        path: ${{ steps.build-pj.outputs.artifact }}
+        overwrite: true
+
+      
+    env:
+      OPENSSL_LIB_PATH: ${{ github.workspace }}/output/openssl/libs/
+      OPENh264_LIB_PATH: ${{ github.workspace }}/output/openh264/libs/
+      OPUS_LIB_PATH: ${{ github.workspace }}/output/opus/libs/
+      BCG729_LIB_PATH: ${{ github.workspace }}/output/bcg729/libs/
+      PJSIP_TMP_PATH: /tmp/pjsip
+      CONFIG_SITE_PATH: ${{ github.workspace }}/lib/pjsip/pjlib/include/pj/config_site.h
+      PJSUA_GENERATED_CSHARP_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/pjsua2
+      PJSUA_GENERATED_JAVA_SRC_DIR: /tmp/pjsip/pjsip-apps/src/swig/java/android/pjsua2/src/main/java
+      PJSUA_GENERATED_SO_PATH: /tmp/pjsip/pjsip-apps/src/swig/java/android/pjsua2/src/main/jniLibs
+      PJSUA_GENERATED_SO_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui.Android/lib
+      PJSUA_BASE_DIR: /tmp/pjsip/pjsip-apps/src/swig
+      TARGET_ANDROID_API: 28
+      OPENSSL_BUILD_OUT_PATH: ${{ github.workspace }}/output/openssl
+      OPENH264_BUILD_OUT_PATH: ${{ github.workspace}}/output/openh264
+      OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/output/opus
+      BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/output/bcg729
+      

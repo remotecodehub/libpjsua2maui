@@ -83,7 +83,7 @@ jobs:
       - name: Upload openssl Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: openssl-output
+          name: openssl-android
           path: ./openssl-output
           overwrite: true
 
@@ -205,22 +205,22 @@ jobs:
     
     - uses: actions/download-artifact@v4
       with:
-        name: openssl-output
+        name: openssl-android
         path: ${{ github.workspace }}/output/openssl
       
     - uses: actions/download-artifact@v4
       with:
-        name: openh264-output
+        name: openh264-android
         path: ${{ github.workspace }}/output/openh264/
         
     - uses: actions/download-artifact@v4
       with:
-        name: opus-output
+        name: opus-android
         path: ${{ github.workspace }}/output/opus/
         
     - uses: actions/download-artifact@v4
       with:
-        name: bcg729-output
+        name: bcg729-android
         path: ${{ github.workspace }}/output/bcg729/
        
     - name: Create config_site.h

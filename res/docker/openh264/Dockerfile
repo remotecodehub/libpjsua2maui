@@ -81,8 +81,7 @@ RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \
       for LIB in /libs/$ARCH/lib/*.so*; do \
           if [ -L "$LIB" ]; then \
               REAL_FILE=$(readlink -f "$LIB"); \
-              cp "$REAL_FILE" "${LIB%.*}.so"; \
-              rm "$LIB"; \
+              mv "$REAL_FILE" "$LIB"; \
           fi; \
       done; \
     done

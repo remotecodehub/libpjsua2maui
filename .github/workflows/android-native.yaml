@@ -203,8 +203,7 @@ jobs:
         DEPS="unzip git curl bzip2 binutils make autoconf openssl \
           libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig libstdc++6 \
           libpthread-stubs0-dev \
-          libc6-dev \ 
-          libgcc-9-dev"
+          libc6-dev"
         sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
     
     - uses: actions/download-artifact@v4

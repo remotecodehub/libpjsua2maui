@@ -46,12 +46,14 @@ jobs:
         run: |
           docker build -t openh264-builder ${{ github.workspace }}/res/docker/openh264
 
-      - name: Run Docker Container and Extract Artifacts
+      - name: Run Docker Container 
         run: | 
-          cd ${{ github.workspace }}/libopenh264-output
-          docker run --name openh264-build -v ./:/root/outputs/libs openh264-builder
-          docker cp openh264-build:/root/outputs/libs .
-          ls -l -R .
+          docker run --name openh264-build openh264-builder
+          
+      - name: Extract Artifacts from Container
+        run: | 
+          docker cp openh264-build:/root/outputs/libs ${{ github.workspace }}/libopenh264-output
+          ls -l -R ${{ github.workspace }}/libopenh264-output
 
       - name: Upload OpenH264 Artifacts
         uses: actions/upload-artifact@v4
@@ -78,11 +80,13 @@ jobs:
           docker build -t openssl-builder ${{ github.workspace }}/res/docker/openssl
         
       - name: Run Docker Container and Extract Artifacts
-        run: | 
-          cd ${{ github.workspace }}/openssl-output
-          docker run --name openssl-build -v .:/root/outputs/libs openssl-builder
-          docker cp openssl-build:/root/outputs/libs .
-          ls -l -R .
+        run: |  
+          docker run --name openssl-build openssl-builder
+      
+      - name: Extract Artifacts from Container
+        run: |  
+          docker cp openssl-build:/root/outputs/libs ${{ github.workspace }}/openssl-output
+          ls -l -R ${{ github.workspace }}/openssl-output
 
       - name: Upload openssl Artifacts
         uses: actions/upload-artifact@v4
@@ -108,12 +112,14 @@ jobs:
         run: |
           docker build -t bcg729-builder ${{ github.workspace }}/res/docker/bcg729
         
-      - name: Run Docker Container and Extract Artifacts
+      - name: Run Docker Container 
         run: |
-          cd ${{ github.workspace }}/bcg729-output
-          docker run --name bcg729-build -v ./:/root/outputs/libs bcg729-builder
-          docker cp bcg729-build:/root/outputs/libs .
-          ls -l -R .
+          docker run --name bcg729-build bcg729-builder
+          
+      - name: Extract Artifacts from Container
+        run: |
+          docker cp bcg729-build:/root/outputs/libs ${{ github.workspace }}/bcg729-output
+          ls -l -R ${{ github.workspace }}/bcg729-output
  
       - name: Upload bcg729 Artifacts
         uses: actions/upload-artifact@v4
@@ -139,13 +145,14 @@ jobs:
         run: |
           docker build -t opus-builder ${{ github.workspace }}/res/docker/opus
           
-      - name: Run Docker Container and Extract Artifacts
+      - name: Run Docker Container
+        run: docker run --name opus-build opus-builder
+        
+      - name: Extract Artifacts from Container
         run: | 
-          cd ${{ github.workspace }}/opus-output
-          docker run --name opus-build -v ./:/root/outputs/libs opus-builder
-          docker cp opus-build:/root/outputs/libs .
-          ls -l -R .
- 
+          docker cp opus-build:/root/outputs/libs ${{ github.workspace }}/opus-output
+          ls -l -R ${{ github.workspace }}/opus-output
+
       - name: Upload opus Artifacts
         uses: actions/upload-artifact@v4
         with:

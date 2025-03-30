@@ -18,8 +18,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     ninja-build \
     cmake \
-    nasm \
-    && apt-get clean
+    nasm  
 
 # Install Android SDK
 RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/tmp \

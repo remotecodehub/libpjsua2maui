@@ -83,7 +83,7 @@ jobs:
       - name: Upload openssl Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: openssl-android
+          name: openssl-output
           path: ./openssl-output
           overwrite: true
 

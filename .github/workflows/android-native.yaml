@@ -45,12 +45,8 @@ jobs:
           mkdir -p ${{ github.workspace }}/output/libs
           docker run --name openh264-build -v ./output:/root/outputs/libs openh264-builder
           docker cp openh264-build:/root/outputs/libs ./output
-      
-      - name: Debug Container Files
-        run: |
-          docker run --name openh264-build -v ./output:/root/outputs/libs openh264-builder
-          docker exec openh264-build ls -l -R /root/outputs/libs
-       
+          ls -l -R ./output
+
       - name: Upload OpenH264 Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -76,12 +72,8 @@ jobs:
           mkdir -p ${{ github.workspace }}/output/libs
           docker run --name openssl-build -v ./output:/root/outputs/libs openssl-builder
           docker cp openssl-build:/root/outputs/libs ./output
+          ls -l -R ./output
 
-      - name: Debug Container Files
-        run: |
-          docker run --name openssl-build -v ./output:/root/outputs/libs openssl-builder
-          docker exec openssl-build ls -l -R /root/outputs/libs
-        
       - name: Upload openssl Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -96,23 +88,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-        
       - name: Build Docker Image
         run: |
           docker build -t bcg729-builder ${{ github.workspace }}/res/docker/bcg729
-
         
       - name: Run Docker Container and Extract Artifacts
         run: |
           mkdir -p ${{ github.workspace }}/output/libs
           docker run --name bcg729-build -v ./output:/root/outputs/libs bcg729-builder
           docker cp bcg729-build:/root/outputs/libs ./output
-      
-      - name: Debug Container Files
-        run: |
-          docker run --name bcg729-build -v ./output:/root/outputs/libs bcg729-builder
-          docker exec bcg729-build ls -l -R /root/outputs/libs
-        
+          ls -l -R ./output
+ 
       - name: Upload bcg729 Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -138,12 +124,8 @@ jobs:
           mkdir -p ${{ github.workspace }}/output/libs
           docker run --name opus-build -v ./output:/root/outputs/libs opus-builder
           docker cp opus-build:/root/outputs/libs ./output
-
-      - name: Debug Container Files
-        run: |
-          docker run --name opus-build -v ./output:/root/outputs/libs opus-builder
-          docker exec opus-build ls -l -R /root/outputs/libs
-          
+          ls -l -R ./output
+ 
       - name: Upload opus Artifacts
         uses: actions/upload-artifact@v4
         with:

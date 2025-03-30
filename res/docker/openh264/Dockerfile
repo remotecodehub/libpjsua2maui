@@ -77,6 +77,14 @@ RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \
         CC=$TOOLCHAIN/bin/clang CXX=$TOOLCHAIN/bin/clang++ LD=$TOOLCHAIN/bin/ld.lld \
         CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"; \
       make install PREFIX=/libs/$ARCH; \
+      echo "Replacing symbolic links with actual files for $ARCH..."; \
+      for LIB in /libs/$ARCH/lib/*.so*; do \
+          if [ -L "$LIB" ]; then \
+              REAL_FILE=$(readlink -f "$LIB"); \
+              cp "$REAL_FILE" "${LIB%.*}.so"; \
+              rm "$LIB"; \
+          fi; \
+      done; \
     done
 
 # Set outputs directory

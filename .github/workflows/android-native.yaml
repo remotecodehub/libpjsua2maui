@@ -48,6 +48,7 @@ jobs:
       
       - name: Debug Container Files
         run: |
+          docker run --name openh264-build -v ./output:/root/outputs/libs openh264-builder
           docker exec openh264-build ls -l -R /root/outputs/libs
        
       - name: Upload OpenH264 Artifacts
@@ -78,6 +79,7 @@ jobs:
 
       - name: Debug Container Files
         run: |
+          docker run --name openssl-build -v ./output:/root/outputs/libs openssl-builder
           docker exec openssl-build ls -l -R /root/outputs/libs
         
       - name: Upload openssl Artifacts
@@ -108,6 +110,7 @@ jobs:
       
       - name: Debug Container Files
         run: |
+          docker run --name bcg729-build -v ./output:/root/outputs/libs bcg729-builder
           docker exec bcg729-build ls -l -R /root/outputs/libs
         
       - name: Upload bcg729 Artifacts
@@ -138,6 +141,7 @@ jobs:
 
       - name: Debug Container Files
         run: |
+          docker run --name opus-build -v ./output:/root/outputs/libs opus-builder
           docker exec opus-build ls -l -R /root/outputs/libs
           
       - name: Upload opus Artifacts
@@ -145,3 +149,5 @@ jobs:
         with:
           name: opus-android
           path: ./output 
+
+  

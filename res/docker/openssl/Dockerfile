@@ -74,7 +74,7 @@ RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \
       esac; \
       echo "Building OpenSSL for $ARCH..."; \
       make clean || true; \
-      PATH="$TOOLCHAIN/bin:$PATH" CC="$CC" ./Configure $TARGET no-shared --prefix=/libs/$ARCH --openssldir=/libs/$ARCH || cat configdata.pm; \
+      PATH="$TOOLCHAIN/bin:$PATH" CC="$CC" ./Configure $TARGET --prefix=/libs/$ARCH --openssldir=/libs/$ARCH || cat configdata.pm; \
       PATH="$TOOLCHAIN/bin:$PATH" make -j$(nproc) && make install_sw; \
     done
 

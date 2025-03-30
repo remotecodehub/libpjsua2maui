@@ -77,6 +77,7 @@ RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \
         CC=$TOOLCHAIN/bin/clang CXX=$TOOLCHAIN/bin/clang++ LD=$TOOLCHAIN/bin/ld.lld \
         CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"; \
       echo "Modifying Makefile to prevent symbolic links..."; \
+      sed -i 's/ln -sfn/cp/' Makefile; \
       sed -i 's/ln -s/cp/' Makefile; \
       make install PREFIX=/libs/$ARCH; \
     done

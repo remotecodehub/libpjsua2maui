@@ -48,7 +48,7 @@ jobs:
 
       - name: Run Docker Container and Extract Artifacts
         run: | 
-          sudo docker run --name openh264-build -v ./output:/root/outputs/libs openh264-builder
+          docker run --name openh264-build -v ./output:/root/outputs/libs openh264-builder
           docker cp openh264-build:/root/outputs/libs ./output
           ls -l -R ./output
 
@@ -78,7 +78,7 @@ jobs:
         
       - name: Run Docker Container and Extract Artifacts
         run: | 
-          sudo docker run --name openssl-build -v ./output:/root/outputs/libs openssl-builder
+          docker run --name openssl-build -v ./output:/root/outputs/libs openssl-builder
           docker cp openssl-build:/root/outputs/libs ./output
           ls -l -R ./output
 
@@ -108,7 +108,7 @@ jobs:
         
       - name: Run Docker Container and Extract Artifacts
         run: |
-          sudo docker run --name bcg729-build -v ./output:/root/outputs/libs bcg729-builder
+          docker run --name bcg729-build -v ./output:/root/outputs/libs bcg729-builder
           docker cp bcg729-build:/root/outputs/libs ./output
           ls -l -R ./output
  
@@ -138,7 +138,7 @@ jobs:
           
       - name: Run Docker Container and Extract Artifacts
         run: | 
-          sudo docker run --name opus-build -v ./output:/root/outputs/libs opus-builder
+          docker run --name opus-build -v ./output:/root/outputs/libs opus-builder
           docker cp opus-build:/root/outputs/libs ./output
           ls -l -R ./output
  

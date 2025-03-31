@@ -1,16 +1,13 @@
 name: build
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
-    
-  pull_request:
-    types: [opened, synchronize, reopened]  
-  
+  workflow_run:
+    workflows:
+      - android-native  
+      - ios-native      
+    types:
+      - completed
+
   workflow_dispatch:
 
 permissions:
@@ -47,27 +44,81 @@ jobs:
           distribution: 'microsoft'
           java-version: '17'
          
-      - name: Download Android & iOS Artifacts
+      - name: Download Android x86 Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pjsip-android-x86
+          path: ./artifacts/android-x86
+      
+      - name: Download Android x86_64 Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pjsip-android-x86_64
+          path: ./artifacts/android-x86_64
+          
+      - name: Download Android arm Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pjsip-android-armeabi-v7a
+          path: ./artifacts/android-armeabi-v7a
+      
+      - name: Download Android arm64 Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pjsip-android-arm64-v8a
+          path: ./artifacts/android-arm64-v8a
+  
+      - name: Download Android java Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: java
+          path: ./artifacts/java
+      
+      - name: Download Android csharp Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: csharp
+          path: ./artifacts/android/csharp
+      
+      - name: Download ios Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: pjsip-x86_64
+          path: ./artifacts/ios/pjsip-x86_64
+      
+      - name: Download ios arm64 Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pjsip-arm64
+          path: ./artifacts/ios/pjsip-arm64
+  
+      - name: Prepare Dirs
         run: |
-          echo "Android ..."
-          curl -L -o ./libpjsua2.maui.so.tar.gz https://github.com/weslleymurdock/libpjsua2-android/releases/download/v2.14.1.1/libpjsua2.tar.gz
-          tar -xzvf libpjsua2.maui.so.tar.gz 
-          mkdir -p ./libpjsua2.maui.android/org/pjsip
-          mkdir -p ./libpjsua2.maui.android/pjsua2maui
-          mkdir -p ./libpjsua2.runtime.android/lib/
-          mv -v ./home/runner/libpjsua2/lib/libpjsua2.maui.android/*.cs ./libpjsua2.maui.android/pjsua2maui
-          rm -rf ./home/runner/libpjsua2/lib/java/org/pjsip/pjsua2
-          mv -v ./home/runner/libpjsua2/lib/java/org/pjsip/* ./libpjsua2.maui.android/org/pjsip/
-          mv -v ./home/runner/libpjsua2/lib/* ./libpjsua2.runtime.android/lib/
-          echo "iOS ..."
-          curl -L -o ./libpjsua2.maui.a.tar.gz https://github.com/weslleymurdock/libpjsua2-ios/releases/download/v2.14.1.1/libpjsua2.tar.gz
-          tar -xzvf libpjsua2.maui.a.tar.gz
-          mkdir -p ./libpjsua2.maui.ios/pjsua2maui
-          mkdir -p ./libpjsua2.runtime.ios/lib/fat 
-          mv -v ./libpjsua2/lib/pjsua2maui/pjsua2/* ./libpjsua2.maui.ios/pjsua2maui
-          lipo -create -output ./libpjsua2.runtime.ios/lib/fat/libpjsua2.a ./libpjsua2/lib/**/*.a 
-          rm -rf ./libpjsua2 libpjsua2.maui.a.tar.gz
-
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.maui.android/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/armeabi-v7a
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/arm64-v8a
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.maui.ios/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
+          mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.so/org/pjsip/
+          mv ${{ github.workspace }}/artifacts/csharp/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2.maui.android/pjsua2
+          mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86
+          mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
+          mv ${{ github.workspace }}/artifacts/android-armeabi-v7a/* ${{ github.workspace }}/src/libpjsua2.so/lib/armeabi-v7a
+          mv ${{ github.workspace }}/artifacts/android-arm64-v8a/* ${{ github.workspace }}/src/libpjsua2.so/lib/arm64-v8a
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/arm_64
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/*.cs ${{ github.workspace }}/src/libpjsua2.maui.ios/pjsua2
+          cd  ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
+          libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
+          rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a
+          cd ${{ github.workspace }}/src/libpjsua2.a/lib/arm_64
+          libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
+          rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a
+          
       - name: Restore Dependencies
         run: | 
           dotnet restore src/libpjsua2.maui.android/libpjsua2.maui.android.csproj
@@ -78,3 +129,14 @@ jobs:
        
       - name: Build MAUI iOS
         run: dotnet publish src/libpjsua2.maui.ios/libpjsua2.maui.ios.csproj -c Release -f net9.0-ios --no-restore
+     
+      - name: Set VERSION variable from tag
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+      
+      - name: Pack
+        run: nuget pack src/libpjsua2maui.nuspec -version "${VERSION}"
+      
+      - name: Push to nuget
+        run: dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${API_KEY} --skip-duplicate
+        env:
+          API_KEY: ${{ secrets.API_KEY }}

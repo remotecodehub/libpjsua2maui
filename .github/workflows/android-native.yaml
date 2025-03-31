@@ -265,9 +265,9 @@ jobs:
         mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/java
 
         mv ${{ env.PJSUA_GENERATED_SO_PATH }}/*/* ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
-        cp ${{ github.workspace }}/outputs/openh264/libs/${{ matrix.arch }}/lib/libopenh264.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
-        cp ${{ github.workspace }}/outputs/openssl/libs/${{ matrix.arch }}/lib/libssl.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
-        cp ${{ github.workspace }}/outputs/openssl/libs/${{ matrix.arch }}/lib/libcrypto.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/output/openh264/libs/${{ matrix.arch }}/lib/libopenh264.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/output/openssl/libs/${{ matrix.arch }}/lib/libssl.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/output/openssl/libs/${{ matrix.arch }}/lib/libcrypto.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp -r -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*  ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp -r -v ${{ env.PJSUA_GENERATED_JAVA_SRC_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/java
         cp -r -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/csharp

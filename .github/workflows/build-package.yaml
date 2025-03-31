@@ -1,4 +1,4 @@
-name: build native ios libraries
+name: build nupkg
 on:
   push:
     branches: [ main, develop ]
@@ -6,7 +6,7 @@ on:
       - '**/*.md'
       - '**/*.gitignore'
       - '**/*.gitattributes'
-      
+    
   pull_request:
     types: [opened, synchronize, reopened]  
     
@@ -929,8 +929,8 @@ jobs:
       - name: Build MAUI iOS
         run: dotnet publish src/libpjsua2.maui.ios/libpjsua2.maui.ios.csproj -c Release -f net9.0-ios --no-restore
       
-      - name: Set VERSION variable from tag
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+      - name: Set VERSION variable
+        run: echo "VERSION=2.15.1" >> $GITHUB_ENV
       
       - name: Pack
         run: nuget pack src/libpjsua2maui.nuspec -version "${VERSION}"

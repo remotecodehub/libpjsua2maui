@@ -46,35 +46,23 @@ RUN mkdir -p /root/build \
 
 # Prepare for cross-compilation
 WORKDIR /root/build/opus
+ 
+RUN echo "Downloading Android.mk file from PjSip website ..."; \
+  mkdir -p jni ; \
+  (cd jni && curl -k -O https://trac.pjsip.org/repos/raw-attachment/ticket/1904/Android.mk) ; \
+  export NDK_PROJECT_PATH=$(pwd) ; \
+  $ANDROID_NDK_ROOT/android-ndk-r28/build/ndk-build NDK_DEBUG=1 V=1 -C /root/build/opus/jni APP_PLATFORM=android-28 APP_ABI="armeabi-v7a arm64-v8a x86 x86_64"  ; \
+  cp -r ./obj/local /libs/ ; \
+  for arch in armeabi-v7a arm64-v8a x86 x86_64; do \
+    echo "Copying Opus file for target arch $arch ..." ; \
+    mkdir -p /libs/$arch ; \
+    cd /libs/$arch ; \
+    mkdir -p lib ; \
+    mv `ls | grep -w -v lib` lib ;\
+    mkdir -p include/opus ; \
+    cp /root/build/opus/include/* include/opus ; \
+  done
 
-RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \
-  case $ARCH in \
-    armeabi-v7a) \
-      TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"; \
-      HOST="arm-linux-androideabi"; \
-      ;; \
-    arm64-v8a) \
-      TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"; \
-      HOST="aarch64-linux-android"; \
-      ;; \
-    x86) \
-      TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"; \
-      HOST="i686-linux-android"; \
-      ;; \
-    x86_64) \
-      TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"; \
-      HOST="x86_64-linux-android"; \
-      ;; \
-  esac; \
-  echo "Building Opus for $ARCH..."; \
-  ./autogen.sh; \
-  ./configure --host=$HOST \
-              --prefix=/libs/$ARCH \
-              --enable-static \
-              --disable-shared; \
-  make -j$(nproc); \
-  make install; \
-done
 
 # Organize compiled files in /root/outputs
 RUN mkdir -p /root/outputs \

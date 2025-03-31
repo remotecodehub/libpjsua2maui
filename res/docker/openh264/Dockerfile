@@ -6,9 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV ANDROID_SDK_ROOT=/root/android-sdk
 ENV NDK_HOME=/root/android-sdk/ndk/
-ENV ANDROID_NDK_HOME=/root/android-sdk/ndk/android-ndk-r28
-ENV ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/r28
-ENV PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_NDK_HOME:$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+ENV ANDROID_NDK_HOME=/root/android-sdk/ndk/android-ndk-r21e
+ENV PATH="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -35,9 +34,10 @@ RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/tmp \
 # Install Android NDK r28
 RUN mkdir -p $NDK_HOME \
     && cd $NDK_HOME \
-    && wget https://dl.google.com/android/repository/android-ndk-r28-linux.zip -O ndk.zip \
+    && wget https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip -O ndk.zip \
     && unzip ndk.zip -d $NDK_HOME \
     && rm ndk.zip
+
 
 # Clone OpenH264 repository
 RUN mkdir -p /root/build \
@@ -48,37 +48,59 @@ RUN mkdir -p /root/build \
 
 # Compile OpenH264 for all architectures
 WORKDIR /root/build/openh264
+RUN sed -e "/binaries: decdemo encdemo/ s/^#*/#/" -i ./build/platform-android.mk
+#RUN sed -i 's|-gcc-toolchain $(GCC_TOOLCHAIN_PATH)||' ./build/platform-android.mk; \
+    #cat ./build/platform-android.mk
 
-RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \
+RUN for ARCH in armeabi-v7a arm64-v8a x86 x86_64; do \ 
       case $ARCH in \
         armeabi-v7a) \
           TARGET=arm; ABI="arm-linux-androideabi"; TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"; \
+          CC=$TOOLCHAIN/bin/armv7a-linux-androideabi28-clang; \
+          CXX=$TOOLCHAIN/bin/armv7a-linux-androideabi28-clang++; \
+          LD=$TOOLCHAIN/bin/armv7a-linux-androideabi28-clang++; \
           CFLAGS="--sysroot=$TOOLCHAIN/sysroot -target armv7-none-linux-androideabi28 -D__ANDROID_API__=28 -fPIC"; \
-          LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -L$TOOLCHAIN/lib64 -L$TOOLCHAIN/sysroot/usr/lib/$ABI -lc -lm -lgcc -lstdc++"; \
+          LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -lc++_shared -lc -lm "; \
           ;; \
         arm64-v8a) \
           TARGET=arm64; ABI="aarch64-linux-android"; TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"; \
+          CC=$TOOLCHAIN/bin/aarch64-linux-android28-clang; \
+          CXX=$TOOLCHAIN/bin/aarch64-linux-android28-clang++; \
+          LD=$TOOLCHAIN/bin/aarch64-linux-android28-clang++; \
           CFLAGS="--sysroot=$TOOLCHAIN/sysroot -target aarch64-none-linux-android28 -D__ANDROID_API__=28 -fPIC"; \
-          LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -L$TOOLCHAIN/lib64 -L$TOOLCHAIN/sysroot/usr/lib/$ABI -lc -lm -lgcc -lstdc++"; \
+          LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -lc++_shared -lc -lm "; \
           ;; \
         x86) \
           TARGET=x86; ABI="i686-linux-android"; TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"; \
+          CC=$TOOLCHAIN/bin/i686-linux-android28-clang; \
+          CXX=$TOOLCHAIN/bin/i686-linux-android28-clang++; \
+          LD=$TOOLCHAIN/bin/i686-linux-android28-clang++; \
           CFLAGS="--sysroot=$TOOLCHAIN/sysroot -target i686-none-linux-android28 -D__ANDROID_API__=28 -fPIC"; \
-          LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -L$TOOLCHAIN/lib64 -L$TOOLCHAIN/sysroot/usr/lib/$ABI -lc -lm -lgcc -lstdc++"; \
+          LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -lc++_shared -lc -lm "; \
           ;; \
         x86_64) \
           TARGET=x86_64; ABI="x86_64-linux-android"; TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"; \
+          CC=$TOOLCHAIN/bin/x86_64-linux-android28-clang; \
+          CXX=$TOOLCHAIN/bin/x86_64-linux-android28-clang++; \
+          LD=$TOOLCHAIN/bin/x86_64-linux-android28-clang++; \
           CFLAGS="--sysroot=$TOOLCHAIN/sysroot -target x86_64-none-linux-android28 -D__ANDROID_API__=28 -fPIC"; \
-          LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -L$TOOLCHAIN/lib64 -L$TOOLCHAIN/sysroot/usr/lib/$ABI -lc -lm -lgcc -lstdc++"; \
+          LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -lc++_shared -lc -lm "; \
           ;; \
       esac; \
       echo "Building OpenH264 for $ARCH..."; \
-      make clean; \
-      make OS=android ARCH=$TARGET TARGET=android NDKROOT=$ANDROID_NDK_HOME \
+      make clean || true; \
+      echo "Cleaning previous builds for $ARCH..."; \
+      find . -name '*.o' -delete || true; \  
+      make OS=android ARCH=$TARGET SYSROOT="$TOOLCHAIN/sysroot" TARGET=android NDKROOT=$ANDROID_NDK_HOME \
         APP_PLATFORM=android-28 APP_STL=c++_shared NDK_TOOLCHAIN_VERSION=clang \
-        CC=$TOOLCHAIN/bin/clang CXX=$TOOLCHAIN/bin/clang++ LD=$TOOLCHAIN/bin/ld.lld \
-        CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"  ; \
-      make install PREFIX=/libs/$ARCH ; \
+        CC=$CC CXX=$CXX LD=$LD \
+        CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" || exit 1; \
+      echo "Installing OpenH264 for $ARCH..."; \
+      make PREFIX=/libs/$ARCH \
+        OS=android ARCH=$TARGET SYSROOT="$TOOLCHAIN/sysroot" TARGET=android NDKROOT=$ANDROID_NDK_HOME \
+        APP_PLATFORM=android-28 APP_STL=c++_shared NDK_TOOLCHAIN_VERSION=clang \
+        CC=$CC CXX=$CXX LD=$LD \
+        CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" install || exit 1; \
     done
 
 # Set outputs directory

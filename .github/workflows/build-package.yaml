@@ -844,49 +844,49 @@ jobs:
           java-version: '17'
           
       - name: Download Android x86 Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pjsip-android-x86
           path: ./artifacts/android-x86
       
       - name: Download Android x86_64 Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pjsip-android-x86_64
           path: ./artifacts/android-x86_64
           
       - name: Download Android arm Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pjsip-android-armeabi-v7a
           path: ./artifacts/android-armeabi-v7a
       
       - name: Download Android arm64 Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pjsip-android-arm64-v8a
           path: ./artifacts/android-arm64-v8a
 
       - name: Download Android java Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: java
           path: ./artifacts/java
       
       - name: Download Android csharp Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: csharp
           path: ./artifacts/android/csharp
       
       - name: Download ios Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pjsip-x86_64
           path: ./artifacts/ios/pjsip-x86_64
       
       - name: Download ios arm64 Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pjsip-arm64
           path: ./artifacts/ios/pjsip-arm64

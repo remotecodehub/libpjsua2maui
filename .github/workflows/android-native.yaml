@@ -261,22 +261,43 @@ jobs:
         cd ${{ env.PJSUA_BASE_DIR }}
         make
         mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/csharp
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/java
+
         mv ${{ env.PJSUA_GENERATED_SO_PATH }}/*/* ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/outputs/openh264/libs/libopenh264.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/outputs/openssl/libs/libssl.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/outputs/openssl/libs/libcrypto.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp -r -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*  ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
-        cp -r -v ${{ env.PJSUA_GENERATED_JAVA_SRC_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}
-        cp -r -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}
+        cp -r -v ${{ env.PJSUA_GENERATED_JAVA_SRC_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/java
+        cp -r -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/csharp
         echo "artifact=${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}" >> "$GITHUB_OUTPUT"
+        echo "csharp=${{ env.PJSIP_BUILD_OUT_PATH }}/csharp" >> "$GITHUB_OUTPUT"
+        echo "java=${{ env.PJSIP_BUILD_OUT_PATH }}/java" >> "$GITHUB_OUTPUT"
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
-    - name: Upload pjsip Artifacts
+    - name: Upload pjsip artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: pjsip-android
+        name: pjsip-android-${{ matrix.arch }}
         path: ${{ steps.build-pj.outputs.artifact }}
         overwrite: true
 
-      
+    - name: Upload csharp artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: csharp
+        path: ${{ steps.build-pj.outputs.csharp }}
+        overwrite: true
+  
+    - name: Upload java artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: java
+        path: ${{ steps.build-pj.outputs.java }}
+        overwrite: true
+
     env:
       OPENSSL_LIB_PATH: ${{ github.workspace }}/output/openssl/libs/
       OPENh264_LIB_PATH: ${{ github.workspace }}/output/openh264/libs/

@@ -903,14 +903,14 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
           mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.so/org/pjsip/
-          mv ${{ github.workspace }}/artifacts/csharp/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2.maui.android/pjsua2
+          mv ${{ github.workspace }}/artifacts/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2.maui.android/pjsua2
           mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86
           mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
           mv ${{ github.workspace }}/artifacts/android-armeabi-v7a/* ${{ github.workspace }}/src/libpjsua2.so/lib/armeabi-v7a
           mv ${{ github.workspace }}/artifacts/android-arm64-v8a/* ${{ github.workspace }}/src/libpjsua2.so/lib/arm64-v8a
           mv ${{ github.workspace }}/artifacts/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
           mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/arm_64
-          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/*.cs ${{ github.workspace }}/src/libpjsua2.maui.ios/pjsua2
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2.maui.ios/pjsua2
           cd  ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
           libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
           rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a

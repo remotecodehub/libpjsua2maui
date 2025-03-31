@@ -260,6 +260,7 @@ jobs:
         make
         cd ${{ env.PJSUA_BASE_DIR }}
         make
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         mv ${{ env.PJSUA_GENERATED_SO_PATH }}/*/* ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp -r -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*  ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp -r -v ${{ env.PJSUA_GENERATED_JAVA_SRC_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}

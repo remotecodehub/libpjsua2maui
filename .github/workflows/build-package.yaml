@@ -501,8 +501,8 @@ jobs:
         cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
         cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
         cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-        cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-        
+        cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.arch }}/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+
         cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 
         echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"

@@ -889,7 +889,7 @@ jobs:
 
       - name: Prepare Dirs
         run: |
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.maui.android/org/pjsip
           mkdir -p ${{ github.workspace }}/src/libpjsua2.maui.android/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86
           mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
@@ -898,7 +898,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.maui.ios/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
-          mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.so/org/pjsip/
+          mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.maui.android/org/pjsip/
           mv ${{ github.workspace }}/artifacts/android/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2.maui.android/pjsua2
           mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86
           mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64

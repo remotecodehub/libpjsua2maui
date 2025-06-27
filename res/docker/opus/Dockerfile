@@ -57,7 +57,7 @@ RUN echo "Downloading Android.mk file from PjSip website ..."; \
     echo "Copying Opus file for target arch $arch ..." ; \
     mkdir -p /libs/$arch ; \
     cd /libs/$arch ; \
-    mkdir -p lib ; \
+    mkdir -p lib ;\
     mv `ls | grep -w -v lib` lib ;\
     mkdir -p include/opus ; \
     cp /root/build/opus/include/* include/opus ; \

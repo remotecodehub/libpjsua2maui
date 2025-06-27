@@ -47,24 +47,20 @@ RUN mkdir -p /root/build \
 # Prepare for cross-compilation
 WORKDIR /root/build/opus
  
-RUN echo "Downloading Android.mk file from PjSip website ..." && \
-  mkdir -p /root/build/opus/jni && \
-  cd /root/build/opus/jni && \
-  curl -k -O https://trac.pjsip.org/repos/raw-attachment/ticket/1904/Android.mk && \
-  cd /root/build/opus && \
-  NDK_PROJECT_PATH=$(pwd) \
-  $ANDROID_NDK_ROOT/android-ndk-r28/ndk-build \
-    NDK_DEBUG=1 V=1 \
-    APP_PLATFORM=android-28 \
-    APP_ABI="armeabi-v7a arm64-v8a x86 x86_64" && \
-  mkdir -p /root/build/opus/libs && \
-  cp -r /root/build/opus/obj/local/* /root/build/opus/libs/ && \
+RUN echo "Downloading Android.mk file from PjSip website ..."; \
+  mkdir -p jni ; \
+  (cd jni && curl -k -O https://trac.pjsip.org/repos/raw-attachment/ticket/1904/Android.mk) ; \
+  export NDK_PROJECT_PATH=$(pwd) ; \
+  $ANDROID_NDK_ROOT/android-ndk-r28/build/ndk-build NDK_DEBUG=1 V=1 -C /root/build/opus/jni APP_PLATFORM=android-28 APP_ABI="armeabi-v7a arm64-v8a x86 x86_64"  ; \
+  cp -r ./obj/local /libs/ ; \
   for arch in armeabi-v7a arm64-v8a x86 x86_64; do \
-    echo "Copying Opus file for target arch $arch ..." && \
-    mkdir -p /root/build/opus/libs/$arch/lib && \
-    mv /root/build/opus/libs/$arch/*.so /root/build/opus/libs/$arch/lib/ || true && \
-    mkdir -p /root/build/opus/libs/$arch/include/opus && \
-    cp /root/build/opus/include/* /root/build/opus/libs/$arch/include/opus/ ; \
+    echo "Copying Opus file for target arch $arch ..." ; \
+    mkdir -p /libs/$arch ; \
+    cd /libs/$arch ; \
+    mkdir -p lib ;\
+    mv `ls | grep -w -v lib` lib ;\
+    mkdir -p include/opus ; \
+    cp /root/build/opus/include/* include/opus ; \
   done
 
 

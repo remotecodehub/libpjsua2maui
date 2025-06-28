@@ -49,6 +49,7 @@ WORKDIR /root/build/opus
  
 RUN echo "Downloading Android.mk file from PjSip website ..."; \
   mkdir -p jni ; \
+  mkdir -p /libs ; \
   (cd jni && curl -k -O https://trac.pjsip.org/repos/raw-attachment/ticket/1904/Android.mk) ; \
   export NDK_PROJECT_PATH=$(pwd) ; \
   $ANDROID_NDK_ROOT/android-ndk-r28/build/ndk-build NDK_DEBUG=1 V=1 -C /root/build/opus/jni APP_PLATFORM=android-28 APP_ABI="armeabi-v7a arm64-v8a x86 x86_64"  ; \

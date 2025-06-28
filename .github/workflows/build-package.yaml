@@ -899,7 +899,8 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
           mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.maui.android/org/pjsip/
-          cp -r -v ${{ github.workspace }}/src/libpjsua2.maui.android/org/pjsip/ ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip
+          cp -r -v ${{ github.workspace }}/src/libpjsua2.maui.android/org/pjsip/ ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip 
           mv ${{ github.workspace }}/artifacts/android/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2.maui.android/pjsua2
           mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86
           mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64

@@ -639,7 +639,7 @@ jobs:
         
       - name: Extract Artifacts from Container
         run: | 
-          docker cp opus-build:/root/outputs/libs ${{ github.workspace }}/opus-output
+          docker cp opus-build:/root/outputs/ ${{ github.workspace }}/opus-output
 
       - name: Upload opus Artifacts
         uses: actions/upload-artifact@v4
@@ -748,7 +748,7 @@ jobs:
         cp -r * ${{ env.PJSIP_TMP_PATH }}
         cd  ${{ env.PJSIP_TMP_PATH }}
         echo "Configuring for ${{ matrix.arch }}"
-        APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} TARGET_ABI=${{ matrix.arch }} ./configure-android --use-ndk-cflags --with-ssl=${{ env.OPENSSL_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-openh264=${{ env.OPENH264_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-opus=${{ env.OPUS_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-bcg729=${{ env.BCG729_BUILD_OUT_PATH }}/libs/${{ matrix.arch}}
+        APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} TARGET_ABI=${{ matrix.arch }} ./configure-android --use-ndk-cflags --with-ssl=${{ env.OPENSSL_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-openh264=${{ env.OPENH264_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-opus=${{ env.OPUS_BUILD_OUT_PATH }}/${{ matrix.arch }} --with-bcg729=${{ env.BCG729_BUILD_OUT_PATH }}/libs/${{ matrix.arch}}
         echo "Make dep"
         make dep
         echo ""

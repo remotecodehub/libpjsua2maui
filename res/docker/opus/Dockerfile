@@ -5,11 +5,11 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV ANDROID_SDK_ROOT=/root/android-sdk
-ENV ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/r28
+ENV ANDROID_NDK_ROOT=/root/android-sdk/ndk/r28/android-ndk-r28
 ENV PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_NDK_ROOT:$PATH
-
+ENV NDK_ROOT=/root/android-sdk/ndk/r28
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y ninja-build \
     wget \
     unzip \
     git \
@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     autoconf \
     automake \
-    libtool
+    libtool \ 
+    cmake 
 
 # Install Android SDK
 RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/tmp \
@@ -31,43 +32,40 @@ RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/tmp \
     && yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platforms;android-28" "platform-tools"
 
 # Install Android NDK r28
-RUN mkdir -p $ANDROID_NDK_ROOT \
-    && cd $ANDROID_NDK_ROOT \
+RUN mkdir -p $NDK_ROOT \
+    && cd $NDK_ROOT \
     && wget https://dl.google.com/android/repository/android-ndk-r28-linux.zip -O ndk.zip \
-    && unzip ndk.zip -d $ANDROID_NDK_ROOT \
+    && unzip ndk.zip -d $NDK_ROOT \
     && rm ndk.zip
 
-# Download Opus source code
-RUN mkdir -p /root/build \
-&& cd /root/build \
-&& git clone https://gitlab.xiph.org/xiph/opus.git \
-&& cd opus \
-&& git checkout tags/v1.4 -b v1.4
+WORKDIR /root/build/
+RUN git clone https://gitlab.xiph.org/xiph/opus.git
+ 
+WORKDIR /root/build/opus 
+RUN git checkout v1.4 && git submodule update --init --recursive
+ENV API=28
+ENV TOOLCHAIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64
+ENV ARCHS="armeabi-v7a arm64-v8a x86 x86_64" 
+RUN echo `which ninja && ninja --version`
+RUN mkdir -p /root/outputs && \
+    for arch in armeabi-v7a arm64-v8a x86 x86_64; do \
+      echo "Building Opus with CMake for $arch..." && \
+      mkdir /root/build/opus/build-$arch && \
+      cd /root/build/opus/build-$arch && \
+      ABI=$arch && \
+      cmake .. \
+        -G Ninja \
+        -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake \
+        -DANDROID_ABI=$ABI \
+        -DANDROID_PLATFORM=android-$API \
+        -DCMAKE_BUILD_TYPE=Release \ 
+        -DBUILD_SHARED_LIBS=OFF \
+        -DOPUS_BUILD_PROGRAMS=OFF \
+        -DOPUS_BUILD_TESTING=OFF \
+        -DCMAKE_INSTALL_PREFIX=/root/outputs/$arch && \
+      cmake --build . --target install;  \ 
+    done
 
-# Prepare for cross-compilation
-WORKDIR /root/build/opus
-
-RUN export NDK_PROJECT_PATH=$(pwd)
-
-RUN echo "Downloading Android.mk file from PjSip website ..." && \
-  mkdir -p /root/build/opus/jni && \
-  cd /root/build/opus/jni && \
-  curl -k -O https://trac.pjsip.org/repos/raw-attachment/ticket/1904/Android.mk && \
-  cd /root/build/opus && \
-  $ANDROID_NDK_ROOT/android-ndk-r28/build/ndk-build NDK_DEBUG=1 V=1 -C /root/build/opus/jni APP_PLATFORM=android-28 APP_ABI="armeabi-v7a arm64-v8a x86 x86_64"  && \
-  mkdir -p /root/build/opus/libs && \
-  cp -r /root/build/opus/obj/local/* /root/build/opus/libs/ && \
-  for arch in armeabi-v7a arm64-v8a x86 x86_64; do \
-    echo "Copying Opus file for target arch $arch ..." && \
-    mkdir -p /root/build/opus/libs/$arch/lib && \
-    mv /root/build/opus/libs/$arch/*.so /root/build/opus/libs/$arch/lib/ || true && \
-    mkdir -p /root/build/opus/libs/$arch/include/opus && \
-    cp /root/build/opus/include/* /root/build/opus/libs/$arch/include/opus/ ; \
-  done
-  
-# Organize compiled files in /root/outputs
-RUN mkdir -p /root/outputs \
-&& cp -r /libs /root/outputs
-
+ 
 # Set working directory
 WORKDIR /root

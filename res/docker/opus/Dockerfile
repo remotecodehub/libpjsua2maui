@@ -47,16 +47,14 @@ RUN mkdir -p /root/build \
 # Prepare for cross-compilation
 WORKDIR /root/build/opus
 
+RUN export NDK_PROJECT_PATH=$(pwd)
+
 RUN echo "Downloading Android.mk file from PjSip website ..." && \
   mkdir -p /root/build/opus/jni && \
   cd /root/build/opus/jni && \
   curl -k -O https://trac.pjsip.org/repos/raw-attachment/ticket/1904/Android.mk && \
   cd /root/build/opus && \
-  NDK_PROJECT_PATH=$(pwd) \
-  $ANDROID_NDK_ROOT/android-ndk-r28/ndk-build \
-    NDK_DEBUG=1 V=1 \
-    APP_PLATFORM=android-28 \
-    APP_ABI="armeabi-v7a arm64-v8a x86 x86_64" && \
+  $ANDROID_NDK_ROOT/android-ndk-r28/build/ndk-build NDK_DEBUG=1 V=1 -C /root/build/opus/jni APP_PLATFORM=android-28 APP_ABI="armeabi-v7a arm64-v8a x86 x86_64"  && \
   mkdir -p /root/build/opus/libs && \
   cp -r /root/build/opus/obj/local/* /root/build/opus/libs/ && \
   for arch in armeabi-v7a arm64-v8a x86 x86_64; do \
@@ -66,7 +64,7 @@ RUN echo "Downloading Android.mk file from PjSip website ..." && \
     mkdir -p /root/build/opus/libs/$arch/include/opus && \
     cp /root/build/opus/include/* /root/build/opus/libs/$arch/include/opus/ ; \
   done
-
+  
 # Organize compiled files in /root/outputs
 RUN mkdir -p /root/outputs \
 && cp -r /libs /root/outputs

@@ -9,7 +9,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<RootNamespace>pjsua2maui.pjsua2</RootNamespace>
-		<AssemblyName>pjsua2.maui.android</AssemblyName>
+		<AssemblyName>pjsua2maui.android</AssemblyName>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
   </PropertyGroup>
@@ -41,16 +41,12 @@
 		<RepositoryUrl>https://github.com/weslleymurdock/pjsua2maui.git</RepositoryUrl>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="org\pjsip\PjCamera.java" />
-	  <None Remove="org\pjsip\PjCamera2.java" />
-	  <None Remove="org\pjsip\PjCameraInfo.java" />
-	  <None Remove="org\pjsip\PjCameraInfo2.java" />
-	</ItemGroup>
-	<ItemGroup>
-	  <AndroidJavaSource Include="org\pjsip\PjCamera.java" />
-	  <AndroidJavaSource Include="org\pjsip\PjCamera2.java" />
-	  <AndroidJavaSource Include="org\pjsip\PjCameraInfo.java" />
-	  <AndroidJavaSource Include="org\pjsip\PjCameraInfo2.java" />
+	  <AndroidResource Remove="org\pjsip\**" />
+	  <Compile Remove="org\pjsip\**" />
+	  <EmbeddedResource Remove="org\pjsip\**" />
+	  <MauiCss Remove="org\pjsip\**" />
+	  <MauiXaml Remove="org\pjsip\**" />
+	  <None Remove="org\pjsip\**" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Update="LICENSE">

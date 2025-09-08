@@ -1,141 +1,80 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup
-    Condition="$(AndroidSupportedAbis.Contains('armeabi-v7a')) or $(RuntimeIdentifiers.Contains('android-arm'))">
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv7\libpjsua2.so">
-      <Link>Platforms\Android\lib\armeabi-v7a\libpjsua2.so</Link>
-      <Abi>armeabi-v7a</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv7\libc++_shared.so">
-      <Link>Platforms\Android\lib\armeabi-v7a\libc++_shared.so</Link>
-      <Abi>armeabi-v7a</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv7\libssl.so">
-      <Link>Platforms\Android\lib\armeabi-v7a\libssl.so</Link>
-      <Abi>armeabi-v7a</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv7\libcrypto.so">
-      <Link>Platforms\Android\lib\armeabi-v7a\libcrypto.so</Link>
-      <Abi>armeabi-v7a</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv7\libopenh264.so">
-      <Link>Platforms\Android\lib\armeabi-v7a\libopenh264.so</Link>
-      <Abi>armeabi-v7a</Abi>
-    </AndroidNativeLibrary>
-  </ItemGroup>
-  <ItemGroup
-    Condition="$(AndroidSupportedAbis.Contains('arm64-v8a')) or $(RuntimeIdentifiers.Contains('android-arm64'))">
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv8\libpjsua2.so">
-      <Link>Platforms\Android\lib\arm64-v8a\libpjsua2.so</Link>
-      <Abi>arm64-v8a</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv8\libc++_shared.so">
-      <Link>Platforms\Android\lib\arm64-v8a\libc++_shared.so</Link>
-      <Abi>arm64-v8a</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv8\libssl.so">
-      <Link>Platforms\Android\lib\arm64-v8a\libssl.so</Link>
-      <Abi>arm64-v8a</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv8\libcrypto.so">
-      <Link>Platforms\Android\lib\arm64-v8a\libcrypto.so</Link>
-      <Abi>arm64-v8a</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-armv8\libopenh264.so">
-      <Link>Platforms\Android\lib\arm64-v8a\libopenh264.so</Link>
-      <Abi>arm64-v8a</Abi>
-    </AndroidNativeLibrary>
-  </ItemGroup>
-  <ItemGroup
-    Condition="$(AndroidSupportedAbis.Contains('x86')) or $(RuntimeIdentifiers.Contains('android-x86'))">
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86\libpjsua2.so">
-      <Link>Platforms\Android\lib\x86\libpjsua2.so</Link>
-      <Abi>x86</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86\libc++_shared.so">
-      <Link>Platforms\Android\lib\x86\libc++_shared.so</Link>
-      <Abi>x86</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86\libssl.so">
-      <Link>Platforms\Android\lib\x86\libssl.so</Link>
-      <Abi>x86</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86\libcrypto.so">
-      <Link>Platforms\Android\lib\x86\libcrypto.so</Link>
-      <Abi>x86</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86\libopenh264.so">
-      <Link>Platforms\Android\lib\x86\libopenh264.so</Link>
-      <Abi>x86</Abi>
-    </AndroidNativeLibrary>
-  </ItemGroup>
-  <ItemGroup
-    Condition="$(AndroidSupportedAbis.Contains('x86_64')) or $(RuntimeIdentifiers.Contains('android-x64'))">
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86_64\libpjsua2.so">
-      <Link>Platforms\Android\lib\x86_64\libpjsua2.so</Link>
-      <Abi>x86_64</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary
-      Include="$(MSBuildThisFileDirectory)native\android-x86_64\libc++_shared.so">
-      <Link>Platforms\Android\lib\x86_64\libc++_shared.so</Link>
-      <Abi>x86_64</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86_64\libssl.so">
-      <Link>Platforms\Android\lib\x86_64\libssl.so</Link>
-      <Abi>x86_64</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86_64\libcrypto.so">
-      <Link>Platforms\Android\lib\x86_64\libcrypto.so</Link>
-      <Abi>x86_64</Abi>
-    </AndroidNativeLibrary>
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)native\android-x86_64\libopenh264.so">
-      <Link>Platforms\Android\lib\x86_64\libopenh264.so</Link>
-      <Abi>x86_64</Abi>
-    </AndroidNativeLibrary>
-  </ItemGroup>
+  <PropertyGroup>
+    <LibVersion>2.15.1</LibVersion>
+    <NuGetPathUnix>$(NuGetPackageRoot.Replace('\', '/'))</NuGetPathUnix>
+  </PropertyGroup>
+ 
+  <!-- Android Native Libraries -->
   <ItemGroup Condition="$(TargetFramework.Contains('android'))">
-    <AndroidJavaSource Include="$(MSBuildThisFileDirectory)..\content\PjCamera2.java">
-      <Link>Platforms\Android\org\pjsip\PjCamera2.java</Link>
-      <Bind></Bind>
-    </AndroidJavaSource>
-    <AndroidJavaSource Include="$(MSBuildThisFileDirectory)..\content\PjCameraInfo.java">
-      <Link>Platforms\Android\org\pjsip\PjCameraInfo.java</Link>
-      <Bind></Bind>
-    </AndroidJavaSource>
-    <AndroidJavaSource Include="$(MSBuildThisFileDirectory)..\content\PjCameraInfo2.java">
-      <Link>Platforms\Android\org\pjsip\PjCameraInfo2.java</Link>
-      <Bind></Bind>
-    </AndroidJavaSource>
-    <AndroidJavaSource Include="$(MSBuildThisFileDirectory)..\content\PjCamera.java">
-      <Link>Platforms\Android\org\pjsip\PjCamera.java</Link>
-      <Bind></Bind>
+    <!-- armeabi-v7a -->
+    <AndroidNativeLibrary Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/android-arm/native/*.so">
+      <Abi>armeabi-v7a</Abi>
+      <Link>Platforms/Android/lib/armeabi-v7a/%(Filename)%(Extension)</Link>
+    </AndroidNativeLibrary>
+
+    <!-- arm64-v8a -->
+    <AndroidNativeLibrary Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/android-arm64/native/*.so">
+      <Abi>arm64-v8a</Abi>
+      <Link>Platforms/Android/lib/arm64-v8a/%(Filename)%(Extension)</Link>
+    </AndroidNativeLibrary>
+
+    <!-- x86 -->
+    <AndroidNativeLibrary Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/android-x86/native/*.so">
+      <Abi>x86</Abi>
+      <Link>Platforms/Android/lib/x86/%(Filename)%(Extension)</Link>
+    </AndroidNativeLibrary>
+
+    <!-- x86_64 -->
+    <AndroidNativeLibrary
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/android-x86_64/native/*.so">
+      <Abi>x86_64</Abi>
+      <Link>Platforms/Android/lib/x86_64/%(Filename)%(Extension)</Link>
+    </AndroidNativeLibrary>
+  </ItemGroup>
+
+  <!-- Android Java Bindings -->
+  <ItemGroup Condition="$(TargetFramework.Contains('android'))">
+    <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCamera*.java">
+      <Link>Platforms/Android/org/pjsip/PjCamera2.java</Link>
+      <Bind />
     </AndroidJavaSource>
   </ItemGroup>
- 
- 
+
+
+  <!-- iOS Static Libraries -->
   <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
-    <None Include="$(MSBuildThisFileDirectory)..\runtime\ios-arm64\libpjsua2.a">
-      <Link>Platforms\iOS\lib\arm64\libpjsua2.a</Link>
+    <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native/libpjsua2.a">
+      <Link>Platforms/iOS/lib/arm64/libpjsua2.a</Link>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)..\runtime\iossimulator-x64\libpjsua2.a">
-      <Link>Platforms\iOS\lib\x86_64\libpjsua2.a</Link>
+    <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native/libpjsua2.a">
+      <Link>Platforms/iOS/lib/x86_64/libpjsua2.a</Link>
     </None>
   </ItemGroup>
-  <ItemGroup Condition="(('$(Platform)' == 'iPhoneSimulator') OR $(RuntimeIdentifier.StartsWith('iossimulator-x64')))">
-    <NativeReference Include="$(MSBuildThisFileDirectory)..\runtime\iossimulator-x64\libpjsua2.a">
+
+  <!-- iOS Native Linking -->
+  <ItemGroup
+    Condition="('$(Platform)' == 'iPhoneSimulator') OR $(RuntimeIdentifier.StartsWith('iossimulator-x64'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native/libpjsua2.a">
       <Kind>Static</Kind>
       <ForceLoad>True</ForceLoad>
       <SmartLink>False</SmartLink>
       <IsCxx>True</IsCxx>
-      <LinkerFlags>-L$(MSBuildThisFileDirectory)..\runtime\iossimulator-x64 -lpjsua2 -ld_classic</LinkerFlags>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native -lpjsua2 -ld_classic</LinkerFlags>
     </NativeReference>
   </ItemGroup>
-  <ItemGroup Condition="(('$(Platform)' == 'iPhone') OR ('$(RuntimeIdentifier)' == 'ios') OR $(RuntimeIdentifier.StartsWith('ios-')) OR $(RuntimeIdentifier.StartsWith('ios.')))">
-    <NativeReference Include="$(MSBuildThisFileDirectory)..\runtime\ios-arm64\libpjsua2.a">
+
+  <ItemGroup
+    Condition="('$(Platform)' == 'iPhone') OR ('$(RuntimeIdentifier)' == 'ios') OR $(RuntimeIdentifier.StartsWith('ios-')) OR $(RuntimeIdentifier.StartsWith('ios.'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native/libpjsua2.a">
       <Kind>Static</Kind>
       <ForceLoad>True</ForceLoad>
       <SmartLink>False</SmartLink>
       <IsCxx>True</IsCxx>
-      <LinkerFlags>-L$(MSBuildThisFileDirectory)..\runtime\ios-arm64 -lpjsua2 -ld_classic</LinkerFlags>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
     </NativeReference>
   </ItemGroup>
+
 </Project>

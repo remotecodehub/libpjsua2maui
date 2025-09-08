@@ -918,14 +918,14 @@ jobs:
           
       - name: Restore Dependencies
         run: | 
-          dotnet restore src/libpjsua2.maui.android/libpjsua2.maui.android.csproj
-          dotnet restore src/libpjsua2.maui.ios/libpjsua2.maui.ios.csproj
+          dotnet restore src/libpjsua2maui.android/libpjsua2maui.android.csproj
+          dotnet restore src/libpjsua2maui.ios/libpjsua2maui.ios.csproj
 
       - name: Build MAUI Android
-        run: dotnet publish src/libpjsua2.maui.android/libpjsua2.maui.android.csproj -c Release -f net9.0-android --no-restore
+        run: dotnet publish src/libpjsua2maui.android/libpjsua2.maui.android.csproj -c Release -f net9.0-android --no-restore
         
       - name: Build MAUI iOS
-        run: dotnet publish src/libpjsua2.maui.ios/libpjsua2.maui.ios.csproj -c Release -f net9.0-ios --no-restore
+        run: dotnet publish src/libpjsua2maui.ios/libpjsua2.maui.ios.csproj -c Release -f net9.0-ios --no-restore
       
       - name: Set VERSION variable
         run: echo "VERSION=2.15.1" >> $GITHUB_ENV

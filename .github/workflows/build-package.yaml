@@ -190,13 +190,13 @@ jobs:
         fi
       shell: sh
       env:
-        SDKVERSION: 18.2
         IOS_MIN_SDK_VERSION: 12.2  
         CONFIG_DISABLE_BITCODE: true
         DEVELOPER: $(xcode-select -print-path)
-        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
-        BUILD_THREADS: $(sysctl hw.ncpu | awk '{print $2}')
-    
+        SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
+        BUILD_THREADS: $(sysctl -n hw.ncpu) 
+        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version) 
+        
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -204,7 +204,7 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        SDKVERSION: 18.2
+        IOS_MIN_SDK_VERSION: 12.2        
 
   opus-ios:
     strategy:

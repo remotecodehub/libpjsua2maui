@@ -17,7 +17,7 @@
         <readme>README.md</readme>
 
         <references>
-            <group targetFramework="net9.0-ios18.2">
+            <group targetFramework="net9.0-ios18.5">
                 <reference file="pjsua2.maui.ios.pdb" />
                 <reference file="pjsua2.maui.ios.dll" />
             </group>
@@ -30,7 +30,7 @@
 
 
         <dependencies>
-            <group targetFramework="net9.0-ios18.2" />
+            <group targetFramework="net9.0-ios18.5" />
             <group targetFramework="net9.0-android34.0" />
         </dependencies>
     </metadata>
@@ -60,11 +60,11 @@
 
         <!-- Managed assemblies -->
         <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2.maui.ios.*"
-            target="lib\net9.0-ios18.2\" />
+            target="lib\net9.0-ios18.5\" />
         <file src="libpjsua2maui.android\bin\Release\net9.0-android\pjsua2maui.android.*"
             target="lib\net9.0-android34.0\" />
         <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2.maui.ios.*"
-            target="ref\net9.0-ios18.2\" />
+            target="ref\net9.0-ios18.5\" />
         <file src="libpjsua2maui.android\bin\Release\net9.0-android\pjsua2maui.android.*"
             target="ref\net9.0-android34.0\" />
 

@@ -928,7 +928,7 @@ jobs:
         run: dotnet publish src/libpjsua2maui.ios/libpjsua2.maui.ios.csproj -c Release -f net9.0-ios --no-restore
       
       - name: Set VERSION variable
-        run: echo "VERSION=2.15.1" >> $GITHUB_ENV
+        run: echo "VERSION=2.15.1.1" >> $GITHUB_ENV
       
       - name: Pack
         run: nuget pack src/libpjsua2maui.nuspec -version "${VERSION}"

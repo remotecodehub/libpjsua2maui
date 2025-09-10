@@ -39,7 +39,7 @@ RUN mkdir -p $NDK_ROOT \
     && rm ndk.zip
 
 WORKDIR /root/build/
-RUN git clone https://gitlab.xiph.org/xiph/opus.git
+RUN git clone https://github.com/xiph/opus.git
  
 WORKDIR /root/build/opus 
 RUN git checkout v1.4 && git submodule update --init --recursive

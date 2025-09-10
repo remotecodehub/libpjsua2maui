@@ -1,6 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LibVersion>2.15.1</LibVersion>
+    <LibVersion>2.15.1.1</LibVersion>
     <NuGetPathUnix>$(NuGetPackageRoot.Replace('\', '/'))</NuGetPathUnix>
   </PropertyGroup>
  

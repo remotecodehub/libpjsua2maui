@@ -3,13 +3,14 @@
     <metadata>
         <id>libpjsua2maui</id>
         <title>libpjsua2maui</title>
-        <version>2.15.1</version>
+        <version>2.15.1.1</version>
         <authors>Weslley Murdock</authors>
         <projectUrl>http://github.com/weslleymurdock/libpjsua2maui</projectUrl>
         <description>PJSIP bindings for .NET MAUI using version 2.15.1 with openh264, openssl, opus,
             and bcg729.</description>
-        <releaseNotes>- Fixed linking issues on iOS\n- Upgraded PJSIP to 2.15.1\n- Unified
-            third-party versions\n- Dropped support for Android lower than 9.0</releaseNotes>
+        <releaseNotes>
+            - Fixed Page size warnings on android
+        </releaseNotes>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <license type="expression">LGPL-3.0-or-later</license>
         <copyright>Copyright ©2025 Remote Code Hub</copyright>

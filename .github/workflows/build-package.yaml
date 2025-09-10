@@ -196,7 +196,7 @@ jobs:
         SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
         BUILD_THREADS: $(sysctl -n hw.ncpu) 
         IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version) 
-        
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -922,7 +922,7 @@ jobs:
           dotnet restore src/libpjsua2maui.ios/libpjsua2maui.ios.csproj
 
       - name: Build MAUI Android
-        run: dotnet publish src/libpjsua2maui.android/libpjsua2.maui.android.csproj -c Release -f net9.0-android --no-restore
+        run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net9.0-android --no-restore
         
       - name: Build MAUI iOS
         run: dotnet publish src/libpjsua2maui.ios/libpjsua2.maui.ios.csproj -c Release -f net9.0-ios --no-restore

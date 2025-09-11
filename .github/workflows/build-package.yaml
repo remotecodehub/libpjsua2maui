@@ -507,16 +507,16 @@ jobs:
             export AR="$(xcrun -sdk iphonesimulator -find ar)"
             export RANLIB="$(xcrun -sdk iphonesimulator -find ranlib)"
 
-            export CFLAGS="-I${{ github.workspace }}/libs/bcg729/include \
+            export CFLAGS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -I${{ github.workspace }}/libs/bcg729/include \
               -I${{ github.workspace }}/libs/ssl/include \
               -I${{ github.workspace }}/libs/opus/include \
               -I${{ github.workspace }}/libs/h264/include"
 
-            export LDFLAGS="-framework AudioToolbox -framework Foundation \
+            export LDFLAGS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} -framework AudioToolbox -framework Foundation \
               -L${{ github.workspace }}/libs/bcg729/lib \
               -L${{ github.workspace }}/libs/ssl/lib \
               -L${{ github.workspace }}/libs/opus/lib \
-              -L${{ github.workspace }}/libs/h264/lib"
+              -L${{ github.workspace }}/libs/h264/lib "
 
             ARCH="-arch arm64" ./configure-iphone \
               --host=arm-apple-darwin \

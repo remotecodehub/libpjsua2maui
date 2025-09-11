@@ -22,7 +22,8 @@
         <copyright>Copyright ©2025 Remote Code Hub</copyright>
         <tags>sip voip pjsip maui native</tags>
         <readme>README.md</readme>
-        <iconUrl>https://raw.githubusercontent.com/weslleymurdock/libpjsua2maui/main/icon.png</iconUrl>
+        <iconUrl>https://raw.githubusercontent.com/weslleymurdock/libpjsua2maui/main/src/icon.png</iconUrl>
+        <icon>icon.png</icon>
         <repository type="git" url="https://github.com/weslleymurdock/libpjsua2maui" />
         <references>
             <group targetFramework="net9.0-ios18.5">
@@ -82,6 +83,7 @@
         <file src="README.md" target="" />
         <!-- LICENSE-->
         <file src="LICENSE" target="" />
-
+        <!-- ICON -->
+        <file src="icon.png" target="" />
     </files>
 </package>

@@ -27,8 +27,8 @@
         <repository type="git" url="https://github.com/weslleymurdock/libpjsua2maui" />
         <references>
             <group targetFramework="net9.0-ios18.5">
-                <reference file="pjsua2.maui.ios.pdb" />
-                <reference file="pjsua2.maui.ios.dll" />
+                <reference file="pjsua2maui.ios.pdb" />
+                <reference file="pjsua2maui.ios.dll" />
             </group>
             <group targetFramework="net9.0-android34.0">
                 <reference file="pjsua2maui.android.pdb" />
@@ -70,19 +70,17 @@
         <file src="libpjsua2maui.android\org\pjsip\*.java" target="contentFiles\any\android\org\pjsip\" />
 
         <!-- Managed assemblies -->
-        <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2.maui.ios.*"
+        <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2maui.ios.*"
             target="lib\net9.0-ios18.5\" />
+        <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2maui.ios.*"
+            target="ref\net9.0-ios18.5\" />
         <file src="libpjsua2maui.android\bin\Release\net9.0-android\pjsua2maui.android.*"
             target="lib\net9.0-android34.0\" />
-        <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2.maui.ios.*"
-            target="ref\net9.0-ios18.5\" />
         <file src="libpjsua2maui.android\bin\Release\net9.0-android\pjsua2maui.android.*"
             target="ref\net9.0-android34.0\" />
 
         <!-- README -->
         <file src="README.md" target="." />
-        <!-- LICENSE-->
-        <file src="../LICENSE" target="." />
         <!-- ICON -->
         <file src="icon.png" target="." />
     </files>

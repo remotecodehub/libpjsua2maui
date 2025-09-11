@@ -566,21 +566,26 @@ jobs:
           if [ "${{ matrix.arch }}" == "arm64s" ]; then
             export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus/lib/pkgconfig:${{ github.workspace }}/libs/h264/lib/pkgconfig
           fi
-          export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS} \
-            -I${{ github.workspace }}/libs/bcg729/include \
-            -I${{ github.workspace }}/libs/ssl/include \
-            -I${{ github.workspace }}/libs/opus/include \
-            -I${{ github.workspace }}/libs/h264/include"
-          export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS} \
-            -L${{ github.workspace }}/libs/bcg729/lib \
-            -L${{ github.workspace }}/libs/ssl/lib \
-            -L${{ github.workspace }}/libs/opus/lib \
-            -L${{ github.workspace }}/libs/h264/lib"
+          export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS}"
+          export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS}"
           ARCH="-arch ${{ matrix.resolved_arch }}" ./configure-iphone \
               --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
               --with-ssl=${{ github.workspace }}/libs/ssl/ \
               --with-opus=${{ github.workspace }}/libs/opus/ \
               --with-openh264=${{ github.workspace }}/libs/h264/
+          echo "FLAGS AFTER CONFIGURE:"
+          echo ""
+          echo "CFLAGS=${CFLAGS}"
+          echo "LDFLAGS=${LDFLAGS}"
+          # Deduplicar CFLAGS
+          export CFLAGS=$(echo "$CFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
+          # Deduplicar LDFLAGS
+          export LDFLAGS=$(echo "$LDFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
+          echo "FLAGS AFTER DEDUPLICATE:"
+          echo ""
+          echo "CFLAGS=${CFLAGS}"
+          echo "LDFLAGS=${LDFLAGS}"
+          
           make dep
           make
           cd ./pjsip-apps/src/swig
@@ -1027,10 +1032,40 @@ jobs:
       - name: Set VERSION variable
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-      - name: Pack
+      - name: Validate .nuspec file entries
         run: |
-          cd ${{ github.workspace }}/src
-          nuget pack libpjsua2maui.nuspec -Version ${{ env.VERSION }}
+          cd "${{ github.workspace }}/src"
+          echo "🔍 Validando arquivos do .nuspec..."
+
+          missing=0
+          while IFS= read -r line; do
+            if [[ "$line" =~ \<file[[:space:]]+src=\"([^\"]+)\" ]]; then
+              srcPath="${match[1]}"
+              # Normaliza separadores
+              normalizedPath="${srcPath//\\//}"
+              if [[ ! -e "$normalizedPath" ]]; then
+                echo "❌ Arquivo ausente: $normalizedPath"
+                ((missing++))
+              fi
+            fi
+          done < libpjsua2maui.nuspec
+
+          if (( missing > 0 )); then
+            echo "❌ $missing arquivo(s) ausente(s) no .nuspec. Corrija antes de empacotar."
+            exit 1
+          else
+            echo "✅ Todos os arquivos do .nuspec estão presentes."
+          fi
+      
+      - name: Pack NuGet (deterministic)
+        shell: zsh
+        run: |
+          cd "${{ github.workspace }}/src"
+          nuget pack libpjsua2maui.nuspec \
+            -Version "${{ env.VERSION }}" \
+            -BasePath "${{ github.workspace }}/src" \
+            -NoDefaultExcludes \
+            -NoPackageAnalysis
 
       - name: Add GitHub NuGet Source
         run: dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name github --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text

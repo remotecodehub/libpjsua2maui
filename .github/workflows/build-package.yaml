@@ -410,6 +410,14 @@ jobs:
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64s]
+        include:
+        - arch: arm64
+          resolved_arch: arm64
+        - arch: arm64s
+          resolved_arch: arm64
+        - arch: x86_64
+          resolved_arch: x86_64
+
       fail-fast: false
     runs-on: macos-latest
     needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
@@ -456,79 +464,36 @@ jobs:
           cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
           cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
 
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
+            export SDKROOT="$DEVPATH/SDKs/iPhoneOS.sdk"
+            export IPHONESDK="iPhoneOS18.5.sdk"
+            export MIN_IOS=-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}             
+          else
+            export CFLAGS="-O2 -m64"
+            export LDFLAGS="-O2 -m64"
+            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+            export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
+            export IPHONESDK="iPhoneSimulator18.5.sdk" 
+            export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
+          fi
 
-          case "${{ matrix.arch }}" in 
-            x86_64)
-              export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
-              export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-              export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
-              export IPHONESDK="iPhoneSimulator18.5.sdk" 
-              export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}"
-              export CFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}\
-                -I${{ github.workspace }}/libs/bcg729/include \
-                -I${{ github.workspace }}/libs/ssl/include \
-                -I${{ github.workspace }}/libs/opus/include \
-                -I${{ github.workspace }}/libs/h264/include"
-              export LDFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}\
-                -L${{ github.workspace }}/libs/bcg729/lib \
-                -L${{ github.workspace }}/libs/ssl/lib \
-                -L${{ github.workspace }}/libs/opus/lib \
-                -L${{ github.workspace }}/libs/h264/lib"
-              ARCH="-arch x86_64" ./configure-iphone \
-                --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
-                --with-ssl=${{ github.workspace }}/libs/ssl/ \
-                --with-opus=${{ github.workspace }}/libs/opus/ \
-                --with-openh264=${{ github.workspace }}/libs/h264/
-            ;;
-            arm64)
-              export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
-              export SDKROOT="$DEVPATH/SDKs/iPhoneOS.sdk"
-              export IPHONESDK="iPhoneOS18.5.sdk"
-              export MIN_IOS=-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}
-              export CFLAGS="-arch arm64 \
-                -I${{ github.workspace }}/libs/bcg729/include \
-                -I${{ github.workspace }}/libs/ssl/include \
-                -I${{ github.workspace }}/libs/opus/include \
-                -I${{ github.workspace }}/libs/h264/include"
-              export LDFLAGS="-arch arm64 \
-                -L${{ github.workspace }}/libs/bcg729/lib \
-                -L${{ github.workspace }}/libs/ssl/lib \
-                -L${{ github.workspace }}/libs/opus/lib \
-                -L${{ github.workspace }}/libs/h264/lib"
-              ARCH="-arch ${{ matrix.arch }}" ./configure-iphone \
-                --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
-                --with-ssl=${{ github.workspace }}/libs/ssl/ \
-                --with-opus=${{ github.workspace }}/libs/opus/ \
-                --with-openh264=${{ github.workspace }}/libs/h264/              
-            ;;
-            arm64s)
-              export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
-              export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-              export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
-              export IPHONESDK="iPhoneSimulator18.5.sdk" 
-              export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}"
-              export CC="$(xcrun -sdk iphonesimulator -find clang)"
-              export CXX="$(xcrun -sdk iphonesimulator -find clang++)"
-              export AR="$(xcrun -sdk iphonesimulator -find ar)"
-              export RANLIB="$(xcrun -sdk iphonesimulator -find ranlib)"  
-              export CFLAGS="-arch arm64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
-                -I${{ github.workspace }}/libs/bcg729/include \
-                -I${{ github.workspace }}/libs/ssl/include \
-                -I${{ github.workspace }}/libs/opus/include \
-                -I${{ github.workspace }}/libs/h264/include"
-              export LDFLAGS="-arch arm64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
-                -L${{ github.workspace }}/libs/bcg729/lib \
-                -L${{ github.workspace }}/libs/ssl/lib \
-                -L${{ github.workspace }}/libs/opus/lib \
-                -L${{ github.workspace }}/libs/h264/lib " 
-              ./configure-iphone \
-                --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
-                --with-ssl=${{ github.workspace }}/libs/ssl/ \
-                --with-opus=${{ github.workspace }}/libs/opus/ \
-                --with-openh264=${{ github.workspace }}/libs/h264/
-            ;;
-          esac
-
+          export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS} \
+            -I${{ github.workspace }}/libs/bcg729/include \
+            -I${{ github.workspace }}/libs/ssl/include \
+            -I${{ github.workspace }}/libs/opus/include \
+            -I${{ github.workspace }}/libs/h264/include"
+          export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS} \
+            -L${{ github.workspace }}/libs/bcg729/lib \
+            -L${{ github.workspace }}/libs/ssl/lib \
+            -L${{ github.workspace }}/libs/opus/lib \
+            -L${{ github.workspace }}/libs/h264/lib"
+          ARCH="-arch ${{ matrix.resolved_arch }}" ./configure-iphone \
+              --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
+              --with-ssl=${{ github.workspace }}/libs/ssl/ \
+              --with-opus=${{ github.workspace }}/libs/opus/ \
+              --with-openh264=${{ github.workspace }}/libs/h264/
           make dep
           make
           cd ./pjsip-apps/src/swig
@@ -540,7 +505,7 @@ jobs:
           cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
           cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
           cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.arch }}/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.resolved_arch }}/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
           cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
           echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
 

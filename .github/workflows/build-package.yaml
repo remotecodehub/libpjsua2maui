@@ -502,22 +502,24 @@ jobs:
               export MIN_IOS="-mios-simulator-version-min=${{env.MIN_IOS_VERSION}}"
               export ARCH="-arch arm64"
               # CFLAGS: inclui min iOS, sysroot e headers das libs externas
-              export CFLAGS="-I${{ env.BCG729_ROOT }}/include \
-                -I${{ env.SSL_ROOT }}/include \
-                -I${{ env.OPUS_ROOT }}/include \
-                -I${{ env.H264_ROOT }}/include"
-              export LDFLAGS="-L${{ env.BCG729_ROOT }}/lib \
-                -L${{ env.SSL_ROOT }}/lib \
-                -L${{ env.OPUS_ROOT }}/lib \
-                -L${{ env.H264_ROOT }}/lib \
+             export CFLAGS="-arch arm64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
+              -I${{ github.workspace }}/libs/bcg729/include \
+              -I${{ github.workspace }}/libs/ssl/include \
+              -I${{ github.workspace }}/libs/opus/include \
+              -I${{ github.workspace }}/libs/h264/include"
+            export LDFLAGS="-arch arm64 \
+              -L${{ github.workspace }}/libs/bcg729/lib \
+              -L${{ github.workspace }}/libs/ssl/lib \
+              -L${{ github.workspace }}/libs/opus/lib \
+              -L${{ github.workspace }}/libs/h264/lib \ 
                 -framework AudioToolbox -framework Foundation"
 
               # Prefix apontando para pasta raiz que contém `include` e `lib` corretos
               ./configure-iphone \
-                --with-bcg729=${{ env.BCG729_ROOT }} \
-                --with-ssl=${{ env.SSL_ROOT }} \
-                --with-opus=${{ env.OPUS_ROOT }} \
-                --with-openh264=${{ env.H264_ROOT }}
+                --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
+                --with-ssl=${{ github.workspace }}/libs/ssl/ \
+                --with-opus=${{ github.workspace }}/libs/opus/ \
+                --with-openh264=${{ github.workspace }}/libs/h264/
           fi
 
 

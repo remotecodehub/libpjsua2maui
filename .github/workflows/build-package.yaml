@@ -1,17 +1,13 @@
-name: build nupkg
+name: Build pjsip for .NET MAUI 
 on:
-  push:
-    branches: [ main, develop ]
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
-    tags:
-      - 'v*' 
   pull_request:
-    types: [opened, synchronize, reopened]  
+    types: [opened, synchronize]
+  push:
+    tags:
+      - 'v*'
     
   workflow_dispatch:
+  
   
 permissions:
   contents: read

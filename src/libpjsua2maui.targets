@@ -47,6 +47,9 @@
     <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native/libpjsua2.a">
       <Link>Platforms/iOS/lib/arm64/libpjsua2.a</Link>
     </None>
+    <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native/libpjsua2.a">
+      <Link>Platforms/iOS/lib/arm64s/libpjsua2.a</Link>
+    </None>
     <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native/libpjsua2.a">
       <Link>Platforms/iOS/lib/x86_64/libpjsua2.a</Link>
     </None>
@@ -54,7 +57,7 @@
 
   <!-- iOS Native Linking -->
   <ItemGroup
-    Condition="('$(Platform)' == 'iPhoneSimulator') OR $(RuntimeIdentifier.StartsWith('iossimulator-x64'))">
+    Condition="('$(Platform)' == 'iPhoneSimulator') AND $(RuntimeIdentifier.StartsWith('iossimulator-x64'))">
     <NativeReference
       Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native/libpjsua2.a">
       <Kind>Static</Kind>
@@ -62,6 +65,18 @@
       <SmartLink>False</SmartLink>
       <IsCxx>True</IsCxx>
       <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native -lpjsua2 -ld_classic</LinkerFlags>
+    </NativeReference>
+  </ItemGroup>
+
+  <ItemGroup
+    Condition="('$(Platform)' == 'iPhoneSimulator') AND $(RuntimeIdentifier.StartsWith('iossimulator-arm64'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native/libpjsua2.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <SmartLink>False</SmartLink>
+      <IsCxx>True</IsCxx>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
     </NativeReference>
   </ItemGroup>
 

@@ -43,6 +43,8 @@
         <!-- Native iOS -->
         <file src="libpjsua2maui.a\lib\x86_64\libpjsua2.a"
             target="runtimes\iossimulator-x64\native\libpjsua2.a" />
+        <file src="libpjsua2maui.a\lib\arm64s\libpjsua2.a"
+            target="runtimes\iossimulator-arm64\native\libpjsua2.a" />
         <file src="libpjsua2maui.a\lib\arm64\libpjsua2.a"
             target="runtimes\ios-arm64\native\libpjsua2.a" />
 

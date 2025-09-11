@@ -416,7 +416,12 @@ jobs:
         with:
           name: bcg729-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/bcg729/
-
+      
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+        
       - name: Install dependencies
         run: |
           brew install automake autoconf libtool pkg-config swig llvm

@@ -93,7 +93,7 @@ jobs:
         sdk_path=$(xcrun --sdk $sdk --show-sdk-path)
         developer_path=$(xcode-select -p)
 
-        h264_prefix="${{ env.OPENH264_PATH }}/builds/${platform}-${{ matrix.arch }}"
+        h264_prefix="${{ env.OPENH264_PATH }}/builds/${platform}-${{ matrix.resolved_arch }}"
         h264_log="${h264_prefix}/build.log"
         mkdir -p "${h264_prefix}/logs"
 

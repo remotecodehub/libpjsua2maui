@@ -34,6 +34,13 @@ jobs:
       fail-fast: false
       matrix:
         arch: [x86_64, arm64, arm64s]
+        include:
+          - arch: arm64
+            resolved_arch: arm64
+          - arch: arm64s
+            resolved_arch: arm64
+          - arch: x86_64
+            resolved_arch: x86_64
     runs-on: macos-latest
     name: openh264-ios
     permissions:
@@ -84,13 +91,13 @@ jobs:
         sed -i.deleteme "s|^PREFIX=.*|PREFIX=${h264_prefix}|" "${h264_makefile}"
         rm -f ${h264_makefile}.deleteme
 
-        make OS=ios ARCH=$([[ "${{ matrix.arch }}" == "arm64s" ]] && echo "arm64" || echo "${{ matrix.arch }}") \
+        make OS=ios ARCH=${{ matrix.resolved_arch }} \
             SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No >> "${h264_log}" || exit 1
 
-        make OS=ios ARCH=$([[ "${{ matrix.arch }}" == "arm64s" ]] && echo "arm64" || echo "${{ matrix.arch }}") \
+        make OS=ios ARCH=${{ matrix.resolved_arch }} \
             SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No install >> "${h264_log}" || exit 1
 
-        make OS=ios ARCH=$([[ "${{ matrix.arch }}" == "arm64s" ]] && echo "arm64" || echo "${{ matrix.arch }}") \
+        make OS=ios ARCH=${{ matrix.resolved_arch }} \
             SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No clean >> "${h264_log}" || exit 1
 
         mv "${h264_makefile_bak}" "${h264_makefile}"
@@ -107,6 +114,7 @@ jobs:
           sed -i'' -e "s|^libdir=.*|libdir=\${pcfiledir}/lib|" "$pc_file"
           sed -i'' -e "s|^includedir=.*|includedir=\${pcfiledir}/include|" "$pc_file"
           echo "Patched OpenH264 pkg-config file: $pc_file"
+          cat $pc_file
         else
           echo "OpenH264 .pc file not found"
           exit 1
@@ -245,6 +253,13 @@ jobs:
     strategy:
       matrix:
         arch: [x86_64, arm64, arm64s]
+        include:
+          - arch: arm64
+            resolved_arch: arm64
+          - arch: arm64s
+            resolved_arch: arm64
+          - arch: x86_64
+            resolved_arch: x86_64
     runs-on: macos-latest
     name: opus-ios 
     permissions:
@@ -300,12 +315,12 @@ jobs:
         else
           HOST="arm-apple-darwin"
         fi
-
+        ARCH="${{ matrix.resolved_arch }}"
         # Determine arch
         if [[ "${{ matrix.arch }}" == "arm64s" ]]; then
           ARCH="arm64"
         else
-          ARCH="${{ matrix.arch }}"
+         
         fi
 
         ./configure \
@@ -334,20 +349,22 @@ jobs:
     - name: Patch Opus .pc for arm64s
       if: matrix.arch == 'arm64s'
       run: |
-        pc_file=$(find "${{ github.workspace }}/opus/build/iPhoneSimulator${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk" -name '*.pc' | head -n 1)
+        opus_base=$(find "${{ github.workspace }}/opus/build/" -type d -name "iPhoneSimulator*-arm64s.sdk" | head -n 1)
+        pc_file=$(find "$opus_base/lib/pkgconfig" -name 'opus.pc' | head -n 1)
+
         if [ -f "$pc_file" ]; then
-          sed -i'' -e "s|^prefix=.*|prefix=\${pcfiledir}|" "$pc_file"
-          sed -i'' -e "s|^exec_prefix=.*|exec_prefix=\${pcfiledir}|" "$pc_file"
-          sed -i'' -e "s|^libdir=.*|libdir=\${pcfiledir}/lib|" "$pc_file"
-          sed -i'' -e "s|^includedir=.*|includedir=\${pcfiledir}/include|" "$pc_file"
-          sed -i'' -e "s|^Cflags=.*|Cflags=-I\${pcfiledir}/include/opus|" "$pc_file"
+          sed -i'' -e "s|^prefix=.*|prefix=${opus_base}|" "$pc_file"
+          sed -i'' -e "s|^exec_prefix=.*|exec_prefix=${opus_base}|" "$pc_file"
+          sed -i'' -e "s|^libdir=.*|libdir=${opus_base}/lib|" "$pc_file"
+          sed -i'' -e "s|^includedir=.*|includedir=${opus_base}/include|" "$pc_file"
+          sed -i'' -e "s|^Cflags=.*|Cflags=-I${opus_base}/include/opus|" "$pc_file"
+          cat $pc_file
           echo "Patched Opus pkg-config file: $pc_file"
         else
-          echo "Opus .pc file not found"
+          echo "Opus .pc file not found in $opus_base"
           exit 1
         fi
-      env:
-        pcfiledir: ${{ github.workspace }}/opus/build/iPhoneSimulator$(xcrun -sdk iphonesimulator --show-sdk-version)-${{ matrix.arch }}.sdk
+      shell: bash
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

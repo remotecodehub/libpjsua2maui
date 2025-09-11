@@ -109,18 +109,20 @@ jobs:
       if: matrix.arch == 'arm64s'
       run: |
         pc_file=$(find "${{ env.OPENH264_PATH }}/builds/iPhoneSimulator-${{ matrix.arch }}" -name '*.pc' | head -n 1)
+
         if [ -f "$pc_file" ]; then
-          sed -i'' -e "s|^prefix=.*|prefix=\${pcfiledir}|" "$pc_file"
-          sed -i'' -e "s|^libdir=.*|libdir=\${pcfiledir}/lib|" "$pc_file"
-          sed -i'' -e "s|^includedir=.*|includedir=\${pcfiledir}/include|" "$pc_file"
-          echo "Patched OpenH264 pkg-config file: $pc_file"
-          cat $pc_file
+          install_prefix="${{ github.workspace }}/libs/h264"
+          sed -i'' -e "s|^prefix=.*|prefix=${install_prefix}|" "$pc_file"
+          sed -i'' -e "s|^libdir=.*|libdir=${install_prefix}/lib|" "$pc_file"
+          sed -i'' -e "s|^includedir=.*|includedir=${install_prefix}/include|" "$pc_file"
+          echo "Patched OpenH264 pkg-config file for PJSIP:"
+          cat "$pc_file"
         else
           echo "OpenH264 .pc file not found"
           exit 1
         fi
-      env:
-        pcfiledir: ${{ env.OPENH264_PATH }}/builds/iPhoneSimulator-${{ matrix.arch }}
+      shell: bash
+
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -290,7 +292,7 @@ jobs:
       id: build
       run: |
         opus_version="1.4"
-        opus_opt_cflags="-Ofast -flto -g"
+        opus_opt_cflags="-O3 -ffast-math -flto -g"
         opus_opt_ldflags="-flto"
         DEVELOPER=$(xcode-select -print-path)
         SDKVERSION=$(xcrun -sdk ${{ matrix.arch == 'arm64' && 'iphoneos' || 'iphonesimulator' }} --show-sdk-version)
@@ -349,22 +351,24 @@ jobs:
     - name: Patch Opus .pc for arm64s
       if: matrix.arch == 'arm64s'
       run: |
-        opus_base=$(find "${{ github.workspace }}/opus/build/" -type d -name "iPhoneSimulator*-arm64s.sdk" | head -n 1)
-        pc_file=$(find "$opus_base/lib/pkgconfig" -name 'opus.pc' | head -n 1)
+        opus_build_dir=$(find "${{ github.workspace }}/opus/build/" -type d -name "iPhoneSimulator*-arm64s.sdk" | head -n 1)
+        pc_file=$(find "$opus_build_dir/lib/pkgconfig" -name 'opus.pc' | head -n 1)
 
         if [ -f "$pc_file" ]; then
-          sed -i'' -e "s|^prefix=.*|prefix=${opus_base}|" "$pc_file"
-          sed -i'' -e "s|^exec_prefix=.*|exec_prefix=${opus_base}|" "$pc_file"
-          sed -i'' -e "s|^libdir=.*|libdir=${opus_base}/lib|" "$pc_file"
-          sed -i'' -e "s|^includedir=.*|includedir=${opus_base}/include|" "$pc_file"
-          sed -i'' -e "s|^Cflags=.*|Cflags=-I${opus_base}/include/opus|" "$pc_file"
-          cat $pc_file
-          echo "Patched Opus pkg-config file: $pc_file"
+          install_prefix="${{ github.workspace }}/libs/opus"
+          sed -i'' -e "s|^prefix=.*|prefix=${install_prefix}|" "$pc_file"
+          sed -i'' -e "s|^exec_prefix=.*|exec_prefix=${install_prefix}|" "$pc_file"
+          sed -i'' -e "s|^libdir=.*|libdir=${install_prefix}/lib|" "$pc_file"
+          sed -i'' -e "s|^includedir=.*|includedir=${install_prefix}/include|" "$pc_file"
+          sed -i'' -e "s|^Cflags=.*|Cflags=-I${install_prefix}/include/opus|" "$pc_file"
+          echo "Patched Opus pkg-config file for PJSIP:"
+          cat "$pc_file"
         else
-          echo "Opus .pc file not found in $opus_base"
+          echo "Opus .pc file not found in $opus_build_dir"
           exit 1
         fi
       shell: bash
+
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

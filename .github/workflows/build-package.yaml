@@ -1053,3 +1053,50 @@ jobs:
 
       - name: Push to GitHub Packages
         run: dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+
+      - name: Extract release notes from CHANGELOG.md
+        id: changelog
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          awk "/^## Version ${TAG}/,/^## Version /" CHANGELOG.md | head -n -1 > RELEASE_BODY.md
+          echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
+          cat RELEASE_BODY.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          body: ${{ env.RELEASE_BODY }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload NuGet Package to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./libpjsua2maui.${{ env.VERSION }}.nupkg
+          asset_name: libpjsua2maui.${{ env.VERSION }}.nupkg
+          asset_content_type: application/octet-stream
+
+      - name: Upload Android Artifacts to Release
+        run: |
+          for arch in x86 x86_64 armeabi-v7a arm64-v8a; do
+            zip -r android-${arch}.zip ./artifacts/android-${arch}
+            gh release upload ${{ github.ref_name }} android-${arch}.zip --repo ${{ github.repository }}
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload iOS Artifacts to Release
+        run: |
+          for arch in x86_64 arm64 arm64s; do
+            zip -r ios-${arch}.zip ./artifacts/ios/pjsip-${arch}
+            gh release upload ${{ github.ref_name }} ios-${arch}.zip --repo ${{ github.repository }}
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

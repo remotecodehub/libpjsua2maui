@@ -296,7 +296,7 @@ jobs:
         if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
           HOST="x86_64-apple-darwin"
         elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
-          HOST="arm64-apple-darwin"
+          HOST="arm-apple-darwin"
         else
           HOST="arm-apple-darwin"
         fi

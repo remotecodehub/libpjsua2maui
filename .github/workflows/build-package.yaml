@@ -72,33 +72,40 @@ jobs:
         case "${{ matrix.arch }}" in
           x86_64)
             platform="iPhoneSimulator"
+            sdk="iphonesimulator"
             os="darwin"
             version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             ;;
           arm64s)
             platform="iPhoneSimulator"
+            sdk="iphonesimulator"
             os="darwin"
             version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             ;;
           arm64)
             platform="iPhoneOS"
+            sdk="iphoneos"
             os="ios"
             version_min="-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}"
             ;;
         esac
 
-        h264_prefix="${{ env.OPENH264_PATH }}/builds/${platform}-${{ matrix.resolved_arch }}"
+        sdk_path=$(xcrun --sdk $sdk --show-sdk-path)
+        developer_path=$(xcode-select -p)
+
+        h264_prefix="${{ env.OPENH264_PATH }}/builds/${platform}-${{ matrix.arch }}"
         h264_log="${h264_prefix}/build.log"
         mkdir -p "${h264_prefix}/logs"
 
-        echo "Building OpenH264 for ${{ matrix.arch }} ($platform, OS=$os)"
+        echo "Building OpenH264 for ${{ matrix.arch }} ($platform, OS=$os, SDK=$sdk)"
 
         cp "${h264_makefile}" "${h264_makefile_bak}"
         sed -i.deleteme "s|^PREFIX=.*|PREFIX=${h264_prefix}|" "${h264_makefile}"
         rm -f ${h264_makefile}.deleteme
 
-        export CFLAGS="-arch ${{ matrix.resolved_arch }} ${version_min}"
-        export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${version_min}"
+        export CFLAGS="-arch ${{ matrix.resolved_arch }} ${version_min} -isysroot ${sdk_path}"
+        export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${version_min} -isysroot ${sdk_path}"
+        export SYSROOT="${sdk_path}"
 
         make OS=${os} ARCH=${{ matrix.resolved_arch }} \
             SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No >> "${h264_log}" || exit 1
@@ -113,6 +120,7 @@ jobs:
 
         echo "artifact=${h264_prefix}" >> "$GITHUB_OUTPUT"
       shell: bash
+
 
     - name: Patch OpenH264 .pc for arm64s
       if: matrix.arch == 'arm64s'

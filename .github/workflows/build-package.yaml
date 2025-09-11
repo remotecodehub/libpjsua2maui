@@ -473,22 +473,24 @@ jobs:
               arch_flag="x86_64"
               sdkname="iphonesimulator"
               sdk_min_flag="-mios-simulator-version-min=${MIN_IOS_VERSION}"
+              export MIN_IOS="${MIN_IOS_VERSION}"
+              export IPHONESDK=$(xcrun --sdk iphonesimulator --show-sdk-version)
               ;;
             arm64s)
               platform="iPhoneSimulator"
-              arch_flag="arm64"                # simulador Apple Silicon usa -arch arm64
+              arch_flag="arm64"            # arm64s simulador -> arm64
               sdkname="iphonesimulator"
               sdk_min_flag="-mios-simulator-version-min=${MIN_IOS_VERSION}"
+              export MIN_IOS="${MIN_IOS_VERSION}"    # necessário para configure-iphone
+              export IPHONESDK=$(xcrun --sdk iphonesimulator --show-sdk-version)
               ;;
             arm64)
               platform="iPhoneOS"
               arch_flag="arm64"
               sdkname="iphoneos"
               sdk_min_flag="-miphoneos-version-min=${MIN_IOS_VERSION}"
-              ;;
-            *)
-              echo "Unsupported arch: ${{ matrix.arch }}"
-              exit 1
+              export MIN_IOS="${MIN_IOS_VERSION}"
+              export IPHONESDK=$(xcrun --sdk iphoneos --show-sdk-version)
               ;;
           esac
 
@@ -520,12 +522,12 @@ jobs:
           # Set devpath and sdkroot for the configure scripts
           export DEVPATH="${xcode_select_path}/Platforms/${platform}.platform/Developer"
           export SDKROOT="${SDKPATH}"
+          export CC="$(xcrun --sdk ${sdkname} -find clang)"
+          export CXX="$(xcrun --sdk ${sdkname} -find clang++)"
 
-          # Compose flags ensuring same minimum iOS version for all
-          # Use -isysroot, -arch and proper -m* flags
-          CFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
+          CFLAGS="-arch ${arch_flag} -O2 -isysroot ${SDKPATH} \
             -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE}"
-          LDFLAGS="-arch ${arch_flag} ${sdk_min_flag} -isysroot ${SDKPATH} \
+          LDFLAGS="-arch ${arch_flag} -isysroot ${SDKPATH} \
             -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB}"
 
           export CFLAGS
@@ -534,12 +536,20 @@ jobs:
           echo "CFLAGS=${CFLAGS}"
           echo "LDFLAGS=${LDFLAGS}"
 
-          # call configure-iphone with ARCH var (the script expects the ARCH variable like '-arch arm64')
-          ARCH="-arch ${arch_flag}" ./configure-iphone \
+          # Chamada sem ARCH
+          ./configure-iphone \
             --with-bcg729=${LIBS_ROOT}/bcg729/ \
             --with-ssl=${LIBS_ROOT}/ssl/ \
             --with-opus=${LIBS_ROOT}/opus/ \
             --with-openh264=${LIBS_ROOT}/h264/
+          
+
+          # call configure-iphone with ARCH var (the script expects the ARCH variable like '-arch arm64')
+          # ARCH="-arch ${arch_flag}" ./configure-iphone \
+          #  --with-bcg729=${LIBS_ROOT}/bcg729/ \
+          #  --with-ssl=${LIBS_ROOT}/ssl/ \
+          #  --with-opus=${LIBS_ROOT}/opus/ \
+          #  --with-openh264=${LIBS_ROOT}/h264/
 
           # build
           make dep
@@ -574,9 +584,7 @@ jobs:
 
           echo "artifact=${OUTDIR}" >> "$GITHUB_OUTPUT"
         env:
-          # MIN_IOS_VERSION is expected from workflow env but set a fallback above if missing
           MIN_IOS_VERSION: 12.2
-          # BUILD_THREADS etc are optional; kept if available
           BUILD_THREADS: $(sysctl -n hw.ncpu)
 
       - name: Upload artifacts
@@ -585,6 +593,7 @@ jobs:
           name: pjsip-${{ matrix.arch }}
           path: ${{ steps.build-pj-ios.outputs.artifact }}
           overwrite: true
+
   openh264:
     runs-on: ubuntu-latest
     

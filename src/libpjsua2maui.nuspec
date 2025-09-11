@@ -5,19 +5,25 @@
         <title>libpjsua2maui</title>
         <version>2.15.1.1</version>
         <authors>Weslley Murdock</authors>
+        <owners>Remote Code Hub</owners>
         <projectUrl>http://github.com/weslleymurdock/libpjsua2maui</projectUrl>
-        <description>PJSIP bindings for .NET MAUI using version 2.15.1 with openh264, openssl, opus,
-            and bcg729.</description>
+        <description>
+            PJSIP bindings for .NET MAUI using version 2.15.1 with openh264, openssl, opus,
+            and bcg729.
+            The builds of native libraries targets iOS devices (arm64), iOS simulators (arm64, x86_64),
+            android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
+        </description>
         <releaseNotes>
             - Fixed Page size warnings on android
             - Added arm64 simulators support on ios targets
         </releaseNotes>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <license type="expression">LGPL-3.0-or-later</license>
+        <license type="file">LICENSE</license>
         <copyright>Copyright ©2025 Remote Code Hub</copyright>
         <tags>sip voip pjsip maui native</tags>
         <readme>README.md</readme>
-
+        <iconUrl>https://raw.githubusercontent.com/weslleymurdock/libpjsua2maui/main/icon.png</iconUrl>
+        <repository type="git" url="https://github.com/weslleymurdock/libpjsua2maui" />
         <references>
             <group targetFramework="net9.0-ios18.5">
                 <reference file="pjsua2.maui.ios.pdb" />
@@ -29,7 +35,7 @@
                 <reference file="pjsua2maui.android.xml" />
             </group>
         </references>
-
+        
 
         <dependencies>
             <group targetFramework="net9.0-ios18.5" />
@@ -72,7 +78,10 @@
         <file src="libpjsua2maui.android\bin\Release\net9.0-android\pjsua2maui.android.*"
             target="ref\net9.0-android34.0\" />
 
-        <!-- Readme -->
+        <!-- README -->
         <file src="README.md" target="" />
+        <!-- LICENSE-->
+        <file src="LICENSE" target="" />
+
     </files>
 </package>

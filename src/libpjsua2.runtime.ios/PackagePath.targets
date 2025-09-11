@@ -1,6 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <!-- Example property to share the package path -->
-    <SharedPackagePath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)').Replace('\', '/')/)..</SharedPackagePath>
-  </PropertyGroup>
-</Project>

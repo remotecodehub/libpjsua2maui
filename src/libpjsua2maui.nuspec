@@ -80,10 +80,10 @@
             target="ref\net9.0-android34.0\" />
 
         <!-- README -->
-        <file src="README.md" target="" />
+        <file src="README.md" target="." />
         <!-- LICENSE-->
-        <file src="../LICENSE" target="" />
+        <file src="../LICENSE" target="." />
         <!-- ICON -->
-        <file src="icon.png" target="" />
+        <file src="icon.png" target="." />
     </files>
 </package>

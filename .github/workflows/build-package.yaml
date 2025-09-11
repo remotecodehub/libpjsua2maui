@@ -449,139 +449,138 @@ jobs:
         run: brew install automake autoconf libtool pkg-config swig llvm nasm
         shell: bash
 
+jobs:
+  pjsip-ios:
+    strategy:
+      matrix:
+        arch: [x86_64, arm64, arm64s]
+      fail-fast: false
+    runs-on: macos-latest
+    needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
+    name: pjsip + h264 + bcg729 + opus + ssl - ios
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: openssl-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/ssl/
+      - uses: actions/download-artifact@v4
+        with:
+          name: openh264-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/h264/
+      - uses: actions/download-artifact@v4
+        with:
+          name: opus-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/opus/
+      - uses: actions/download-artifact@v4
+        with:
+          name: bcg729-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/bcg729/
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install dependencies
+        run: |
+          brew install automake autoconf libtool pkg-config swig llvm
+
       - name: Build pjsip
         id: build-pj-ios
-        shell: bash
         run: |
-          set -euo pipefail
-          echo "Starting pjsip build for arch=${{ matrix.arch }}"
-
-          if [ -z "${MIN_IOS_VERSION:-}" ]; then
-            echo "MIN_IOS_VERSION not set; defaulting to 12.2"
-            MIN_IOS_VERSION="12.2"
-          fi
-
-          xcode_select_path=$(xcode-select -p)
-
-          # copy pjsip code into build workspace
-          cp -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+          cp -v -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
           mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
-          rm -rf ~/pjsip_build/bundle/${{ matrix.arch }}/*
-          cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
+          cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
           cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
 
-          # prepare include/lib paths from downloaded artifacts
-          LIBS_ROOT="${{ github.workspace }}/libs"
-          BCG_INCLUDE="${LIBS_ROOT}/bcg729/include"
-          BCG_LIB="${LIBS_ROOT}/bcg729/lib"
-          SSL_INCLUDE="${LIBS_ROOT}/ssl/include"
-          SSL_LIB="${LIBS_ROOT}/ssl/lib"
-          OPUS_INCLUDE="${LIBS_ROOT}/opus/include"
-          OPUS_LIB="${LIBS_ROOT}/opus/lib"
-          H264_INCLUDE="${LIBS_ROOT}/h264/include"
-          H264_LIB="${LIBS_ROOT}/h264/lib"
+          if [ "${{ matrix.arch }}" == "x86_64" ]; then
+            # Build para simulador x86_64
+            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+            export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
+            export CFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
+              -I${{ github.workspace }}/libs/bcg729/include \
+              -I${{ github.workspace }}/libs/ssl/include \
+              -I${{ github.workspace }}/libs/opus/include \
+              -I${{ github.workspace }}/libs/h264/include"
+            export LDFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
+              -L${{ github.workspace }}/libs/bcg729/lib \
+              -L${{ github.workspace }}/libs/ssl/lib \
+              -L${{ github.workspace }}/libs/opus/lib \
+              -L${{ github.workspace }}/libs/h264/lib"
+            ARCH="-arch x86_64" ./configure-iphone \
+              --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
+              --with-ssl=${{ github.workspace }}/libs/ssl/ \
+              --with-opus=${{ github.workspace }}/libs/opus/ \
+              --with-openh264=${{ github.workspace }}/libs/h264/
 
-          # map matrix arch -> platform / arch_flag / sdkname / host_triple
-          case "${{ matrix.arch }}" in
-            x86_64)
-              platform="iPhoneSimulator"
-              arch_flag="x86_64"
-              sdkname="iphonesimulator"
-              host_triple="x86_64-apple-darwin"
-              ;;
-            arm64s)
-              platform="iPhoneSimulator"
-              arch_flag="arm64"    # simulador Apple Silicon usa arm64
-              sdkname="iphonesimulator"
-              host_triple="arm-apple-darwin"
-              ;;
-            arm64)
-              platform="iPhoneOS"
-              arch_flag="arm64"
-              sdkname="iphoneos"
-              host_triple="arm-apple-darwin"
-              ;;
-            *)
-              echo "Unsupported arch: ${{ matrix.arch }}"
-              exit 1
-              ;;
-          esac
+          elif [ "${{ matrix.arch }}" == "arm64" ]; then
+            # Build para device arm64
+            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
+            export SDKROOT="$DEVPATH/SDKs/iPhoneOS.sdk"
+            export CFLAGS="-arch arm64 -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} \
+              -I${{ github.workspace }}/libs/bcg729/include \
+              -I${{ github.workspace }}/libs/ssl/include \
+              -I${{ github.workspace }}/libs/opus/include \
+              -I${{ github.workspace }}/libs/h264/include"
+            export LDFLAGS="-arch arm64 \
+              -L${{ github.workspace }}/libs/bcg729/lib \
+              -L${{ github.workspace }}/libs/ssl/lib \
+              -L${{ github.workspace }}/libs/opus/lib \
+              -L${{ github.workspace }}/libs/h264/lib"
+            ARCH="-arch arm64" ./configure-iphone \
+              --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
+              --with-ssl=${{ github.workspace }}/libs/ssl/ \
+              --with-opus=${{ github.workspace }}/libs/opus/ \
+              --with-openh264=${{ github.workspace }}/libs/h264/
 
-          # SDK info
-          SDKPATH=$(xcrun --sdk ${sdkname} --show-sdk-path)
-          SDKVER=$(xcrun --sdk ${sdkname} --show-sdk-version)
-          export IPHONESDK="${platform}${SDKVER}.sdk"    
-          export MIN_IOS="${MIN_IOS_VERSION}"  
-
-          echo "platform=${platform} arch_flag=${arch_flag} sdk=${SDKPATH} sdkver=${SDKVER} host=${host_triple} IPHONESDK=${IPHONESDK}"
-
-          CFLAGS="-arch ${arch_flag} -O2 -isysroot ${SDKPATH} -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE}"
-          LDFLAGS="-arch ${arch_flag} -isysroot ${SDKPATH} -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB}"
-
-          export CFLAGS
-          export LDFLAGS
-
-          # Set devpath and sdkroot for the configure scripts
-          export DEVPATH="${xcode_select_path}/Platforms/${platform}.platform/Developer"
-          export SDKROOT="${SDKPATH}"
-
-          # Use clang/clang++/ar/ranlib from xcrun for the chosen SDK
-          export CC="$(xcrun --sdk ${sdkname} --find clang)"
-          export CXX="$(xcrun --sdk ${sdkname} --find clang++)"
-          export AR="$(xcrun --sdk ${sdkname} --find ar)"
-          export RANLIB="$(xcrun --sdk ${sdkname} --find ranlib)"
-
-          echo "CC=${CC} CXX=${CXX} AR=${AR} RANLIB=${RANLIB}"
-          echo "CFLAGS=${CFLAGS}"
-          echo "LDFLAGS=${LDFLAGS}"
-          echo "MIN_IOS (numeric) = ${MIN_IOS}"
-
-          # Pass --host so configure knows this is a cross-build and avoids trying to execute test binaries.
-          # For arm64s (simulator) we DO NOT pass ARCH (it caused duplicated flags); for other archs we can keep it.
-          if [ "${{ matrix.arch }}" = "arm64s" ]; then
-            ./configure-iphone \
-              --host=${host_triple} \
-              --with-bcg729=${LIBS_ROOT}/bcg729/ \
-              --with-ssl=${LIBS_ROOT}/ssl/ \
-              --with-opus=${LIBS_ROOT}/opus/ \
-              --with-openh264=${LIBS_ROOT}/h264/
-          else
-            ARCH="-arch ${arch_flag}" ./configure-iphone \
-              --host=${host_triple} \
-              --with-bcg729=${LIBS_ROOT}/bcg729/ \
-              --with-ssl=${LIBS_ROOT}/ssl/ \
-              --with-opus=${LIBS_ROOT}/opus/ \
-              --with-openh264=${LIBS_ROOT}/h264/
+          elif [ "${{ matrix.arch }}" == "arm64s" ]; then
+            # Build para simulador arm64 (Apple Silicon)
+            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+            export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
+            export CFLAGS="-arch arm64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
+              -I${{ github.workspace }}/libs/bcg729/include \
+              -I${{ github.workspace }}/libs/ssl/include \
+              -I${{ github.workspace }}/libs/opus/include \
+              -I${{ github.workspace }}/libs/h264/include"
+            export LDFLAGS="-arch arm64 \
+              -L${{ github.workspace }}/libs/bcg729/lib \
+              -L${{ github.workspace }}/libs/ssl/lib \
+              -L${{ github.workspace }}/libs/opus/lib \
+              -L${{ github.workspace }}/libs/h264/lib"
+            ARCH="-arch arm64" ./configure-iphone \
+              --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
+              --with-ssl=${{ github.workspace }}/libs/ssl/ \
+              --with-opus=${{ github.workspace }}/libs/opus/ \
+              --with-openh264=${{ github.workspace }}/libs/h264/
           fi
 
-          # build
           make dep
-          make -j "$(sysctl -n hw.ncpu)"
+          make
 
-          # build swig bindings
           cd ./pjsip-apps/src/swig
-          sed -i'' -e 's/xamarin/maui/g' ./csharp/Makefile || true
-          make -j "$(sysctl -n hw.ncpu)" || true
+          sed -i'' -e 's/xamarin/maui/g' ./csharp/Makefile
+          make
 
-          # collect outputs
-          OUTDIR="${{ github.workspace }}/pjsip-${{ matrix.arch }}"
-          mkdir -p "${OUTDIR}/lib" "${OUTDIR}/cs"
+          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 
-          cp -v -f ${SSL_LIB}/*.a "${OUTDIR}/lib/" 2>/dev/null || true
-          cp -v -f ${OPUS_LIB}/*.a "${OUTDIR}/lib/" 2>/dev/null || true
-          cp -v -f ${BCG_LIB}/*.a "${OUTDIR}/lib/" 2>/dev/null || true
-          cp -v -f ${H264_LIB}/*.a "${OUTDIR}/lib/" 2>/dev/null || true
+          cp -v -f ${{ github.workspace }}/libs/ssl/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.arch }}/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
 
-          # try copy pjsip libs
-          if [ -d "./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.arch }}" ]; then
-            cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.arch }}/*.a "${OUTDIR}/lib/" 2>/dev/null || true
-          elif [ -d "./csharp/pjsua2maui/pjsua2maui.iOS/lib/${arch_flag}" ]; then
-            cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${arch_flag}/*.a "${OUTDIR}/lib/" 2>/dev/null || true
-          fi
+          cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 
-          cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs "${OUTDIR}/cs/" 2>/dev/null || true
+          echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
 
-          echo "artifact=${OUTDIR}" >> "$GITHUB_OUTPUT"
         env:
           MIN_IOS_VERSION: 12.2
           BUILD_THREADS: $(sysctl -n hw.ncpu)

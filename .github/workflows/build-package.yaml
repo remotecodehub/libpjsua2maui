@@ -551,6 +551,7 @@ jobs:
           case "${{ matrix.arch }}" in
             x86_64)            
               ARCH="-arch ${arch_flag}" ./configure-iphone \
+                --host=${arch_flag}-apple-darwin \
                 --with-bcg729=${LIBS_ROOT}/bcg729/ \
                 --with-ssl=${LIBS_ROOT}/ssl/ \
                 --with-opus=${LIBS_ROOT}/opus/ \
@@ -558,6 +559,7 @@ jobs:
             ;;
             arm64s)              
               ./configure-iphone \
+                --host=${arch_flag}-apple-darwin \
                 --with-bcg729=${LIBS_ROOT}/bcg729/ \
                 --with-ssl=${LIBS_ROOT}/ssl/ \
                 --with-opus=${LIBS_ROOT}/opus/ \
@@ -565,6 +567,7 @@ jobs:
             ;;
             arm64)              
               ARCH="-arch ${arch_flag}" ./configure-iphone \
+                --host=${arch_flag}-apple-darwin \
                 --with-bcg729=${LIBS_ROOT}/bcg729/ \
                 --with-ssl=${LIBS_ROOT}/ssl/ \
                 --with-opus=${LIBS_ROOT}/opus/ \

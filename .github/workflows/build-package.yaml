@@ -885,7 +885,7 @@ jobs:
     - name: Upload java artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: java
+        name: java-${{ matrix.arch }}
         path: ${{ steps.build-pj.outputs.java }}
         overwrite: true
 
@@ -964,7 +964,7 @@ jobs:
       - name: Download Android java Artifact
         uses: actions/download-artifact@v4
         with:
-          name: java
+          name: java-x86_64
           path: ./artifacts/java
       
       - name: Download Android csharp Artifact

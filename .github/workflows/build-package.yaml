@@ -253,6 +253,7 @@ jobs:
 
   opus-ios:
     strategy:
+      fail-fast: false
       matrix:
         arch: [x86_64, arm64, arm64s]
         include:
@@ -310,21 +311,14 @@ jobs:
         ./autogen.sh
 
         # Determine host triple
-        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
+        if [[ "${{ matrix.resolved_arch }}" == "x86_64" ]]; then
           HOST="x86_64-apple-darwin"
-        elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
+        elif [[ "${{ matrix.resolved_arch }}" == "arm64" ]]; then
           HOST="arm-apple-darwin"
-        else
-          HOST="arm-apple-darwin"
-        fi
-        ARCH="${{ matrix.resolved_arch }}"
-        # Determine arch
-        if [[ "${{ matrix.arch }}" == "arm64s" ]]; then
-          ARCH="arm64"
-        else
-         
         fi
 
+        ARCH="${{ matrix.resolved_arch }}"
+        
         ./configure \
           --enable-float-approx \
           --disable-shared \

@@ -62,7 +62,7 @@ jobs:
         brew install nasm autoconf automake libtool 
       shell: sh
           
-    - name: Build For arch
+    - name: Build OpenH264 for ${{ matrix.arch }}
       id: build
       run: |
         cd ${{ env.OPENH264_PATH }}
@@ -72,32 +72,41 @@ jobs:
         case "${{ matrix.arch }}" in
           x86_64)
             platform="iPhoneSimulator"
-            ;;
-          arm64)
-            platform="iPhoneOS"
+            os="darwin"
+            version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             ;;
           arm64s)
             platform="iPhoneSimulator"
+            os="darwin"
+            version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+            ;;
+          arm64)
+            platform="iPhoneOS"
+            os="ios"
+            version_min="-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}"
             ;;
         esac
 
-        h264_prefix="${{ env.OPENH264_PATH }}/builds/${platform}-${{ matrix.arch }}"
+        h264_prefix="${{ env.OPENH264_PATH }}/builds/${platform}-${{ matrix.resolved_arch }}"
         h264_log="${h264_prefix}/build.log"
         mkdir -p "${h264_prefix}/logs"
 
-        echo "Building OpenH264 for ${{ matrix.arch }} ($platform)"
+        echo "Building OpenH264 for ${{ matrix.arch }} ($platform, OS=$os)"
 
         cp "${h264_makefile}" "${h264_makefile_bak}"
         sed -i.deleteme "s|^PREFIX=.*|PREFIX=${h264_prefix}|" "${h264_makefile}"
         rm -f ${h264_makefile}.deleteme
 
-        make OS=ios ARCH=${{ matrix.resolved_arch }} \
+        export CFLAGS="-arch ${{ matrix.resolved_arch }} ${version_min}"
+        export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${version_min}"
+
+        make OS=${os} ARCH=${{ matrix.resolved_arch }} \
             SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No >> "${h264_log}" || exit 1
 
-        make OS=ios ARCH=${{ matrix.resolved_arch }} \
+        make OS=${os} ARCH=${{ matrix.resolved_arch }} \
             SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No install >> "${h264_log}" || exit 1
 
-        make OS=ios ARCH=${{ matrix.resolved_arch }} \
+        make OS=${os} ARCH=${{ matrix.resolved_arch }} \
             SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No clean >> "${h264_log}" || exit 1
 
         mv "${h264_makefile_bak}" "${h264_makefile}"
@@ -108,7 +117,7 @@ jobs:
     - name: Patch OpenH264 .pc for arm64s
       if: matrix.arch == 'arm64s'
       run: |
-        pc_file=$(find "${{ env.OPENH264_PATH }}/builds/iPhoneSimulator-${{ matrix.arch }}" -name '*.pc' | head -n 1)
+        pc_file=$(find "${{ env.OPENH264_PATH }}/builds/iPhoneSimulator-${{ matrix.resolved_arch }}" -name '*.pc' | head -n 1)
 
         if [ -f "$pc_file" ]; then
           install_prefix="${{ github.workspace }}/libs/h264"
@@ -309,19 +318,15 @@ jobs:
         cd "${{ env.OPUS_PATH }}"
 
         ./autogen.sh
-
-        # Determine host triple
+ 
         if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
-          HOST="x86_64-apple-darwin"
-          version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-        elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
-          HOST="arm-apple-darwin"
-          version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-        elif [[ "${{ matrix.arch }}" == "arm64" ]]; then
-          HOST="arm-apple-darwin"
-          version_min="-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}"
+          HOST="x86_64-apple-darwin" 
+          opus_opt_cflags="-O3 -ffast-math -flto -g -Wno-cast-align"
+        else
+          HOST="arm-apple-darwin" 
+          opus_opt_cflags="-O3 -ffast-math -flto -g"
         fi
-
+        version_min=$([[ "${{ matrix.arch }}" == "arm64" ]] && echo "-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}" || echo "-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}")
         ARCH="${{ matrix.resolved_arch }}"
         
         ./configure \

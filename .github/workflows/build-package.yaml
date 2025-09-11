@@ -507,15 +507,15 @@ jobs:
           H264_INCLUDE="${LIBS_ROOT}/h264/include"
           H264_LIB="${LIBS_ROOT}/h264/lib"
 
-          # Set devpath and sdkroot for the configure scripts
-          export DEVPATH="${xcode_select_path}/Platforms/${platform}.platform/Developer"
-          export SDKROOT="${SDKPATH}"
-
           # Resolve SDK path and version
           SDKPATH=$(xcrun --sdk ${sdkname} --show-sdk-path)
           SDKVER=$(xcrun --sdk ${sdkname} --show-sdk-version)
           echo "platform=$platform arch_flag=$arch_flag sdk=$SDKPATH sdkver=$SDKVER"
 
+          # Set devpath and sdkroot for the configure scripts
+          export DEVPATH="${xcode_select_path}/Platforms/${platform}.platform/Developer"
+          export SDKROOT="${SDKPATH}"
+          
           # Set compiler paths
           export CC="$(xcrun --sdk ${sdkname} --find clang)"
           export CXX="$(xcrun --sdk ${sdkname} --find clang++)"

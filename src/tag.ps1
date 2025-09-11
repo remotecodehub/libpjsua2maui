@@ -57,41 +57,16 @@ function PushTag($v) {
 
     if (TagExistsRemote $tagName) {
         Write-Warning "⚠️ A tag remota '$tagName' já existe."
-        $choice = Read-Host "Deseja remover a tag remota (r) ou criar nova versão local (n)? [r/n]"
-        if ($choice -match '^[rR]$') {
-            DeleteRemoteTag $v
-            DeleteLocalTag $v
-            $newVersion = Read-Host "Informe nova versão (formato X.X.X ou X.X.X.X)"
-            if (IsValidVersion($newVersion)) {
-                if (CreateSignedTag $newVersion) {
-                    PushTag $newVersion
-                }
-            } else {
-                Write-Error "❌ Versão inválida. Encerrando."
-                exit 1
-            }
-        } elseif ($choice -match '^[nN]$') {
-            $newVersion = Read-Host "Informe nova versão (formato X.X.X ou X.X.X.X)"
-            if (IsValidVersion($newVersion)) {
-                if (CreateSignedTag $newVersion) {
-                    PushTag $newVersion
-                }
-            } else {
-                Write-Error "❌ Versão inválida. Encerrando."
-                exit 1
-            }
-        } else {
-            Write-Error "❌ Opção inválida. Encerrando."
-            exit 1
-        }
-    } else {
-        try {
-            git push origin $tagName
-            Write-Host "🚀 Tag '$tagName' enviada ao repositório remoto com sucesso."
-        } catch {
-            Write-Error "❌ Falha ao enviar a tag '$tagName'."
-            exit 1
-        }
+        return $false
+    }
+
+    try {
+        git push origin $tagName
+        Write-Host "🚀 Tag '$tagName' enviada ao repositório remoto com sucesso."
+        return $true
+    } catch {
+        Write-Error "❌ Falha ao enviar a tag '$tagName'."
+        return $false
     }
 }
 
@@ -102,7 +77,7 @@ function DeleteRemoteTag($v) {
         Write-Host "🗑️ Tag remota '$tagName' removida com sucesso."
         return $true
     } catch {
-        Write-Error "❌ Falha ao remover a tag remota '$tagName'."
+        Write-Warning "⚠️ Falha ao remover a tag remota '$tagName'. Ela pode não existir."
         return $false
     }
 }
@@ -114,7 +89,7 @@ function DeleteLocalTag($v) {
         Write-Host "🗑️ Tag local '$tagName' removida com sucesso."
         return $true
     } catch {
-        Write-Error "❌ Falha ao remover a tag local '$tagName'."
+        Write-Warning "⚠️ Falha ao remover a tag local '$tagName'. Ela pode não existir."
         return $false
     }
 }
@@ -125,15 +100,27 @@ if (-not (IsValidVersion $version)) {
     exit 1
 }
 
-if ($push) {
+$tagName = "v$version"
+
+if ($push -and $delete) {
+    Write-Host "🔁 Modo combinado: deletando e recriando a tag '$tagName'..."
+    DeleteRemoteTag $version | Out-Null
+    DeleteLocalTag $version | Out-Null
+
     if (CreateSignedTag $version) {
-        PushTag $version
+        PushTag $version | Out-Null
     }
-} elseif ($delete) {
-    if (DeleteRemoteTag $version) {
-        DeleteLocalTag $version
+}
+elseif ($push) {
+    if (CreateSignedTag $version) {
+        PushTag $version | Out-Null
     }
-} else {
-    Write-Error "❌ Operação inválida. Use -push para criar/enviar ou -delete para especificar a operação"
-    Exit 1
+}
+elseif ($delete) {
+    DeleteRemoteTag $version | Out-Null
+    DeleteLocalTag $version | Out-Null
+}
+else {
+    Write-Error "❌ Operação inválida. Use -push, -delete ou ambos para especificar a ação desejada."
+    exit 1
 }

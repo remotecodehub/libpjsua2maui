@@ -528,12 +528,10 @@ jobs:
                 -framework AudioToolbox -framework Foundation"
               ;;
           esac
-          IPHONESDK=$(if [ "${{ matrix.arch }}" = "arm64" ]; then xcrun -sdk iphoneos --show-sdk-version; else xcrun -sdk iphonesimulator --show-sdk-version; fi)
-          export IPHONESDK
-          # Resolve SDK path and version
           
-          echo "platform=$platform arch_flag=$arch_flag sdk=$SDKPATH sdkver=$SDKVER"
-
+          export CFLAGS
+          export LDFLAGS
+        
           # Set devpath and sdkroot for the configure scripts
           export DEVPATH="${xcode_select_path}/Platforms/${platform}.platform/Developer"
           export SDKROOT="${SDKPATH}"
@@ -543,11 +541,9 @@ jobs:
           export CXX="$(xcrun --sdk ${sdkname} --find clang++)"
           export AR="$(xcrun --sdk ${sdkname} --find libtool)"
           export RANLIB="ranlib"
-
-          # Compose flags
+          echo "platform=$platform arch_flag=$arch_flag sdk=$SDKPATH sdkver=$SDKVER CC=${CC} CXX={CXX}"
           
-          export CFLAGS
-          export LDFLAGS
+          # Compose flags
 
           echo "CFLAGS=${CFLAGS}"
           echo "LDFLAGS=${LDFLAGS}"

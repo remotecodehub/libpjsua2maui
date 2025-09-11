@@ -4,6 +4,9 @@
 
     - ✅ Removed Warnings of page size from android native libs on android builds
     - 🧬 Added support on iOS to arm64 simulators
+    - 🎯 Closes #5
+    - 🎯 Closes #33
+    - 🎯 Closes #34
 
 ## Version 2.15.1
 

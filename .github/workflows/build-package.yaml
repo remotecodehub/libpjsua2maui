@@ -1,17 +1,13 @@
-name: build nupkg
+name: Build pjsip for .NET MAUI 
 on:
-  push:
-    branches: [ main, develop ]
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
-    tags:
-      - 'v*' 
   pull_request:
-    types: [opened, synchronize, reopened]  
+    types: [opened, synchronize]
+  push:
+    tags:
+      - 'v*'
     
   workflow_dispatch:
+  
   
 permissions:
   contents: read
@@ -885,7 +881,7 @@ jobs:
     - name: Upload java artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: java
+        name: java-${{ matrix.arch }}
         path: ${{ steps.build-pj.outputs.java }}
         overwrite: true
 
@@ -964,7 +960,7 @@ jobs:
       - name: Download Android java Artifact
         uses: actions/download-artifact@v4
         with:
-          name: java
+          name: java-x86_64
           path: ./artifacts/java
       
       - name: Download Android csharp Artifact

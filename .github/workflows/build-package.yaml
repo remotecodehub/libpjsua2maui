@@ -458,14 +458,16 @@ jobs:
 
           if [ "${{ matrix.arch }}" == "arm64s" || "${{ matrix.arch }}" == "x86_64" ]; then
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
+            export IPHONESDK="iPhoneSimulator18.5.sdk" 
             if [ "${{ matrix.arch }}" == "x86_64" ]; then
-              export CFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
+              export CFLAGS="-arch x86_64 -O2 -m64 \
                 -I${{ github.workspace }}/libs/bcg729/include \
                 -I${{ github.workspace }}/libs/ssl/include \
                 -I${{ github.workspace }}/libs/opus/include \
                 -I${{ github.workspace }}/libs/h264/include"
-              export LDFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
+              export LDFLAGS="-arch x86_64 -O2 -m64 \
                 -L${{ github.workspace }}/libs/bcg729/lib \
                 -L${{ github.workspace }}/libs/ssl/lib \
                 -L${{ github.workspace }}/libs/opus/lib \
@@ -480,12 +482,12 @@ jobs:
               export CXX="$(xcrun -sdk iphonesimulator -find clang++)"
               export AR="$(xcrun -sdk iphonesimulator -find ar)"
               export RANLIB="$(xcrun -sdk iphonesimulator -find ranlib)"  
-              export CFLAGS="-arch arm64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
+              export CFLAGS="-arch arm64 -O2 -m64 \
                 -I${{ github.workspace }}/libs/bcg729/include \
                 -I${{ github.workspace }}/libs/ssl/include \
                 -I${{ github.workspace }}/libs/opus/include \
                 -I${{ github.workspace }}/libs/h264/include"
-              export LDFLAGS="-arch arm64 \
+              export LDFLAGS="-arch arm64 -O2 -m64 \
                 -L${{ github.workspace }}/libs/bcg729/lib \
                 -L${{ github.workspace }}/libs/ssl/lib \
                 -L${{ github.workspace }}/libs/opus/lib \
@@ -499,7 +501,9 @@ jobs:
           else
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
             export SDKROOT="$DEVPATH/SDKs/iPhoneOS.sdk"
-            export CFLAGS="-arch arm64 -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} \
+            export IPHONESDK="iPhoneOS18.5.sdk"
+            export MIN_IOS=-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}
+            export CFLAGS="-arch arm64 \
               -I${{ github.workspace }}/libs/bcg729/include \
               -I${{ github.workspace }}/libs/ssl/include \
               -I${{ github.workspace }}/libs/opus/include \

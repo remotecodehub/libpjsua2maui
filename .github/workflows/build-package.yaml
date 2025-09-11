@@ -815,6 +815,9 @@ jobs:
         with:
           dotnet-version: |
             9.0.x
+      
+      - name: Setup nuget 
+        run: brew install nuget
 
       - name: Install MAUI Workload
         run: dotnet workload install maui --ignore-failed-sources
@@ -917,7 +920,7 @@ jobs:
         run: echo "VERSION=2.15.1.1" >> $GITHUB_ENV
       
       - name: Pack
-        run: dotnet pack src/libpjsua2maui.nuspec -c Release -p:PackageVersion=${VERSION}
+        run: nuget pack src/libpjsua2maui.nuspec -Version ${VERSION}
       
       - name: Push to nuget
         run: dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${API_KEY} --skip-duplicate

@@ -18,7 +18,7 @@
             - Added arm64 simulators support on ios targets
         </releaseNotes>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <license type="file">LICENSE</license>
+        <license type="expression">GPL-3.0-only</license>
         <copyright>Copyright ©2025 Remote Code Hub</copyright>
         <tags>sip voip pjsip maui native</tags>
         <readme>README.md</readme>
@@ -82,7 +82,7 @@
         <!-- README -->
         <file src="README.md" target="" />
         <!-- LICENSE-->
-        <file src="LICENSE" target="" />
+        <file src="../LICENSE" target="" />
         <!-- ICON -->
         <file src="icon.png" target="" />
     </files>

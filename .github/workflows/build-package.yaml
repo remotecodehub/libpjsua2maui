@@ -461,18 +461,19 @@ jobs:
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
             export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
             export IPHONESDK="iPhoneSimulator18.5.sdk" 
+            export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}"
             if [ "${{ matrix.arch }}" == "x86_64" ]; then
-              export CFLAGS="-arch x86_64 -O2 -m64 \
+              export CFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}\
                 -I${{ github.workspace }}/libs/bcg729/include \
                 -I${{ github.workspace }}/libs/ssl/include \
                 -I${{ github.workspace }}/libs/opus/include \
                 -I${{ github.workspace }}/libs/h264/include"
-              export LDFLAGS="-arch x86_64 -O2 -m64 \
+              export LDFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}\
                 -L${{ github.workspace }}/libs/bcg729/lib \
                 -L${{ github.workspace }}/libs/ssl/lib \
                 -L${{ github.workspace }}/libs/opus/lib \
                 -L${{ github.workspace }}/libs/h264/lib"
-              ARCH="-arch ${{ matrix.arch }}" ./configure-iphone \
+              ARCH="-arch x86_64" ./configure-iphone \
                 --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
                 --with-ssl=${{ github.workspace }}/libs/ssl/ \
                 --with-opus=${{ github.workspace }}/libs/opus/ \
@@ -482,12 +483,12 @@ jobs:
               export CXX="$(xcrun -sdk iphonesimulator -find clang++)"
               export AR="$(xcrun -sdk iphonesimulator -find ar)"
               export RANLIB="$(xcrun -sdk iphonesimulator -find ranlib)"  
-              export CFLAGS="-arch arm64 -O2 -m64 \
+              export CFLAGS="-arch arm64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
                 -I${{ github.workspace }}/libs/bcg729/include \
                 -I${{ github.workspace }}/libs/ssl/include \
                 -I${{ github.workspace }}/libs/opus/include \
                 -I${{ github.workspace }}/libs/h264/include"
-              export LDFLAGS="-arch arm64 -O2 -m64 \
+              export LDFLAGS="-arch arm64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
                 -L${{ github.workspace }}/libs/bcg729/lib \
                 -L${{ github.workspace }}/libs/ssl/lib \
                 -L${{ github.workspace }}/libs/opus/lib \

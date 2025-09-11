@@ -49,25 +49,25 @@
         <file src="libpjsua2maui.targets" target="build\libpjsua2maui.targets" />
 
         <!-- Native iOS -->
-        <file src="libpjsua2maui.a\lib\x86_64\libpjsua2.a"
+        <file src="libpjsua2.a\lib\x86_64\libpjsua2.a"
             target="runtimes\iossimulator-x64\native\libpjsua2.a" />
-        <file src="libpjsua2maui.a\lib\arm64s\libpjsua2.a"
+        <file src="libpjsua2.a\lib\arm64s\libpjsua2.a"
             target="runtimes\iossimulator-arm64\native\libpjsua2.a" />
-        <file src="libpjsua2maui.a\lib\arm64\libpjsua2.a"
+        <file src="libpjsua2.a\lib\arm64\libpjsua2.a"
             target="runtimes\ios-arm64\native\libpjsua2.a" />
 
         <!-- Native Android -->
         <!-- armeabi-v7a -->
-        <file src="libpjsua2maui.so\lib\armeabi-v7a\*" target="runtimes\android-arm\native\" />
+        <file src="libpjsua2.so\lib\armeabi-v7a\*" target="runtimes\android-arm\native\" />
         <!-- arm64-v8a -->
-        <file src="libpjsua2maui.so\lib\arm64-v8a\*" target="runtimes\android-arm64\native\" />
+        <file src="libpjsua2.so\lib\arm64-v8a\*" target="runtimes\android-arm64\native\" />
         <!-- x86 -->
-        <file src="libpjsua2maui.so\lib\x86\*" target="runtimes\android-x86\native\" />
+        <file src="libpjsua2.so\lib\x86\*" target="runtimes\android-x86\native\" />
         <!-- x86_64 -->
-        <file src="libpjsua2maui.so\lib\x86_64\*" target="runtimes\android-x86_64\native\" />
+        <file src="libpjsua2.so\lib\x86_64\*" target="runtimes\android-x86_64\native\" />
 
         <!-- Java bindings -->
-        <file src="libpjsua2maui.so\org\pjsip\*.java" target="contentFiles\any\android\org\pjsip\" />
+        <file src="libpjsua2.so\org\pjsip\*.java" target="contentFiles\any\android\org\pjsip\" />
 
         <!-- Managed assemblies -->
         <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2.maui.ios.*"

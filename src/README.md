@@ -1,8 +1,8 @@
-# pjsua2maui - pjsip for .NET MAUI
+# libpjsua2maui - pjsip bindings for .NET MAUI
 
 ## Usage
 
-1 . Install the package (on solutions that target only android and/or ios) with ``` dotnet add package libpjsua2maui --version 2.15.1 ```
+1 . Install the package (on solutions that target only android and/or ios) with ``` dotnet add package libpjsua2maui --version 2.15.1.1 ```
 
 2 . On Android application, in the file ```MainApplication.cs``` put the following code on the constructor:
 
@@ -47,7 +47,7 @@ public MainApplication(IntPtr handle, JniHandleOwnership ownership)
 
 that code is responsible for load the java camera classes and the native libs from the package. On iOS there's no need to add nothing
 
-3 . Override the desired classes from nuget package for use in the application like this, e.g.: 
+3 . Override the desired classes from nuget package for use in the application like this, e.g.:
 
 ```csharp
 using pjsua2maui.pjsua2;
@@ -140,4 +140,4 @@ public class SoftCall : Call
 
 4 . For callbacks of the classes from the package, is necessary to override the callbacks from the classes of package.
 
-5 . Enjoy SIP functionalities. 
+5 . Enjoy SIP functionalities.

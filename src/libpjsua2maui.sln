@@ -2,10 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libpjsua2.runtime.android", "libpjsua2.runtime.android\libpjsua2.runtime.android.csproj", "{0A3E83B7-1630-4967-8C98-5C6C2FC0E8A9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libpjsua2.runtime.ios", "libpjsua2.runtime.ios\libpjsua2.runtime.ios.csproj", "{E7ED8AB2-0540-4EC3-AAA1-921F4C8FCEE3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libpjsua2maui.android", "libpjsua2maui.android\libpjsua2maui.android.csproj", "{2A01D678-C606-6A86-B0C8-E1D76156F536}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libpjsua2maui.ios", "libpjsua2maui.ios\libpjsua2maui.ios.csproj", "{4F710F6B-EFC6-D7BB-0849-0D3C53B349DC}"
@@ -15,15 +11,7 @@ Global
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0A3E83B7-1630-4967-8C98-5C6C2FC0E8A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A3E83B7-1630-4967-8C98-5C6C2FC0E8A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A3E83B7-1630-4967-8C98-5C6C2FC0E8A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A3E83B7-1630-4967-8C98-5C6C2FC0E8A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7ED8AB2-0540-4EC3-AAA1-921F4C8FCEE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7ED8AB2-0540-4EC3-AAA1-921F4C8FCEE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7ED8AB2-0540-4EC3-AAA1-921F4C8FCEE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7ED8AB2-0540-4EC3-AAA1-921F4C8FCEE3}.Release|Any CPU.Build.0 = Release|Any CPU
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution  
 		{2A01D678-C606-6A86-B0C8-E1D76156F536}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2A01D678-C606-6A86-B0C8-E1D76156F536}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A01D678-C606-6A86-B0C8-E1D76156F536}.Release|Any CPU.ActiveCfg = Release|Any CPU

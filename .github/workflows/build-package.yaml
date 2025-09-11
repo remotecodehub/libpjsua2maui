@@ -909,25 +909,16 @@ jobs:
     name: build-nupkg
     needs: [pjsip-android, pjsip-ios]
     steps:
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
+#      - uses: maxim-lobanov/setup-xcode@v1
+#        with:
+#          xcode-version: latest-stable
 
       - name: Checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            9.0.x
-      
+ 
       - name: Setup nuget 
         run: brew install nuget
-
-      - name: Install MAUI Workload
-        run: dotnet workload install maui --ignore-failed-sources
-        
+ 
       - uses: actions/setup-java@v2
         with:
           distribution: 'microsoft'
@@ -991,18 +982,16 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86
           mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/armeabi-v7a
           mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/arm64-v8a
           mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip
-          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64s
           mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
           mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip/
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip
-          cp -r -v ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip/ ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip 
           mv ${{ github.workspace }}/artifacts/android/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86
           mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
@@ -1024,8 +1013,10 @@ jobs:
           
       - name: Restore Dependencies
         run: | 
-          dotnet restore src/libpjsua2maui.android/libpjsua2maui.android.csproj
-          dotnet restore src/libpjsua2maui.ios/libpjsua2maui.ios.csproj
+          cd ${{ github.workspace }}/src/
+          dotnet restore workloads
+          dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
+          dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
 
       - name: Build MAUI Android
         run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net9.0-android --no-restore

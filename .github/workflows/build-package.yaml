@@ -473,24 +473,21 @@ jobs:
               arch_flag="x86_64"
               sdkname="iphonesimulator"
               sdk_min_flag="-mios-simulator-version-min=${MIN_IOS_VERSION}"
-              export MIN_IOS="${MIN_IOS_VERSION}"
-              export IPHONESDK=$(xcrun --sdk iphonesimulator --show-sdk-version)
+              export MIN_IOS="${MIN_IOS_VERSION}" 
               ;;
             arm64s)
               platform="iPhoneSimulator"
               arch_flag="arm64"            # arm64s simulador -> arm64
               sdkname="iphonesimulator"
               sdk_min_flag="-mios-simulator-version-min=${MIN_IOS_VERSION}"
-              export MIN_IOS="${MIN_IOS_VERSION}"    # necessário para configure-iphone
-              export IPHONESDK=$(xcrun --sdk iphonesimulator --show-sdk-version)
+              export MIN_IOS="${MIN_IOS_VERSION}"     
               ;;
             arm64)
               platform="iPhoneOS"
               arch_flag="arm64"
               sdkname="iphoneos"
               sdk_min_flag="-miphoneos-version-min=${MIN_IOS_VERSION}"
-              export MIN_IOS="${MIN_IOS_VERSION}"
-              export IPHONESDK=$(xcrun --sdk iphoneos --show-sdk-version)
+              export MIN_IOS="${MIN_IOS_VERSION}" 
               ;;
           esac
 
@@ -507,8 +504,7 @@ jobs:
           cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
           cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
 
-          # prepare include/lib paths from downloaded artifacts
-          # NOTE: the artifact root was downloaded into e.g. $GITHUB_WORKSPACE/libs/ssl/...
+          # prepare include/lib paths from downloaded artifacts 
           LIBS_ROOT="${{ github.workspace }}/libs"
           BCG_INCLUDE="${LIBS_ROOT}/bcg729/include"
           BCG_LIB="${LIBS_ROOT}/bcg729/lib"
@@ -522,12 +518,12 @@ jobs:
           # Set devpath and sdkroot for the configure scripts
           export DEVPATH="${xcode_select_path}/Platforms/${platform}.platform/Developer"
           export SDKROOT="${SDKPATH}"
-          export CC="$(xcrun --sdk ${sdkname} -find clang)"
-          export CXX="$(xcrun --sdk ${sdkname} -find clang++)"
 
-          CFLAGS="-arch ${arch_flag} -O2 -isysroot ${SDKPATH} \
+          # Compose flags ensuring same minimum iOS version for all
+          # Use -isysroot, -arch and proper -m* flags
+          CFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
             -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE}"
-          LDFLAGS="-arch ${arch_flag} -isysroot ${SDKPATH} \
+          LDFLAGS="-arch ${arch_flag} ${sdk_min_flag} -isysroot ${SDKPATH} \
             -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB}"
 
           export CFLAGS
@@ -536,20 +532,12 @@ jobs:
           echo "CFLAGS=${CFLAGS}"
           echo "LDFLAGS=${LDFLAGS}"
 
-          # Chamada sem ARCH
-          ./configure-iphone \
+          # call configure-iphone with ARCH var
+          ARCHARCH="-arch ${arch_flag}" ./configure-iphone \
             --with-bcg729=${LIBS_ROOT}/bcg729/ \
             --with-ssl=${LIBS_ROOT}/ssl/ \
             --with-opus=${LIBS_ROOT}/opus/ \
             --with-openh264=${LIBS_ROOT}/h264/
-          
-
-          # call configure-iphone with ARCH var (the script expects the ARCH variable like '-arch arm64')
-          # ARCH="-arch ${arch_flag}" ./configure-iphone \
-          #  --with-bcg729=${LIBS_ROOT}/bcg729/ \
-          #  --with-ssl=${LIBS_ROOT}/ssl/ \
-          #  --with-opus=${LIBS_ROOT}/opus/ \
-          #  --with-openh264=${LIBS_ROOT}/h264/
 
           # build
           make dep
@@ -586,6 +574,7 @@ jobs:
         env:
           MIN_IOS_VERSION: 12.2
           BUILD_THREADS: $(sysctl -n hw.ncpu)
+          IPHONESDK: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

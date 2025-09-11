@@ -67,7 +67,7 @@
         <file src="libpjsua2.so\lib\x86_64\*" target="runtimes\android-x86_64\native\" />
 
         <!-- Java bindings -->
-        <file src="libpjsua2.so\org\pjsip\*.java" target="contentFiles\any\android\org\pjsip\" />
+        <file src="libpjsua2maui.android\org\pjsip\*.java" target="contentFiles\any\android\org\pjsip\" />
 
         <!-- Managed assemblies -->
         <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2.maui.ios.*"

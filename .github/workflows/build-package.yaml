@@ -98,6 +98,22 @@ jobs:
         echo "artifact=${h264_prefix}" >> "$GITHUB_OUTPUT"
       shell: bash
 
+    - name: Patch OpenH264 .pc for arm64s
+      if: matrix.arch == 'arm64s'
+      run: |
+        pc_file=$(find "${{ env.OPENH264_PATH }}/builds/iPhoneSimulator-${{ matrix.arch }}" -name '*.pc' | head -n 1)
+        if [ -f "$pc_file" ]; then
+          sed -i'' -e "s|^prefix=.*|prefix=\${pcfiledir}|" "$pc_file"
+          sed -i'' -e "s|^libdir=.*|libdir=\${pcfiledir}/lib|" "$pc_file"
+          sed -i'' -e "s|^includedir=.*|includedir=\${pcfiledir}/include|" "$pc_file"
+          echo "Patched OpenH264 pkg-config file: $pc_file"
+        else
+          echo "OpenH264 .pc file not found"
+          exit 1
+        fi
+      env:
+        pcfiledir: ${{ env.OPENH264_PATH }}/builds/iPhoneSimulator-${{ matrix.arch }}
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -280,7 +296,7 @@ jobs:
         if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
           HOST="x86_64-apple-darwin"
         elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
-          HOST="arm-apple-darwin"
+          HOST="arm64-apple-darwin"
         else
           HOST="arm-apple-darwin"
         fi
@@ -315,6 +331,24 @@ jobs:
         IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
         BUILD_THREADS: $(sysctl -n hw.ncpu)
 
+    - name: Patch Opus .pc for arm64s
+      if: matrix.arch == 'arm64s'
+      run: |
+        pc_file=$(find "${{ github.workspace }}/opus/build/iPhoneSimulator${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk" -name '*.pc' | head -n 1)
+        if [ -f "$pc_file" ]; then
+          sed -i'' -e "s|^prefix=.*|prefix=\${pcfiledir}|" "$pc_file"
+          sed -i'' -e "s|^exec_prefix=.*|exec_prefix=\${pcfiledir}|" "$pc_file"
+          sed -i'' -e "s|^libdir=.*|libdir=\${pcfiledir}/lib|" "$pc_file"
+          sed -i'' -e "s|^includedir=.*|includedir=\${pcfiledir}/include|" "$pc_file"
+          sed -i'' -e "s|^Cflags=.*|Cflags=-I\${pcfiledir}/include/opus|" "$pc_file"
+          echo "Patched Opus pkg-config file: $pc_file"
+        else
+          echo "Opus .pc file not found"
+          exit 1
+        fi
+      env:
+        pcfiledir: ${{ github.workspace }}/opus/build/iPhoneSimulator$(xcrun -sdk iphonesimulator --show-sdk-version)-${{ matrix.arch }}.sdk
+        
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -450,36 +484,22 @@ jobs:
           name: bcg729-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/bcg729/
     
-      - name: Patch OpenH264 pkg-config for arm64s
+      - name: Validate OpenH264 pkg-config
         if: matrix.arch == 'arm64s'
         run: |
-          pc_file=$(find "${{ github.workspace }}/libs/h264" -name '*.pc' | head -n 1)
-          if [ -f "$pc_file" ]; then
-            sed -i'' -e "s|^prefix=.*|prefix=${{ github.workspace }}/libs/h264|" "$pc_file"
-            sed -i'' -e "s|^libdir=.*|libdir=${{ github.workspace }}/libs/h264/lib|" "$pc_file"
-            sed -i'' -e "s|^includedir=.*|includedir=${{ github.workspace }}/libs/h264/include|" "$pc_file"
-            echo "Patched pkg-config file: $pc_file"
-          else
-            echo "No pkg-config file found in libs/h264"
-            exit 1
-          fi
+          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/h264
+          echo "OpenH264 version: $(pkg-config --modversion openh264)"
+          echo "OpenH264 libs: $(pkg-config --libs openh264)"
+          echo "OpenH264 cflags: $(pkg-config --cflags openh264)"
         shell: bash
-      
-      - name: Patch Opus pkg-config for arm64s
+
+      - name: Validate Opus pkg-config
         if: matrix.arch == 'arm64s'
         run: |
-          pc_file=$(find "${{ github.workspace }}/libs/opus" -name '*.pc' | head -n 1)
-          if [ -f "$pc_file" ]; then
-            sed -i'' -e "s|^prefix=.*|prefix=${{ github.workspace }}/libs/opus|" "$pc_file"
-            sed -i'' -e "s|^exec_prefix=.*|exec_prefix=${{ github.workspace }}/libs/opus|" "$pc_file"
-            sed -i'' -e "s|^libdir=.*|libdir=${{ github.workspace }}/libs/opus/lib|" "$pc_file"
-            sed -i'' -e "s|^includedir=.*|includedir=${{ github.workspace }}/libs/opus/include|" "$pc_file"
-            sed -i'' -e "s|^Cflags=.*|Cflags=-I${{ github.workspace }}/libs/opus/include/opus|" "$pc_file"
-            echo "Patched Opus pkg-config file: $pc_file"
-          else
-            echo "No pkg-config file found in libs/opus"
-            exit 1
-          fi
+          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus
+          echo "Opus version: $(pkg-config --modversion opus)"
+          echo "Opus libs: $(pkg-config --libs opus)"
+          echo "Opus cflags: $(pkg-config --cflags opus)"
         shell: bash
 
       - name: Setup Xcode
@@ -513,7 +533,9 @@ jobs:
             export IPHONESDK="iPhoneSimulator18.5.sdk" 
             export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
           fi
-
+          if [ "${{ matrix.arch }}" == "arm64s" ]; then
+            export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus:${{ github.workspace }}/libs/h264
+          fi
           export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS} \
             -I${{ github.workspace }}/libs/bcg729/include \
             -I${{ github.workspace }}/libs/ssl/include \

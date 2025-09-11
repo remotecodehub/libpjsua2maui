@@ -446,9 +446,7 @@ jobs:
           xcode-version: latest-stable
 
       - name: Install dependencies
-        run: |
-          brew update
-          brew install automake autoconf libtool pkg-config swig llvm nasm
+        run: brew install automake autoconf libtool pkg-config swig llvm nasm
         shell: bash
 
       - name: Build pjsip
@@ -492,10 +490,10 @@ jobs:
           esac
   
           # copy pjsip code into build workspace
-          cp -v -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+          cp -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
           mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
           rm -rf ~/pjsip_build/bundle/${{ matrix.arch }}/*
-          cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
+          cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
           cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
 
           # prepare include/lib paths from downloaded artifacts 
@@ -543,7 +541,7 @@ jobs:
             --with-bcg729=${LIBS_ROOT}/bcg729/ \
             --with-ssl=${LIBS_ROOT}/ssl/ \
             --with-opus=${LIBS_ROOT}/opus/ \
-            --with-openh264=${LIBS_ROOT}/h264/
+            --with-openh264=${LIBS_ROOT}/h264/ || $(cat config.log && exit 1)
 
           # build
           make dep

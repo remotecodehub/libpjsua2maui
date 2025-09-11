@@ -457,7 +457,6 @@ jobs:
           cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
 
           if [ "${{ matrix.arch }}" == "x86_64" ]; then
-            # Build para simulador x86_64
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
             export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
             export CFLAGS="-arch x86_64 -O2 -m64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
@@ -470,14 +469,12 @@ jobs:
               -L${{ github.workspace }}/libs/ssl/lib \
               -L${{ github.workspace }}/libs/opus/lib \
               -L${{ github.workspace }}/libs/h264/lib"
-            ARCH="-arch x86_64" ./configure-iphone \
+            ARCH="-arch ${{ matrix.arch }}" ./configure-iphone \
               --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
               --with-ssl=${{ github.workspace }}/libs/ssl/ \
               --with-opus=${{ github.workspace }}/libs/opus/ \
               --with-openh264=${{ github.workspace }}/libs/h264/
-
           elif [ "${{ matrix.arch }}" == "arm64" ]; then
-            # Build para device arm64
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
             export SDKROOT="$DEVPATH/SDKs/iPhoneOS.sdk"
             export CFLAGS="-arch arm64 -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} \
@@ -490,47 +487,37 @@ jobs:
               -L${{ github.workspace }}/libs/ssl/lib \
               -L${{ github.workspace }}/libs/opus/lib \
               -L${{ github.workspace }}/libs/h264/lib"
-            ARCH="-arch arm64" ./configure-iphone \
+            ARCH="-arch ${{ matrix.arch }}" ./configure-iphone \
               --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
               --with-ssl=${{ github.workspace }}/libs/ssl/ \
               --with-opus=${{ github.workspace }}/libs/opus/ \
               --with-openh264=${{ github.workspace }}/libs/h264/
-
           elif [ "${{ matrix.arch }}" == "arm64s" ]; then 
               export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
               export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
-              export MIN_IOS_VERSION=12.2
-
               export CC="$(xcrun -sdk iphonesimulator -find clang)"
               export CXX="$(xcrun -sdk iphonesimulator -find clang++)"
               export AR="$(xcrun -sdk iphonesimulator -find ar)"
               export RANLIB="$(xcrun -sdk iphonesimulator -find ranlib)"
-
+              export MIN_IOS="-mios-simulator-version-min=${{env.MIN_IOS_VERSION}}"
+              export ARCH="-arch arm64"
               # CFLAGS: inclui min iOS, sysroot e headers das libs externas
-              export CFLAGS="-arch arm64 \
-                -isysroot $SDKROOT \
-                -mios-simulator-version-min=${MIN_IOS_VERSION} \
-                -I${{ github.workspace }}/libs/bcg729/include \
-                -I${{ github.workspace }}/libs/ssl/include \
-                -I${{ github.workspace }}/libs/opus/include \
-                -I${{ github.workspace }}/libs/h264/include"
-
-              # LDFLAGS: inclui min iOS, sysroot, libs externas e frameworks necessários
-              export LDFLAGS="-arch arm64 \
-                -isysroot $SDKROOT \
-                -mios-simulator-version-min=${MIN_IOS_VERSION} \
-                -L${{ github.workspace }}/libs/bcg729/lib \
-                -L${{ github.workspace }}/libs/ssl/lib \
-                -L${{ github.workspace }}/libs/opus/lib \
-                -L${{ github.workspace }}/libs/h264/lib \
+              export CFLAGS="-I${{ env.BCG729_ROOT }}/include \
+                -I${{ env.SSL_ROOT }}/include \
+                -I${{ env.OPUS_ROOT }}/include \
+                -I${{ env.H264_ROOT }}/include"
+              export LDFLAGS="-L${{ env.BCG729_ROOT }}/lib \
+                -L${{ env.SSL_ROOT }}/lib \
+                -L${{ env.OPUS_ROOT }}/lib \
+                -L${{ env.H264_ROOT }}/lib \
                 -framework AudioToolbox -framework Foundation"
 
               # Prefix apontando para pasta raiz que contém `include` e `lib` corretos
               ./configure-iphone \
-                --with-bcg729=${{ github.workspace }}/libs/bcg729 \
-                --with-ssl=${{ github.workspace }}/libs/ssl \
-                --with-opus=${{ github.workspace }}/libs/opus \
-                --with-openh264=${{ github.workspace }}/libs/h264
+                --with-bcg729=${{ env.BCG729_ROOT }} \
+                --with-ssl=${{ env.SSL_ROOT }} \
+                --with-opus=${{ env.OPUS_ROOT }} \
+                --with-openh264=${{ env.H264_ROOT }}
           fi
 
 
@@ -544,10 +531,10 @@ jobs:
           mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
           mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
 
-          cp -v -f ${{ github.workspace }}/libs/ssl/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ env.SSL_ROOT }}/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ env.OPUS_ROOT }}/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ env.BCG729_ROOT }}/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ env.H264_ROOT }}/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
           cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.arch }}/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
 
           cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
@@ -557,7 +544,12 @@ jobs:
         env:
           MIN_IOS_VERSION: 12.2
           BUILD_THREADS: $(sysctl -n hw.ncpu)
-          IOS_SDK_VERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
+          LIBS_ROOT: ${{ github.workspace }}/libs
+          BCG729_ROOT: ${{ env.LIBS_ROOT }}/bcg729
+          H264_ROOT: ${{ env.LIBS_ROOT }}/h264
+          OPUS_ROOT: ${{ env.LIBS_ROOT }}/opus
+          SSL_ROOT: ${{ env.LIBS_ROOT }}/ssl
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:

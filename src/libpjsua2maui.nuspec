@@ -10,6 +10,7 @@
             and bcg729.</description>
         <releaseNotes>
             - Fixed Page size warnings on android
+            - Added arm64 simulators support on ios targets
         </releaseNotes>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <license type="expression">LGPL-3.0-or-later</license>

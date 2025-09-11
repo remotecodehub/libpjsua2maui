@@ -510,7 +510,7 @@ jobs:
           # SDK info
           SDKPATH=$(xcrun --sdk ${sdkname} --show-sdk-path)
           SDKVER=$(xcrun --sdk ${sdkname} --show-sdk-version)
-          export IPHONESDK="${SDKVER}"    
+          export IPHONESDK="${platform}${SDKVER}.sdk"    
           export MIN_IOS="${MIN_IOS_VERSION}"  
 
           echo "platform=${platform} arch_flag=${arch_flag} sdk=${SDKPATH} sdkver=${SDKVER} host=${host_triple} IPHONESDK=${IPHONESDK}"

@@ -103,24 +103,28 @@ if (-not (IsValidVersion $version)) {
 $tagName = "v$version"
 
 if ($push -and $delete) {
-    Write-Host "🔁 Modo combinado: deletando e recriando a tag '$tagName'..."
+    Write-Host '🔁 Modo combinado: deletando e recriando a tag  $tagName ...'
     DeleteRemoteTag $version | Out-Null
     DeleteLocalTag $version | Out-Null
 
     if (CreateSignedTag $version) {
         PushTag $version | Out-Null
     }
+    Exit 0;
 }
-elseif ($push) {
+
+if ($push) {
     if (CreateSignedTag $version) {
         PushTag $version | Out-Null
     }
+    Exit 0;
 }
-elseif ($delete) {
+if ($delete) {
     DeleteRemoteTag $version | Out-Null
     DeleteLocalTag $version | Out-Null
+    Exit 0;
 }
-else {
-    Write-Error "❌ Operação inválida. Use -push, -delete ou ambos para especificar a ação desejada."
-    exit 1
-}
+
+Write-Error '❌ Operação inválida. Use -push, -delete ou ambos para especificar a ação desejada.'
+exit 1
+

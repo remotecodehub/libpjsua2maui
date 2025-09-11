@@ -108,7 +108,7 @@ jobs:
   openssl-ios:
     strategy:
       matrix:
-        arch: [x86_64, arm64s, arm64]
+        arch: [x86_64, arm64, arm64s]
     runs-on: macos-latest
     name: openssl-ios 
     permissions:
@@ -413,7 +413,7 @@ jobs:
       fail-fast: false
     runs-on: macos-latest
     needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
-    name: pjsip + h264 + bcg729 + opus + ssl - ios
+    name: pjsip - ios
     permissions:
       contents: write
     steps:
@@ -497,31 +497,40 @@ jobs:
               --with-openh264=${{ github.workspace }}/libs/h264/
 
           elif [ "${{ matrix.arch }}" == "arm64s" ]; then 
-            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
-            export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
-            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-            export CC="$(xcrun -sdk iphonesimulator -find clang)"
-            export CXX="$(xcrun -sdk iphonesimulator -find clang++)"
-            export AR="$(xcrun -sdk iphonesimulator -find ar)"
-            export RANLIB="$(xcrun -sdk iphonesimulator -find ranlib)"
+              export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+              export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
+              export MIN_IOS_VERSION=12.2
 
-            export CFLAGS="-arch arm64 \
-              -I${{ github.workspace }}/libs/bcg729/include \
-              -I${{ github.workspace }}/libs/ssl/include \
-              -I${{ github.workspace }}/libs/opus/include \
-              -I${{ github.workspace }}/libs/h264/include"
+              export CC="$(xcrun -sdk iphonesimulator -find clang)"
+              export CXX="$(xcrun -sdk iphonesimulator -find clang++)"
+              export AR="$(xcrun -sdk iphonesimulator -find ar)"
+              export RANLIB="$(xcrun -sdk iphonesimulator -find ranlib)"
 
-            export LDFLAGS="-arch arm64 \
-              -L${{ github.workspace }}/libs/bcg729/lib \
-              -L${{ github.workspace }}/libs/ssl/lib \
-              -L${{ github.workspace }}/libs/opus/lib \
-              -L${{ github.workspace }}/libs/h264/lib"
+              # CFLAGS: inclui min iOS, sysroot e headers das libs externas
+              export CFLAGS="-arch arm64 \
+                -isysroot $SDKROOT \
+                -mios-simulator-version-min=${MIN_IOS_VERSION} \
+                -I${{ github.workspace }}/libs/bcg729/include \
+                -I${{ github.workspace }}/libs/ssl/include \
+                -I${{ github.workspace }}/libs/opus/include \
+                -I${{ github.workspace }}/libs/h264/include"
 
-            ./configure-iphone \
-              --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
-              --with-ssl=${{ github.workspace }}/libs/ssl/ \
-              --with-opus=${{ github.workspace }}/libs/opus/ \
-              --with-openh264=${{ github.workspace }}/libs/h264/
+              # LDFLAGS: inclui min iOS, sysroot, libs externas e frameworks necessários
+              export LDFLAGS="-arch arm64 \
+                -isysroot $SDKROOT \
+                -mios-simulator-version-min=${MIN_IOS_VERSION} \
+                -L${{ github.workspace }}/libs/bcg729/lib \
+                -L${{ github.workspace }}/libs/ssl/lib \
+                -L${{ github.workspace }}/libs/opus/lib \
+                -L${{ github.workspace }}/libs/h264/lib \
+                -framework AudioToolbox -framework Foundation"
+
+              # Prefix apontando para pasta raiz que contém `include` e `lib` corretos
+              ./configure-iphone \
+                --with-bcg729=${{ github.workspace }}/libs/bcg729 \
+                --with-ssl=${{ github.workspace }}/libs/ssl \
+                --with-opus=${{ github.workspace }}/libs/opus \
+                --with-openh264=${{ github.workspace }}/libs/h264
           fi
 
 
@@ -695,7 +704,7 @@ jobs:
         arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
       fail-fast: false
     needs: [bcg729, openh264, openssl, opus]
-    name: pjsip + h264 + bcg729 + opus + ssl - android
+    name: pjsip - android
     permissions:
         contents: write
 

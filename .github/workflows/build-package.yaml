@@ -434,18 +434,53 @@ jobs:
         with:
           name: openssl-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/ssl/
+      
       - uses: actions/download-artifact@v4
         with:
           name: openh264-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/h264/
+      
       - uses: actions/download-artifact@v4
         with:
           name: opus-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/opus/
+      
       - uses: actions/download-artifact@v4
         with:
           name: bcg729-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/bcg729/
+    
+      - name: Patch OpenH264 pkg-config for arm64s
+        if: matrix.arch == 'arm64s'
+        run: |
+          pc_file=$(find "${{ github.workspace }}/libs/h264" -name '*.pc' | head -n 1)
+          if [ -f "$pc_file" ]; then
+            sed -i'' -e "s|^prefix=.*|prefix=${{ github.workspace }}/libs/h264|" "$pc_file"
+            sed -i'' -e "s|^libdir=.*|libdir=${{ github.workspace }}/libs/h264/lib|" "$pc_file"
+            sed -i'' -e "s|^includedir=.*|includedir=${{ github.workspace }}/libs/h264/include|" "$pc_file"
+            echo "Patched pkg-config file: $pc_file"
+          else
+            echo "No pkg-config file found in libs/h264"
+            exit 1
+          fi
+        shell: bash
+      
+      - name: Patch Opus pkg-config for arm64s
+        if: matrix.arch == 'arm64s'
+        run: |
+          pc_file=$(find "${{ github.workspace }}/libs/opus" -name '*.pc' | head -n 1)
+          if [ -f "$pc_file" ]; then
+            sed -i'' -e "s|^prefix=.*|prefix=${{ github.workspace }}/libs/opus|" "$pc_file"
+            sed -i'' -e "s|^exec_prefix=.*|exec_prefix=${{ github.workspace }}/libs/opus|" "$pc_file"
+            sed -i'' -e "s|^libdir=.*|libdir=${{ github.workspace }}/libs/opus/lib|" "$pc_file"
+            sed -i'' -e "s|^includedir=.*|includedir=${{ github.workspace }}/libs/opus/include|" "$pc_file"
+            sed -i'' -e "s|^Cflags=.*|Cflags=-I${{ github.workspace }}/libs/opus/include/opus|" "$pc_file"
+            echo "Patched Opus pkg-config file: $pc_file"
+          else
+            echo "No pkg-config file found in libs/opus"
+            exit 1
+          fi
+        shell: bash
 
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1

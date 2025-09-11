@@ -107,14 +107,14 @@ jobs:
 
   openssl-ios:
     strategy:
-      fail-fast: false
       matrix:
-        arch: [x86_64, arm64, arm64s]
+        arch: [x86_64, arm64s, arm64]
     runs-on: macos-latest
-    name: openssl-ios
+    name: openssl-ios 
     permissions:
       contents: write
     steps:
+    
     - name: Checkout
       uses: actions/checkout@v3
       with:
@@ -124,61 +124,97 @@ jobs:
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
-
+    
     - name: Install deps
-      run: brew install nasm autoconf automake libtool
+      run: |
+        brew install nasm autoconf automake libtool 
       shell: sh
-
+         
     - name: Build OpenSSL
       id: build
       run: |
+        INCLUDE_DIR=""
+        OPENSSLCONF_ALL=()
+        LIBSSL_IOS=()
+        LIBSSL_IOSSIM=()
+        LIBCRYPTO_IOS=()
+        LIBCRYPTO_IOSSIM=()
+        export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
+        export SDKVERSION
+        export IOS_MIN_SDK_VERSION
+        export TVOS_MIN_SDK_VERSION
+        export WATCHOS_MIN_SDK_VERSION
+        export CONFIG_DISABLE_BITCODE
         cd ${{ env.OPENSSL_PATH }}
+        
         chmod u+x ./Configure
-
-        # Map architectures
-        if [ "${{ matrix.arch }}" = "x86_64" ]; then
-          PLATFORM="iPhoneSimulator"
-          TARGET="ios-sim-cross-x86_64"
-        elif [ "${{ matrix.arch }}" = "arm64" ]; then
-          PLATFORM="iPhoneOS"
-          TARGET="ios-cross-arm64"
-        elif [ "${{ matrix.arch }}" = "arm64s" ]; then
-          PLATFORM="iPhoneSimulator"
-          TARGET="ios-sim-cross-arm64"
+        # Determine platform
+        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
+            PLATFORM="iPhoneSimulator"
+            TARGET="ios-sim-cross-x86_64"
+        elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
+            TARGET="ios-sim-cross-arm64"
+            PLATFORM="iPhoneSimulator"
         else
-          echo "Unsupported arch: ${{ matrix.arch }}"
-          exit 1
+          TARGET="ios-cross-arm64"
+          PLATFORM="iPhoneOS"
         fi
+        
+        
+        # Extract ARCH from TARGET (part after last dash)
+        #ARCH=$(echo "${TARGET}" | sed -E 's|^.*\-([^\-]+)$|\1|g')
+        ARCH=${{ matrix.arch }}
+        # Cross compile references, see Configurations/10-main.conf
+        export CROSS_COMPILE="${{ env.DEVELOPER }}/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
+        export CROSS_TOP="${{ env.DEVELOPER }}/Platforms/${PLATFORM}.platform/Developer"
+        export CROSS_SDK="${PLATFORM}${{ env.SDKVERSION }}.sdk"
 
-        # Paths
-        CROSS_TOP="$(xcode-select -p)/Platforms/${PLATFORM}.platform/Developer"
-        CROSS_SDK="${PLATFORM}${{ env.SDKVERSION }}.sdk"
-        echo "Building OpenSSL for ${{ matrix.arch }} ($PLATFORM / $TARGET)"
-
-        # Output
-        TARGETDIR="${{ env.OPENSSL_PATH }}/bin/${PLATFORM}${{ env.SDKVERSION }}-${{ matrix.arch }}"
-        mkdir -p "${TARGETDIR}"
+        # Prepare TARGETDIR  
+        TARGETDIR="${{ env.OPENSSL_PATH }}/bin/${PLATFORM}${{env.SDKVERSION}}-${{ matrix.arch }}.sdk"
         echo "artifact=${TARGETDIR}" >> "$GITHUB_OUTPUT"
+        mkdir -p "${TARGETDIR}"
+        ## Determine config options
+        # Add build target, --prefix and prevent async (references to getcontext(),
+        # setcontext() and makecontext() result in App Store rejections) and creation
+        # of shared libraries (default since 1.1.0)
+        LOCAL_CONFIG_OPTIONS="${TARGET} --prefix=${TARGETDIR} ${CONFIG_OPTIONS} no-async no-shared"
 
-        # Configure
-        ./Configure $TARGET \
-          --prefix=${TARGETDIR} \
-          no-shared no-async no-tests \
-          -fembed-bitcode -miphoneos-version-min=${{ env.IOS_MIN_SDK_VERSION }}
+        # Only relevant for 64 bit builds
+        # if [[ "${CONFIG_ENABLE_EC_NISTP_64_GCC_128}" == "true" && "${{ matrix.arch }}" == *64  ]]; then
+        #     LOCAL_CONFIG_OPTIONS="${LOCAL_CONFIG_OPTIONS} enable-ec_nistp_64_gcc_128"
+        # fi
 
-        # Build
-        make -j$(sysctl -n hw.ncpu)
+        # Run Configure
+        ./Configure ${LOCAL_CONFIG_OPTIONS} no-tests 
 
-        # Install
-        make install_dev
-      shell: bash
+        # Run make
+        echo "  Make (using ${{ env.BUILD_THREADS }} thread(s))..." 
+        make -j "${{ env.BUILD_THREADS }}"  
+
+
+        # Run make install
+        set -e 
+        make install_dev  
+
+        # Remove source dir, add references to library files to relevant arrays
+        # Keep reference to first build target for include file
+        if [[ "${PLATFORM}" == iPhoneOS ]]; then
+            LIBSSL_IOS+=("${TARGETDIR}/lib/libssl.a")
+            LIBCRYPTO_IOS+=("${TARGETDIR}/lib/libcrypto.a")
+            OPENSSLCONF_SUFFIX="ios_${{matrix.arch}}"
+        elif [[ "${PLATFORM}" == iPhoneSimulator ]]; then
+            LIBSSL_IOSSIM+=("${TARGETDIR}/lib/libssl.a")
+            LIBCRYPTO_IOSSIM+=("${TARGETDIR}/lib/libcrypto.a")
+            OPENSSLCONF_SUFFIX="ios_${{ matrix.arch }}"
+        fi
+      shell: sh
       env:
-        IOS_MIN_SDK_VERSION: 12.2
-        SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
+        IOS_MIN_SDK_VERSION: 12.2  
         CONFIG_DISABLE_BITCODE: true
-        DEVELOPER: $(xcode-select -print-path) 
-        BUILD_THREADS: $(sysctl -n hw.ncpu)
-        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
+        DEVELOPER: $(xcode-select -print-path)
+        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
+        BUILD_THREADS: $(sysctl -n hw.ncpu) 
+        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version) 
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -187,89 +223,92 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        IOS_MIN_SDK_VERSION: 12.2    
+        IOS_MIN_SDK_VERSION: 12.2
 
   opus-ios:
     strategy:
-      fail-fast: false
       matrix:
         arch: [x86_64, arm64, arm64s]
     runs-on: macos-latest
-    name: opus-ios
+    name: opus-ios 
     permissions:
       contents: write
     steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+         submodules: 'true'
+         
     - name: Checkout
       uses: actions/checkout@v3
       with:
         submodules: 'true'
-
+         
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
-
+    
     - name: Install deps
-      run: brew install nasm autoconf automake libtool
+      run: |
+        brew install nasm autoconf automake libtool 
       shell: sh
-
-    - name: Build Opus
+         
+    - name: Build opus
       id: build
       run: |
         opus_version="1.4"
         opus_opt_cflags="-Ofast -flto -g"
         opus_opt_ldflags="-flto"
-        opus_repo_dir=${{ env.OPUS_PATH }}
-        opus_output_dir="${opus_repo_dir}/dependencies"
-        opus_build_dir="${opus_repo_dir}/build"
-        opus_inter_dir="${opus_build_dir}/built"
+        DEVELOPER=$(xcode-select -print-path)
+        SDKVERSION=$(xcrun -sdk ${{ matrix.arch == 'arm64' && 'iphoneos' || 'iphonesimulator' }} --show-sdk-version)
+        PLATFORM=${{ matrix.arch == 'arm64' && 'iPhoneOS' || 'iPhoneSimulator' }}
+        TARGETDIR="${{ github.workspace }}/opus/build/${PLATFORM}${SDKVERSION}-${{ matrix.arch }}.sdk"
 
-        mkdir -p "${opus_output_dir}/include" "${opus_output_dir}/lib" "${opus_inter_dir}"
-        cd "${opus_repo_dir}"
+        mkdir -p "${TARGETDIR}/include"
+        mkdir -p "${TARGETDIR}/lib"
+
+        echo "artifact=${TARGETDIR}" >> "$GITHUB_OUTPUT"
+        echo "-- Building Opus for ${{ matrix.arch }} on ${PLATFORM}"
+
+        cd "${{ env.OPUS_PATH }}"
+
         ./autogen.sh
 
-        case "${{ matrix.arch }}" in
-          x86_64)
-            PLATFORM="iPhoneSimulator"
-            HOST="x86_64-apple-darwin"
-            ARCH_FLAG="x86_64"
-            ;;
-          arm64)
-            PLATFORM="iPhoneOS"
-            HOST="arm-apple-darwin"
-            ARCH_FLAG="arm64"
-            ;;
-          arm64s)
-            PLATFORM="iPhoneSimulator"
-            HOST="arm-apple-darwin"
-            ARCH_FLAG="arm64" # arm64s -> arm64
-            ;;
-        esac
+        # Determine host triple
+        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
+          HOST="x86_64-apple-darwin"
+        elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
+          HOST="arm-apple-darwin"
+        else
+          HOST="arm-apple-darwin"
+        fi
 
-        SDK_PATH=$(xcrun --sdk ${PLATFORM,,} --show-sdk-path)
-        BUILD_DIR="${opus_inter_dir}/${PLATFORM}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk"
-        mkdir -p "$BUILD_DIR"
-        echo "artifact=$BUILD_DIR" >> "$GITHUB_OUTPUT"
-
-        export CC="$(xcrun -sdk ${PLATFORM,,} -find clang)"
-        export CFLAGS="-arch $ARCH_FLAG -isysroot $SDK_PATH -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} $opus_opt_cflags"
-        export LDFLAGS="-arch $ARCH_FLAG -isysroot $SDK_PATH -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} $opus_opt_ldflags"
+        # Determine arch
+        if [[ "${{ matrix.arch }}" == "arm64s" ]]; then
+          ARCH="arm64"
+        else
+          ARCH="${{ matrix.arch }}"
+        fi
 
         ./configure \
-          --host=$HOST \
           --enable-float-approx \
           --disable-shared \
           --enable-static \
           --with-pic \
           --disable-extra-programs \
           --disable-doc \
-          --prefix="$BUILD_DIR"
+          --host=${HOST} \
+          --prefix="${TARGETDIR}" \
+          LDFLAGS="${opus_opt_ldflags} -fPIE -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -L${TARGETDIR}/lib" \
+          CFLAGS="${opus_opt_cflags} -arch ${ARCH} -fPIE -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -I${TARGETDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk"
 
-        make -j$(sysctl -n hw.ncpu)
-        make install
-      shell: bash
+        make -j${{ env.BUILD_THREADS }}
+        make install 
+      shell: sh
       env:
-        SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
+        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
         MIN_IOS_VERSION: 12.2
         CONFIG_DISABLE_BITCODE: true
         DEVELOPER: $(xcode-select -print-path)
@@ -283,7 +322,7 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
+        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
     
   bcg729-ios:
     strategy:
@@ -365,7 +404,7 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
       env:
-        SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
+        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
  
   pjsip-ios:
     strategy:

@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net9.0-ios</TargetFramework>
+        <UseMaui>true</UseMaui>
+        <SingleProject>true</SingleProject>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
+        <AssemblyName>pjsua2.maui.ios</AssemblyName>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>libpjsua2maui.ios</PackageId>
+        <Version>2.15.1</Version>
+        <AssemblyVersion>2.15.1.1</AssemblyVersion>
+        <FileVersion>2.15.1.1</FileVersion>
+        <Title>PJSIP bindings for .NET MAUI</Title>
+        <Authors>Weslley Murdock</Authors>
+        <Company>Remote Code Hub</Company>
+        <Copyright>Copyright ©2025 Remote Code Hub</Copyright>
+        <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$HOME/Nuget</PackageOutputPath>
+        <PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
+        <Description>
+            PJSIP pjsua2 bindings for pjsua2
+            Provides .NET for ios bindings for libpjsua2 by pjsip.
+            Pjsip version used is 2.15.1, using thirdy party libs such as openh264, openssl, opus and bcg729
+            #NOTES
+            Min iOS version : 12.2
+            Target iOS version : 18.5
+            
+            This library enables working with the pjsip SIP stack implementation for make voip
+            calls.
+            For this release see notes -
+            https://github.com/weslleymurdock/pjsua2maui/blob/main/README.md and
+            https://github.com/weslleymurdock/pjsua2maui/blob/main/CHANGELOG.md
+        </Description>
+        <PackageProjectUrl>https://github.com/weslleymurdock/pjsua2maui</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/weslleymurdock/pjsua2maui.git</RepositoryUrl>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Update="LICENSE">
+            <PackagePath>\</PackagePath>
+            <Pack>True</Pack>
+        </None>
+    </ItemGroup>
+</Project>

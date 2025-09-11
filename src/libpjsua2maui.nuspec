@@ -3,104 +3,87 @@
     <metadata>
         <id>libpjsua2maui</id>
         <title>libpjsua2maui</title>
-        <version>2.14.1.1</version>
-        <authors>Weslley Murdock</authors> 
+        <version>2.15.1.1</version>
+        <authors>Weslley Murdock</authors>
+        <owners>Remote Code Hub</owners>
         <projectUrl>http://github.com/weslleymurdock/libpjsua2maui</projectUrl>
-        <description>PJSIP libpjsua2 bindings for .NET MAUI
-            Provides PJSIP bindings for .NET MAUI.
-            Pjsip version used is 2.14.1, using thirdy party libs such as openh264, openssl and opus
-            #NOTES
-            Min Android version : 5.0 (API 21)
-            Max Android version : 14.0 (API 34)
-            Min iOS version     : 12.2
-            Max iOS version     : 18.1
-
-            This library enables working with the pjsip SIP stack implementation for make voip
-            calls.
-            For this release see notes -
-            https://github.com/weslleymurdock/libpjsua2maui/blob/main/README.md and
-            https://github.com/weslleymurdock/libpjsua2maui/blob/main/CHANGELOG.md
+        <description>
+            PJSIP bindings for .NET MAUI using version 2.15.1 with openh264, openssl, opus,
+            and bcg729.
+            The builds of native libraries targets iOS devices (arm64), iOS simulators (arm64, x86_64),
+            android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
         </description>
-        <releaseNotes>First Release</releaseNotes>
-        <!--<icon>icon.png</icon>-->
+        <releaseNotes>
+            - Fixed Page size warnings on android
+            - Added arm64 simulators support on ios targets
+        </releaseNotes>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <license type="expression">LGPL-3.0-or-later</license>
-        <copyright>Copyright ©2024 Remote Code Hub</copyright>
-        <tags>sip voip pjsip pjlib pjsua pjsua2 libpjsua2 pjproject pjsua2maui maui net native</tags>
+        <license type="file">LICENSE</license>
+        <copyright>Copyright ©2025 Remote Code Hub</copyright>
+        <tags>sip voip pjsip maui native</tags>
+        <readme>README.md</readme>
+        <iconUrl>https://raw.githubusercontent.com/weslleymurdock/libpjsua2maui/main/src/icon.png</iconUrl>
+        <icon>icon.png</icon>
+        <repository type="git" url="https://github.com/weslleymurdock/libpjsua2maui" />
         <references>
-            <group targetFramework="net9.0-android34.0">
-                <reference file="pjsua2.maui.android.dll" />
-                <reference file="pjsua2.maui.android.pdb" />
-            </group>
-            <group targetFramework="net9.0-ios18.1">
-                <reference file="pjsua2.maui.ios.dll" />
+            <group targetFramework="net9.0-ios18.5">
                 <reference file="pjsua2.maui.ios.pdb" />
+                <reference file="pjsua2.maui.ios.dll" />
+            </group>
+            <group targetFramework="net9.0-android34.0">
+                <reference file="pjsua2maui.android.pdb" />
+                <reference file="pjsua2maui.android.dll" />
+                <reference file="pjsua2maui.android.xml" />
             </group>
         </references>
         
+
         <dependencies>
+            <group targetFramework="net9.0-ios18.5" />
             <group targetFramework="net9.0-android34.0" />
-            <group targetFramework="net9.0-ios18.1" />
         </dependencies>
     </metadata>
+
     <files>
+        <!-- Targets -->
         <file src="libpjsua2maui.targets" target="build\libpjsua2maui.targets" />
-        <file src="libpjsua2.a\lib\x86_64\libpjsua2.a"
-            target="runtime\iossimulator-x64\libpjsua2.a" />
-        <file src="libpjsua2.a\lib\arm64\libpjsua2.a"
-            target="runtime\ios-arm64\libpjsua2.a" />
 
-        <file src="libpjsua2.so\lib\armeabi-v7a\libpjsua2.so"
-            target="build\native\android-armv7\libpjsua2.so" />
-        <file src="libpjsua2.so\lib\armeabi-v7a\libcrypto.so"
-            target="build\native\android-armv7\libcrypto.so" />
-        <file src="libpjsua2.so\lib\armeabi-v7a\libssl.so"
-            target="build\native\android-armv7\libssl.so" />
-        <file src="libpjsua2.so\lib\armeabi-v7a\libopenh264.so"
-            target="build\native\android-armv7\libopenh264.so" />
-        <file src="libpjsua2.so\lib\armeabi-v7a\libc++_shared.so"
-            target="build\native\android-armv7\libc++_shared.so" />
+        <!-- Native iOS -->
+        <file src="libpjsua2maui.a\lib\x86_64\libpjsua2.a"
+            target="runtimes\iossimulator-x64\native\libpjsua2.a" />
+        <file src="libpjsua2maui.a\lib\arm64s\libpjsua2.a"
+            target="runtimes\iossimulator-arm64\native\libpjsua2.a" />
+        <file src="libpjsua2maui.a\lib\arm64\libpjsua2.a"
+            target="runtimes\ios-arm64\native\libpjsua2.a" />
 
-        <file src="libpjsua2.so\lib\arm64-v8a\libpjsua2.so"
-            target="build\native\android-armv8\libpjsua2.so" />
-        <file src="libpjsua2.so\lib\arm64-v8a\libcrypto.so"
-            target="build\native\android-armv8\libcrypto.so" />
-        <file src="libpjsua2.so\lib\arm64-v8a\libssl.so"
-            target="build\native\android-armv8\libssl.so" />
-        <file src="libpjsua2.so\lib\arm64-v8a\libopenh264.so"
-            target="build\native\android-armv8\libopenh264.so" />
-        <file src="libpjsua2.so\lib\arm64-v8a\libc++_shared.so"
-            target="build\native\android-armv8\libc++_shared.so" />
+        <!-- Native Android -->
+        <!-- armeabi-v7a -->
+        <file src="libpjsua2maui.so\lib\armeabi-v7a\*" target="runtimes\android-arm\native\" />
+        <!-- arm64-v8a -->
+        <file src="libpjsua2maui.so\lib\arm64-v8a\*" target="runtimes\android-arm64\native\" />
+        <!-- x86 -->
+        <file src="libpjsua2maui.so\lib\x86\*" target="runtimes\android-x86\native\" />
+        <!-- x86_64 -->
+        <file src="libpjsua2maui.so\lib\x86_64\*" target="runtimes\android-x86_64\native\" />
 
-        <file src="libpjsua2.so\lib\x86\libpjsua2.so" target="build\native\android-x86\libpjsua2.so" />
-        <file src="libpjsua2.so\lib\x86\libcrypto.so" target="build\native\android-x86\libcrypto.so" />
-        <file src="libpjsua2.so\lib\x86\libssl.so" target="build\native\android-x86\libssl.so" />
-        <file src="libpjsua2.so\lib\x86\libopenh264.so"
-            target="build\native\android-x86\libopenh264.so" />
-        <file src="libpjsua2.so\lib\x86\libc++_shared.so"
-            target="build\native\android-x86\libc++_shared.so" />
+        <!-- Java bindings -->
+        <file src="libpjsua2maui.so\org\pjsip\*.java" target="contentFiles\any\android\org\pjsip\" />
 
-        <file src="libpjsua2.so\lib\x86_64\libpjsua2.so"
-            target="build\native\android-x86_64\libpjsua2.so" />
-        <file src="libpjsua2.so\lib\x86_64\libcrypto.so"
-            target="build\native\android-x86_64\libcrypto.so" />
-        <file src="libpjsua2.so\lib\x86_64\libssl.so" target="build\native\android-x86_64\libssl.so" />
-        <file src="libpjsua2.so\lib\x86_64\libopenh264.so"
-            target="build\native\android-x86_64\libopenh264.so" />
-        <file src="libpjsua2.so\lib\x86_64\libc++_shared.so"
-            target="build\native\android-x86_64\libc++_shared.so" />
+        <!-- Managed assemblies -->
+        <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2.maui.ios.*"
+            target="lib\net9.0-ios18.5\" />
+        <file src="libpjsua2maui.android\bin\Release\net9.0-android\pjsua2maui.android.*"
+            target="lib\net9.0-android34.0\" />
+        <file src="libpjsua2maui.ios\bin\Release\net9.0-ios\pjsua2.maui.ios.*"
+            target="ref\net9.0-ios18.5\" />
+        <file src="libpjsua2maui.android\bin\Release\net9.0-android\pjsua2maui.android.*"
+            target="ref\net9.0-android34.0\" />
 
-        <file src="libpjsua2.so\org\pjsip\*.java" target="content" />
-        <file src="libpjsua2.maui.ios\bin\Release\net9.0-ios\"
-            target="lib\net9.0-ios18.1" />
-        <file src="libpjsua2.maui.android\bin\Release\net9.0-android\"
-            target="lib\net9.0-android34.0" />
-        <file src="libpjsua2.maui.ios\bin\Release\net9.0-ios\"
-            target="ref\net9.0-ios18.1" />
-        <file src="libpjsua2.maui.android\bin\Release\net9.0-android\"
-            target="ref\net9.0-android34.0" /> 
+        <!-- README -->
+        <file src="README.md" target="" />
+        <!-- LICENSE-->
+        <file src="LICENSE" target="" />
+        <!-- ICON -->
+        <file src="icon.png" target="" />
     </files>
 </package>
-
- 
-          

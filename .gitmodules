@@ -1,0 +1,15 @@
+[submodule "lib/pjsip"]
+	path = lib/pjsip
+	url = https://github.com/pjsip/pjproject.git
+[submodule "lib/openh264"]
+	path = lib/openh264
+	url = https://github.com/cisco/openh264.git
+[submodule "lib/openssl"]
+	path = lib/openssl
+	url = https://github.com/openssl/openssl.git
+[submodule "lib/opus"]
+	path = lib/opus
+	url = https://github.com/xiph/opus.git
+[submodule "lib/bcg729"]
+	path = lib/bcg729
+	url = https://github.com/BelledonneCommunications/bcg729.git

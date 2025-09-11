@@ -1,0 +1,1055 @@
+name: build nupkg
+on:
+  push:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.gitignore'
+      - '**/*.gitattributes'
+    tags:
+      - 'v*' 
+  pull_request:
+    types: [opened, synchronize, reopened]  
+    
+  workflow_dispatch:
+  
+permissions:
+  contents: read
+
+env:
+    BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
+    OPENH264_PATH: ${{ github.workspace }}/lib/openh264
+    OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
+    OPUS_PATH: ${{ github.workspace }}/lib/opus
+    PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
+    MIN_IOS_VERSION: 12.2
+    DOTNET_NOLOGO: true                     # Disable the .NET logo
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Disable the .NET first time experience
+    DOTNET_CLI_TELEMETRY_OPTOUT: true       # Disable sending .NET CLI telemetry
+    PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
+    SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output    
+
+jobs:
+  openh264-ios:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, arm64, arm64s]
+        include:
+          - arch: arm64
+            resolved_arch: arm64
+          - arch: arm64s
+            resolved_arch: arm64
+          - arch: x86_64
+            resolved_arch: x86_64
+    runs-on: macos-latest
+    name: openh264-ios
+    permissions:
+      contents: write
+    steps:
+        
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+          
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+      
+    - name: Install deps
+      run: |
+        brew install nasm autoconf automake libtool 
+      shell: sh
+          
+    - name: Build OpenH264 for ${{ matrix.arch }}
+      id: build
+      run: |
+        cd ${{ env.OPENH264_PATH }}
+        h264_makefile="Makefile"
+        h264_makefile_bak="Makefile.bak"
+
+        case "${{ matrix.arch }}" in
+          x86_64)
+            platform="iPhoneSimulator"
+            sdk="iphonesimulator"
+            os="darwin"
+            version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+            ;;
+          arm64s)
+            platform="iPhoneSimulator"
+            sdk="iphonesimulator"
+            os="darwin"
+            version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+            ;;
+          arm64)
+            platform="iPhoneOS"
+            sdk="iphoneos"
+            os="ios"
+            version_min="-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}"
+            ;;
+        esac
+
+        sdk_path=$(xcrun --sdk $sdk --show-sdk-path)
+        developer_path=$(xcode-select -p)
+
+        h264_prefix="${{ env.OPENH264_PATH }}/builds/${platform}-${{ matrix.resolved_arch }}"
+        h264_log="${h264_prefix}/build.log"
+        mkdir -p "${h264_prefix}/logs"
+
+        echo "Building OpenH264 for ${{ matrix.arch }} ($platform, OS=$os, SDK=$sdk)"
+
+        cp "${h264_makefile}" "${h264_makefile_bak}"
+        sed -i.deleteme "s|^PREFIX=.*|PREFIX=${h264_prefix}|" "${h264_makefile}"
+        rm -f ${h264_makefile}.deleteme
+
+        export CFLAGS="-arch ${{ matrix.resolved_arch }} ${version_min} -isysroot ${sdk_path}"
+        export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${version_min} -isysroot ${sdk_path}"
+        export SYSROOT="${sdk_path}"
+
+        make OS=${os} ARCH=${{ matrix.resolved_arch }} \
+            SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No >> "${h264_log}" || exit 1
+
+        make OS=${os} ARCH=${{ matrix.resolved_arch }} \
+            SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No install >> "${h264_log}" || exit 1
+
+        make OS=${os} ARCH=${{ matrix.resolved_arch }} \
+            SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No clean >> "${h264_log}" || exit 1
+
+        mv "${h264_makefile_bak}" "${h264_makefile}"
+
+        echo "artifact=${h264_prefix}" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+
+    - name: Patch OpenH264 .pc for arm64s
+      if: matrix.arch == 'arm64s'
+      run: |
+        pc_file=$(find "${{ env.OPENH264_PATH }}/builds/iPhoneSimulator-${{ matrix.resolved_arch }}" -name '*.pc' | head -n 1)
+
+        if [ -f "$pc_file" ]; then
+          install_prefix="${{ github.workspace }}/libs/h264"
+          sed -i'' -e "s|^prefix=.*|prefix=${install_prefix}|" "$pc_file"
+          sed -i'' -e "s|^libdir=.*|libdir=${install_prefix}/lib|" "$pc_file"
+          sed -i'' -e "s|^includedir=.*|includedir=${install_prefix}/include|" "$pc_file"
+          echo "Patched OpenH264 pkg-config file for PJSIP:"
+          cat "$pc_file"
+        else
+          echo "OpenH264 .pc file not found"
+          exit 1
+        fi
+      shell: bash
+
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openh264-${{ matrix.arch }}
+        path: ${{ steps.build.outputs.artifact }}
+        overwrite: true
+
+  openssl-ios:
+    strategy:
+      matrix:
+        arch: [x86_64, arm64, arm64s]
+    runs-on: macos-latest
+    name: openssl-ios 
+    permissions:
+      contents: write
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Install deps
+      run: |
+        brew install nasm autoconf automake libtool 
+      shell: sh
+         
+    - name: Build OpenSSL
+      id: build
+      run: |
+        INCLUDE_DIR=""
+        OPENSSLCONF_ALL=()
+        LIBSSL_IOS=()
+        LIBSSL_IOSSIM=()
+        LIBCRYPTO_IOS=()
+        LIBCRYPTO_IOSSIM=()
+        export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
+        export SDKVERSION
+        export IOS_MIN_SDK_VERSION
+        export TVOS_MIN_SDK_VERSION
+        export WATCHOS_MIN_SDK_VERSION
+        export CONFIG_DISABLE_BITCODE
+        cd ${{ env.OPENSSL_PATH }}
+        
+        chmod u+x ./Configure
+        # Determine platform
+        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
+            PLATFORM="iPhoneSimulator"
+            TARGET="ios-sim-cross-x86_64"
+        elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
+            TARGET="ios-sim-cross-arm64"
+            PLATFORM="iPhoneSimulator"
+        else
+          TARGET="ios-cross-arm64"
+          PLATFORM="iPhoneOS"
+        fi
+        
+        
+        # Extract ARCH from TARGET (part after last dash)
+        #ARCH=$(echo "${TARGET}" | sed -E 's|^.*\-([^\-]+)$|\1|g')
+        ARCH=${{ matrix.arch }}
+        # Cross compile references, see Configurations/10-main.conf
+        export CROSS_COMPILE="${{ env.DEVELOPER }}/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
+        export CROSS_TOP="${{ env.DEVELOPER }}/Platforms/${PLATFORM}.platform/Developer"
+        export CROSS_SDK="${PLATFORM}${{ env.SDKVERSION }}.sdk"
+
+        # Prepare TARGETDIR  
+        TARGETDIR="${{ env.OPENSSL_PATH }}/bin/${PLATFORM}${{env.SDKVERSION}}-${{ matrix.arch }}.sdk"
+        echo "artifact=${TARGETDIR}" >> "$GITHUB_OUTPUT"
+        mkdir -p "${TARGETDIR}"
+        ## Determine config options
+        # Add build target, --prefix and prevent async (references to getcontext(),
+        # setcontext() and makecontext() result in App Store rejections) and creation
+        # of shared libraries (default since 1.1.0)
+        LOCAL_CONFIG_OPTIONS="${TARGET} --prefix=${TARGETDIR} ${CONFIG_OPTIONS} no-async no-shared"
+
+        # Only relevant for 64 bit builds
+        # if [[ "${CONFIG_ENABLE_EC_NISTP_64_GCC_128}" == "true" && "${{ matrix.arch }}" == *64  ]]; then
+        #     LOCAL_CONFIG_OPTIONS="${LOCAL_CONFIG_OPTIONS} enable-ec_nistp_64_gcc_128"
+        # fi
+
+        # Run Configure
+        ./Configure ${LOCAL_CONFIG_OPTIONS} no-tests 
+
+        # Run make
+        echo "  Make (using ${{ env.BUILD_THREADS }} thread(s))..." 
+        make -j "${{ env.BUILD_THREADS }}"  
+
+
+        # Run make install
+        set -e 
+        make install_dev  
+
+        # Remove source dir, add references to library files to relevant arrays
+        # Keep reference to first build target for include file
+        if [[ "${PLATFORM}" == iPhoneOS ]]; then
+            LIBSSL_IOS+=("${TARGETDIR}/lib/libssl.a")
+            LIBCRYPTO_IOS+=("${TARGETDIR}/lib/libcrypto.a")
+            OPENSSLCONF_SUFFIX="ios_${{matrix.arch}}"
+        elif [[ "${PLATFORM}" == iPhoneSimulator ]]; then
+            LIBSSL_IOSSIM+=("${TARGETDIR}/lib/libssl.a")
+            LIBCRYPTO_IOSSIM+=("${TARGETDIR}/lib/libcrypto.a")
+            OPENSSLCONF_SUFFIX="ios_${{ matrix.arch }}"
+        fi
+      shell: sh
+      env:
+        IOS_MIN_SDK_VERSION: 12.2  
+        CONFIG_DISABLE_BITCODE: true
+        DEVELOPER: $(xcode-select -print-path)
+        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
+        BUILD_THREADS: $(sysctl -n hw.ncpu) 
+        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version) 
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openssl-${{ matrix.arch }}
+        path: ${{ steps.build.outputs.artifact }}
+        overwrite: true
+      env:
+        IOS_MIN_SDK_VERSION: 12.2
+
+  opus-ios:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, arm64, arm64s]
+        include:
+          - arch: arm64
+            resolved_arch: arm64
+          - arch: arm64s
+            resolved_arch: arm64
+          - arch: x86_64
+            resolved_arch: x86_64
+    runs-on: macos-latest
+    name: opus-ios 
+    permissions:
+      contents: write
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+         submodules: 'true'
+         
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+         
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Install deps
+      run: |
+        brew install nasm autoconf automake libtool 
+      shell: sh
+         
+    - name: Build opus
+      id: build
+      run: |
+        opus_version="1.4"
+        opus_opt_cflags="-O3 -ffast-math -flto -g"
+        opus_opt_ldflags="-flto"
+        DEVELOPER=$(xcode-select -print-path)
+        SDKVERSION=$(xcrun -sdk ${{ matrix.arch == 'arm64' && 'iphoneos' || 'iphonesimulator' }} --show-sdk-version)
+        PLATFORM=${{ matrix.arch == 'arm64' && 'iPhoneOS' || 'iPhoneSimulator' }}
+        TARGETDIR="${{ github.workspace }}/opus/build/${PLATFORM}${SDKVERSION}-${{ matrix.resolved_arch }}.sdk"
+
+        mkdir -p "${TARGETDIR}/include"
+        mkdir -p "${TARGETDIR}/lib"
+
+        echo "artifact=${TARGETDIR}" >> "$GITHUB_OUTPUT"
+        echo "-- Building Opus for ${{ matrix.arch }} on ${PLATFORM}"
+
+        cd "${{ env.OPUS_PATH }}"
+
+        ./autogen.sh
+ 
+        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
+          HOST="x86_64-apple-darwin" 
+          opus_opt_cflags="-O3 -ffast-math -flto -g -Wno-cast-align"
+        else
+          HOST="arm-apple-darwin" 
+          opus_opt_cflags="-O3 -ffast-math -flto -g"
+        fi
+        version_min=$([[ "${{ matrix.arch }}" == "arm64" ]] && echo "-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}" || echo "-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}")
+        ARCH="${{ matrix.resolved_arch }}"
+        
+        ./configure \
+          --enable-float-approx \
+          --disable-shared \
+          --enable-static \
+          --with-pic \
+          --disable-extra-programs \
+          --disable-doc \
+          --host=${HOST} \
+          --prefix="${TARGETDIR}" \
+          LDFLAGS="${opus_opt_ldflags} -fPIE ${version_min} -L${TARGETDIR}/lib" \
+          CFLAGS="${opus_opt_cflags} -arch ${ARCH} -fPIE ${version_min} -I${TARGETDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk"
+
+        make -j${{ env.BUILD_THREADS }}
+        make install 
+      shell: sh
+      env:
+        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
+        MIN_IOS_VERSION: 12.2
+        CONFIG_DISABLE_BITCODE: true
+        DEVELOPER: $(xcode-select -print-path)
+        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
+        BUILD_THREADS: $(sysctl -n hw.ncpu)
+
+    - name: Patch Opus .pc for arm64s
+      if: matrix.arch == 'arm64s'
+      run: |
+        opus_build_dir=$(find "${{ github.workspace }}/opus/build/" -type d -name "iPhoneSimulator*-arm64.sdk" | head -n 1)
+        pc_file=$(find "$opus_build_dir/lib/pkgconfig" -name 'opus.pc' | head -n 1)
+
+        if [ -f "$pc_file" ]; then
+          install_prefix="${{ github.workspace }}/libs/opus"
+          sed -i'' -e "s|^prefix=.*|prefix=${install_prefix}|" "$pc_file"
+          sed -i'' -e "s|^exec_prefix=.*|exec_prefix=${install_prefix}|" "$pc_file"
+          sed -i'' -e "s|^libdir=.*|libdir=${install_prefix}/lib|" "$pc_file"
+          sed -i'' -e "s|^includedir=.*|includedir=${install_prefix}/include|" "$pc_file"
+          sed -i'' -e "s|^Cflags=.*|Cflags=-I${install_prefix}/include/opus|" "$pc_file"
+          echo "Patched Opus pkg-config file for PJSIP:"
+          cat "$pc_file"
+        else
+          echo "Opus .pc file not found in $opus_build_dir"
+          exit 1
+        fi
+      shell: bash
+
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: opus-${{ matrix.arch }}
+        path: ${{ steps.build.outputs.artifact }}
+        overwrite: true
+      env:
+        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
+    
+  bcg729-ios:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, arm64, arm64s]  
+    runs-on: macos-latest
+    name: bcg729-ios 
+    permissions:
+      contents: write
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+
+    - name: Install deps
+      run: |
+        brew install nasm autoconf automake libtool
+      shell: sh
+
+    - name: Build bcg729 for iOS
+      id: build
+      run: |
+        echo "Building BCG729 for iOS"
+        xcode_dev_path=$(xcode-select -print-path)
+        cd ${{ env.BCG729_PATH }}
+
+        echo "-- Compiling for ${{ matrix.arch }}"
+
+        case "${{ matrix.arch }}" in
+          x86_64)
+            os_platform="iPhoneSimulator"
+            cmake_arch="x86_64"
+            ;;
+          arm64)
+            os_platform="iPhoneOS"
+            cmake_arch="arm64"
+            ;;
+          arm64s)
+            os_platform="iPhoneSimulator"
+            cmake_arch="arm64"
+            ;;
+        esac
+
+        sdk_path="${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk"
+
+        build_dir="${os_platform}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk"
+        rm -rf "$build_dir" CMakeFiles CMakeCache.txt
+
+        mkdir -p "$build_dir"
+
+        cmake \
+          -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+          -DCMAKE_OSX_ARCHITECTURES=$cmake_arch \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX="$build_dir" \
+          -DCMAKE_SKIP_INSTALL_RPATH=ON \
+          -DCMAKE_MAKE_PROGRAM:PATH=$(which make) \
+          -DCMAKE_C_COMPILER=$(which clang) \
+          -DCMAKE_OSX_SYSROOT="$sdk_path" \
+          .
+
+        make || exit 1
+        make install
+
+        echo "artifact=${{ env.BCG729_PATH }}/$build_dir/" >> "$GITHUB_OUTPUT"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: bcg729-${{ matrix.arch }}
+        path: ${{ steps.build.outputs.artifact }}
+        overwrite: true
+      env:
+        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
+  
+  pjsip-ios:
+    strategy:
+      matrix:
+        arch: [x86_64, arm64, arm64s]
+        include:
+        - arch: arm64
+          resolved_arch: arm64
+        - arch: arm64s
+          resolved_arch: arm64
+        - arch: x86_64
+          resolved_arch: x86_64
+
+      fail-fast: false
+    runs-on: macos-latest
+    needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
+    name: pjsip - ios
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: openssl-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/ssl/
+      
+      - uses: actions/download-artifact@v4
+        with:
+          name: openh264-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/h264/
+      
+      - uses: actions/download-artifact@v4
+        with:
+          name: opus-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/opus/
+      
+      - uses: actions/download-artifact@v4
+        with:
+          name: bcg729-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/bcg729/
+    
+      - name: Validate OpenH264 pkg-config
+        if: matrix.arch == 'arm64s'
+        run: |
+          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/h264/lib/pkgconfig
+          echo "OpenH264 version: $(pkg-config --modversion openh264)"
+          echo "OpenH264 libs: $(pkg-config --libs openh264)"
+          echo "OpenH264 cflags: $(pkg-config --cflags openh264)"
+        shell: bash
+
+      - name: Validate Opus pkg-config
+        if: matrix.arch == 'arm64s'
+        run: |
+          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus/lib/pkgconfig
+          echo "Opus version: $(pkg-config --modversion opus)"
+          echo "Opus libs: $(pkg-config --libs opus)"
+          echo "Opus cflags: $(pkg-config --cflags opus)"
+        shell: bash
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install dependencies
+        run: |
+          brew install automake autoconf libtool pkg-config swig llvm
+
+      - name: Build pjsip
+        id: build-pj-ios
+        run: |
+          cp -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+          mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
+          cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
+          cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
+
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
+            export SDKROOT="$DEVPATH/SDKs/iPhoneOS.sdk"
+            export IPHONESDK="iPhoneOS18.5.sdk"
+            export MIN_IOS=-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}             
+          else
+            export CFLAGS="-O2 -m64"
+            export LDFLAGS="-O2 -m64"
+            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+            export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
+            export IPHONESDK="iPhoneSimulator18.5.sdk" 
+            export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
+          fi
+          if [ "${{ matrix.arch }}" == "arm64s" ]; then
+            export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus/lib/pkgconfig:${{ github.workspace }}/libs/h264/lib/pkgconfig
+          fi
+          export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS} \
+            -I${{ github.workspace }}/libs/bcg729/include \
+            -I${{ github.workspace }}/libs/ssl/include \
+            -I${{ github.workspace }}/libs/opus/include \
+            -I${{ github.workspace }}/libs/h264/include"
+          export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS} \
+            -L${{ github.workspace }}/libs/bcg729/lib \
+            -L${{ github.workspace }}/libs/ssl/lib \
+            -L${{ github.workspace }}/libs/opus/lib \
+            -L${{ github.workspace }}/libs/h264/lib"
+          ARCH="-arch ${{ matrix.resolved_arch }}" ./configure-iphone \
+              --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
+              --with-ssl=${{ github.workspace }}/libs/ssl/ \
+              --with-opus=${{ github.workspace }}/libs/opus/ \
+              --with-openh264=${{ github.workspace }}/libs/h264/
+          make dep
+          make
+          cd ./pjsip-apps/src/swig
+          sed -i'' -e 's/xamarin/maui/g' ./csharp/Makefile
+          make
+          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+          cp -v -f ${{ github.workspace }}/libs/ssl/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.resolved_arch }}/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+          echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
+
+        env:
+          MIN_IOS_VERSION: 12.2
+          BUILD_THREADS: $(sysctl -n hw.ncpu)
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pjsip-${{ matrix.arch }}
+          path: ${{ steps.build-pj-ios.outputs.artifact }}
+          overwrite: true
+
+  openh264:
+    runs-on: ubuntu-latest
+    
+    steps:
+       
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create Output Directory
+        run: mkdir -p ${{ github.workspace }}/libopenh264-output
+
+      - name: Set Permissions for Output Directory
+        run: chmod -R 777 ${{ github.workspace }}/libopenh264-output
+
+      - name: Build Docker Image
+        run: |
+          docker build -t openh264-builder ${{ github.workspace }}/res/docker/openh264
+
+      - name: Run Docker Container 
+        run: | 
+          docker run --name openh264-build openh264-builder
+          
+      - name: Extract Artifacts from Container
+        run: | 
+          docker cp openh264-build:/root/outputs/libs ${{ github.workspace }}/libopenh264-output
+           
+      - name: Upload OpenH264 Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: openh264-android
+          path: ${{ github.workspace }}/libopenh264-output
+          overwrite: true
+  
+  openssl:
+    runs-on: ubuntu-latest
+    
+    steps:
+        
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create Output Directory
+        run: mkdir -p ${{ github.workspace }}/openssl-output
+
+      - name: Set Permissions for Output Directory
+        run: chmod -R 777 ${{ github.workspace }}/openssl-output
+
+      - name: Build Docker Image
+        run: |
+          docker build -t openssl-builder ${{ github.workspace }}/res/docker/openssl
+        
+      - name: Run Docker Container and Extract Artifacts
+        run: |  
+          docker run --name openssl-build openssl-builder
+      
+      - name: Extract Artifacts from Container
+        run: |  
+          docker cp openssl-build:/root/outputs/libs ${{ github.workspace }}/openssl-output
+          
+
+      - name: Upload openssl Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: openssl-android
+          path: ./openssl-output
+          overwrite: true
+
+  bcg729:
+    runs-on: ubuntu-latest
+    
+    steps:
+        
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create Output Directory
+        run: mkdir -p ${{ github.workspace }}/bcg729-output
+
+      - name: Set Permissions for Output Directory
+        run: chmod -R 777 ${{ github.workspace }}/bcg729-output
+
+      - name: Build Docker Image
+        run: |
+          docker build -t bcg729-builder ${{ github.workspace }}/res/docker/bcg729
+        
+      - name: Run Docker Container 
+        run: |
+          docker run --name bcg729-build bcg729-builder
+          
+      - name: Extract Artifacts from Container
+        run: |
+          docker cp bcg729-build:/root/outputs/libs ${{ github.workspace }}/bcg729-output
+ 
+      - name: Upload bcg729 Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bcg729-android
+          path: ./bcg729-output 
+          overwrite: true
+
+  opus:
+    runs-on: ubuntu-latest
+      
+    steps:
+          
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Create Output Directory
+        run: mkdir -p ${{ github.workspace }}/opus-output
+
+      - name: Set Permissions for Output Directory
+        run: chmod -R 777 ${{ github.workspace }}/opus-output
+
+      - name: Build Docker Image
+        run: |
+          docker build -t opus-builder ${{ github.workspace }}/res/docker/opus
+          
+      - name: Run Docker Container
+        run: docker run --name opus-build opus-builder
+        
+      - name: Extract Artifacts from Container
+        run: | 
+          docker cp opus-build:/root/outputs/ ${{ github.workspace }}/opus-output
+
+      - name: Upload opus Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: opus-android
+          path: ${{ github.workspace }}/opus-output 
+          overwrite: true
+           
+  pjsip-android:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
+      fail-fast: false
+    needs: [bcg729, openh264, openssl, opus]
+    name: pjsip - android
+    permissions:
+        contents: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+        
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        check-latest: true
+      
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: 11076708 
+        packages: platforms;android-28 tools platform-tools build-tools;34.0.0
+    
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r28
+        add-to-path: true
+        link-to-sdk: true
+      
+    - name: Debug NDK
+      shell: bash
+      run: |
+        ls -R $ANDROID_NDK_HOME
+      env: 
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+    - name: Prepare Environment
+      run: |
+        cd ${{ github.workspace }}
+        sudo mkdir -p /home/runner/libpjsua2 
+        
+        DEPS="unzip git curl bzip2 binutils make autoconf openssl \
+          libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig libstdc++6 \
+          libpthread-stubs0-dev \
+          libc6-dev"
+        sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
+    
+    - uses: actions/download-artifact@v4
+      with:
+        name: openssl-android
+        path: ${{ github.workspace }}/output/openssl
+      
+    - uses: actions/download-artifact@v4
+      with:
+        name: openh264-android
+        path: ${{ github.workspace }}/output/openh264/
+        
+    - uses: actions/download-artifact@v4
+      with:
+        name: opus-android
+        path: ${{ github.workspace }}/output/opus/
+        
+    - uses: actions/download-artifact@v4
+      with:
+        name: bcg729-android
+        path: ${{ github.workspace }}/output/bcg729/
+       
+    - name: Create config_site.h
+      run: |
+        echo "Creating config site file for Android ..."
+        echo "#define PJ_CONFIG_ANDROID 1" > ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_HAS_G7221_CODEC 1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_AUDIO_DEV_HAS_ANDROID_JNI 0" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_AUDIO_DEV_HAS_OPENSL 1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJSIP_AUTH_AUTO_SEND_NEXT 0" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_HAS_OPUS_CODEC 1" >> ${{ env.CONFIG_SITE_PATH }} 
+        echo "Changing PJSIP_MAX_PKT_LEN to 6000"
+        echo "#define PJSIP_MAX_PKT_LEN 6000" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "Enabling BCG729 in config_site"
+        echo "#define PJMEDIA_HAS_BCG729 1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "Enabling Video support in config_site"
+        echo "#define PJMEDIA_HAS_VIDEO 1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#include <pj/config_site_sample.h>" >> ${{ env.CONFIG_SITE_PATH }}
+        sed -i'' -e 's/xamarin/maui/g' ${{ env.PJSIP_PATH }}/pjsip-apps/src/swig/csharp/Makefile
+
+    - name: Build
+      id: build-pj
+      run: |
+        cd ${{ env.PJSIP_PATH }}
+        mkdir -p ${{ env.PJSIP_TMP_PATH }} 
+        cp -r * ${{ env.PJSIP_TMP_PATH }}
+        cd  ${{ env.PJSIP_TMP_PATH }}
+        echo "Configuring for ${{ matrix.arch }}"
+        APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} TARGET_ABI=${{ matrix.arch }} ./configure-android --use-ndk-cflags --with-ssl=${{ env.OPENSSL_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-openh264=${{ env.OPENH264_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-opus=${{ env.OPUS_BUILD_OUT_PATH }}/${{ matrix.arch }} --with-bcg729=${{ env.BCG729_BUILD_OUT_PATH }}/libs/${{ matrix.arch}}
+        echo "Make dep"
+        make dep
+        echo ""
+        echo "make"
+        make
+        cd ${{ env.PJSUA_BASE_DIR }}
+        make
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/csharp
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/java
+
+        mv ${{ env.PJSUA_GENERATED_SO_PATH }}/*/* ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/output/openh264/libs/${{ matrix.arch }}/lib/libopenh264.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/output/openssl/libs/${{ matrix.arch }}/lib/libssl.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/output/openssl/libs/${{ matrix.arch }}/lib/libcrypto.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp -r -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*  ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp -r -v ${{ env.PJSUA_GENERATED_JAVA_SRC_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/java
+        cp -r -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/csharp
+        echo "artifact=${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}" >> "$GITHUB_OUTPUT"
+        echo "csharp=${{ env.PJSIP_BUILD_OUT_PATH }}/csharp" >> "$GITHUB_OUTPUT"
+        echo "java=${{ env.PJSIP_BUILD_OUT_PATH }}/java" >> "$GITHUB_OUTPUT"
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+    - name: Upload pjsip artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pjsip-android-${{ matrix.arch }}
+        path: ${{ steps.build-pj.outputs.artifact }}
+        overwrite: true
+
+    - name: Upload csharp artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: csharp-${{ matrix.arch }}
+        path: ${{ steps.build-pj.outputs.csharp }}
+        overwrite: true
+  
+    - name: Upload java artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: java
+        path: ${{ steps.build-pj.outputs.java }}
+        overwrite: true
+
+    env:
+      OPENSSL_LIB_PATH: ${{ github.workspace }}/output/openssl/libs/
+      OPENh264_LIB_PATH: ${{ github.workspace }}/output/openh264/libs/
+      OPUS_LIB_PATH: ${{ github.workspace }}/output/opus/libs/
+      BCG729_LIB_PATH: ${{ github.workspace }}/output/bcg729/libs/
+      PJSIP_TMP_PATH: /tmp/pjsip
+      CONFIG_SITE_PATH: ${{ github.workspace }}/lib/pjsip/pjlib/include/pj/config_site.h
+      PJSUA_GENERATED_CSHARP_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/pjsua2
+      PJSUA_GENERATED_JAVA_SRC_DIR: /tmp/pjsip/pjsip-apps/src/swig/java/android/pjsua2/src/main/java
+      PJSUA_GENERATED_SO_PATH: /tmp/pjsip/pjsip-apps/src/swig/java/android/pjsua2/src/main/jniLibs
+      PJSUA_GENERATED_SO_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui.Android/lib
+      PJSUA_BASE_DIR: /tmp/pjsip/pjsip-apps/src/swig
+      TARGET_ANDROID_API: 28
+      OPENSSL_BUILD_OUT_PATH: ${{ github.workspace }}/output/openssl
+      OPENH264_BUILD_OUT_PATH: ${{ github.workspace}}/output/openh264
+      OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/output/opus/outputs
+      BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/output/bcg729
+
+  build-nupkg:
+    if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: macos-latest
+    name: build-nupkg
+    needs: [pjsip-android, pjsip-ios]
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Checkout
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+      
+      - name: Setup nuget 
+        run: brew install nuget
+
+      - name: Install MAUI Workload
+        run: dotnet workload install maui --ignore-failed-sources
+        
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+          
+      - name: Download Android x86 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pjsip-android-x86
+          path: ./artifacts/android-x86
+      
+      - name: Download Android x86_64 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pjsip-android-x86_64
+          path: ./artifacts/android-x86_64
+          
+      - name: Download Android arm Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pjsip-android-armeabi-v7a
+          path: ./artifacts/android-armeabi-v7a
+      
+      - name: Download Android arm64 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pjsip-android-arm64-v8a
+          path: ./artifacts/android-arm64-v8a
+
+      - name: Download Android java Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: java
+          path: ./artifacts/java
+      
+      - name: Download Android csharp Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: csharp-x86_64
+          path: ./artifacts/android/csharp
+      
+      - name: Download ios Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: pjsip-x86_64
+          path: ./artifacts/ios/pjsip-x86_64
+      
+      - name: Download ios arm64 Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pjsip-arm64
+          path: ./artifacts/ios/pjsip-arm64
+
+      - name: Download ios arm64s Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pjsip-arm64s
+          path: ./artifacts/ios/pjsip-arm64s
+        
+      - name: Prepare Dirs
+        run: |
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/armeabi-v7a
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/arm64-v8a
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64s
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
+          mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip/
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip
+          cp -r -v ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip/ ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip 
+          mv ${{ github.workspace }}/artifacts/android/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2
+          mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86
+          mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
+          mv ${{ github.workspace }}/artifacts/android-armeabi-v7a/* ${{ github.workspace }}/src/libpjsua2.so/lib/armeabi-v7a
+          mv ${{ github.workspace }}/artifacts/android-arm64-v8a/* ${{ github.workspace }}/src/libpjsua2.so/lib/arm64-v8a
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/arm64s
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2
+          cd  ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
+          libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
+          rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a
+          cd ${{ github.workspace }}/src/libpjsua2.a/lib/arm64s
+          libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
+          rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a
+          cd ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
+          libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
+          rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a
+          
+      - name: Restore Dependencies
+        run: | 
+          dotnet restore src/libpjsua2maui.android/libpjsua2maui.android.csproj
+          dotnet restore src/libpjsua2maui.ios/libpjsua2maui.ios.csproj
+
+      - name: Build MAUI Android
+        run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net9.0-android --no-restore
+        
+      - name: Build MAUI iOS
+        run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net9.0-ios --no-restore
+      
+      - name: Set VERSION variable
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Pack
+        run: nuget pack src/libpjsua2maui.nuspec -Version ${VERSION}
+
+      - name: Add GitHub NuGet Source
+        run: dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name github --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+
+      - name: Push to nuget.org
+        run: dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${API_KEY} --skip-duplicate
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+
+      - name: Push to GitHub Packages
+        run: dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate

@@ -1014,7 +1014,7 @@ jobs:
       - name: Restore Dependencies
         run: | 
           cd ${{ github.workspace }}/src/
-          dotnet restore workloads
+          dotnet workload restore $(find . -name "*.sln" | head -n 1)
           dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
           dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
 

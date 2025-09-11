@@ -298,7 +298,7 @@ jobs:
         DEVELOPER=$(xcode-select -print-path)
         SDKVERSION=$(xcrun -sdk ${{ matrix.arch == 'arm64' && 'iphoneos' || 'iphonesimulator' }} --show-sdk-version)
         PLATFORM=${{ matrix.arch == 'arm64' && 'iPhoneOS' || 'iPhoneSimulator' }}
-        TARGETDIR="${{ github.workspace }}/opus/build/${PLATFORM}${SDKVERSION}-${{ matrix.arch }}.sdk"
+        TARGETDIR="${{ github.workspace }}/opus/build/${PLATFORM}${SDKVERSION}-${{ matrix.resolved_arch }}.sdk"
 
         mkdir -p "${TARGETDIR}/include"
         mkdir -p "${TARGETDIR}/lib"
@@ -311,10 +311,15 @@ jobs:
         ./autogen.sh
 
         # Determine host triple
-        if [[ "${{ matrix.resolved_arch }}" == "x86_64" ]]; then
+        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
           HOST="x86_64-apple-darwin"
-        elif [[ "${{ matrix.resolved_arch }}" == "arm64" ]]; then
+          version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+        elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
           HOST="arm-apple-darwin"
+          version_min="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+        elif [[ "${{ matrix.arch }}" == "arm64" ]]; then
+          HOST="arm-apple-darwin"
+          version_min="-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}"
         fi
 
         ARCH="${{ matrix.resolved_arch }}"
@@ -328,8 +333,8 @@ jobs:
           --disable-doc \
           --host=${HOST} \
           --prefix="${TARGETDIR}" \
-          LDFLAGS="${opus_opt_ldflags} -fPIE -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -L${TARGETDIR}/lib" \
-          CFLAGS="${opus_opt_cflags} -arch ${ARCH} -fPIE -miphoneos-version-min=${{ env.MIN_IOS_VERSION }} -I${TARGETDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk"
+          LDFLAGS="${opus_opt_ldflags} -fPIE ${version_min} -L${TARGETDIR}/lib" \
+          CFLAGS="${opus_opt_cflags} -arch ${ARCH} -fPIE ${version_min} -I${TARGETDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk"
 
         make -j${{ env.BUILD_THREADS }}
         make install 
@@ -345,7 +350,7 @@ jobs:
     - name: Patch Opus .pc for arm64s
       if: matrix.arch == 'arm64s'
       run: |
-        opus_build_dir=$(find "${{ github.workspace }}/opus/build/" -type d -name "iPhoneSimulator*-arm64s.sdk" | head -n 1)
+        opus_build_dir=$(find "${{ github.workspace }}/opus/build/" -type d -name "iPhoneSimulator*-arm64.sdk" | head -n 1)
         pc_file=$(find "$opus_build_dir/lib/pkgconfig" -name 'opus.pc' | head -n 1)
 
         if [ -f "$pc_file" ]; then
@@ -502,7 +507,7 @@ jobs:
       - name: Validate OpenH264 pkg-config
         if: matrix.arch == 'arm64s'
         run: |
-          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/h264
+          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/h264/lib/pkgconfig
           echo "OpenH264 version: $(pkg-config --modversion openh264)"
           echo "OpenH264 libs: $(pkg-config --libs openh264)"
           echo "OpenH264 cflags: $(pkg-config --cflags openh264)"
@@ -511,7 +516,7 @@ jobs:
       - name: Validate Opus pkg-config
         if: matrix.arch == 'arm64s'
         run: |
-          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus
+          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus/lib/pkgconfig
           echo "Opus version: $(pkg-config --modversion opus)"
           echo "Opus libs: $(pkg-config --libs opus)"
           echo "Opus cflags: $(pkg-config --cflags opus)"
@@ -549,7 +554,7 @@ jobs:
             export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
           fi
           if [ "${{ matrix.arch }}" == "arm64s" ]; then
-            export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus:${{ github.workspace }}/libs/h264
+            export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus/lib/pkgconfig:${{ github.workspace }}/libs/h264/lib/pkgconfig
           fi
           export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS} \
             -I${{ github.workspace }}/libs/bcg729/include \

@@ -590,7 +590,6 @@ jobs:
         env:
           MIN_IOS_VERSION: 12.2
           BUILD_THREADS: $(sysctl -n hw.ncpu)
-          IPHONESDK: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

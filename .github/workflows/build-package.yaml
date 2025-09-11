@@ -533,7 +533,7 @@ jobs:
           echo "LDFLAGS=${LDFLAGS}"
 
           # call configure-iphone with ARCH var
-          ARCHARCH="-arch ${arch_flag}" ./configure-iphone \
+          ARCH="-arch ${arch_flag}" ./configure-iphone \
             --with-bcg729=${LIBS_ROOT}/bcg729/ \
             --with-ssl=${LIBS_ROOT}/ssl/ \
             --with-opus=${LIBS_ROOT}/opus/ \

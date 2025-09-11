@@ -485,3 +485,4 @@ src/workload-install.ps1
 *.dylib
 *.lib
 *.dll
+**/*.zip

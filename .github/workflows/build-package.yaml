@@ -490,13 +490,7 @@ jobs:
               export MIN_IOS="${MIN_IOS_VERSION}" 
               ;;
           esac
-
-          # get SDK path using xcrun (robust)
-          SDKPATH=$(xcrun --sdk ${sdkname} --show-sdk-path)
-          SDKVER=$(xcrun --sdk ${sdkname} --show-sdk-version)
-
-          echo "platform=$platform arch_flag=$arch_flag sdk=$SDKPATH sdkver=$SDKVER"
-
+  
           # copy pjsip code into build workspace
           cp -v -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
           mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
@@ -519,12 +513,24 @@ jobs:
           export DEVPATH="${xcode_select_path}/Platforms/${platform}.platform/Developer"
           export SDKROOT="${SDKPATH}"
 
-          # Compose flags ensuring same minimum iOS version for all
-          # Use -isysroot, -arch and proper -m* flags
+          # Resolve SDK path and version
+          SDKPATH=$(xcrun --sdk ${sdkname} --show-sdk-path)
+          SDKVER=$(xcrun --sdk ${sdkname} --show-sdk-version)
+          echo "platform=$platform arch_flag=$arch_flag sdk=$SDKPATH sdkver=$SDKVER"
+
+          # Set compiler paths
+          export CC="$(xcrun --sdk ${sdkname} --find clang)"
+          export CXX="$(xcrun --sdk ${sdkname} --find clang++)"
+          export AR="$(xcrun --sdk ${sdkname} --find libtool)"
+          export RANLIB="ranlib"
+
+          # Compose flags
           CFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
-            -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE}"
+          -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE} \
+          -DPJ_SDK_NAME=\"${SDKVER}\""
           LDFLAGS="-arch ${arch_flag} ${sdk_min_flag} -isysroot ${SDKPATH} \
-            -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB}"
+          -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB} \
+          -framework AudioToolbox -framework Foundation"
 
           export CFLAGS
           export LDFLAGS

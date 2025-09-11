@@ -455,7 +455,7 @@ jobs:
           mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
           cp -r -v ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
           cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
-
+          export MIN_IOS=${{env.MIN_IOS_VERSION}}
           if [ "${{ matrix.arch }}" == "x86_64" ]; then
             # Build para simulador x86_64
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
@@ -498,19 +498,32 @@ jobs:
 
           elif [ "${{ matrix.arch }}" == "arm64s" ]; then
             # Build para simulador arm64 (Apple Silicon)
+            export IPHONESDK="iPhoneSimulator.sdk"
+            export MIN_IOS="12.2"
             export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
-            export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
-            export CFLAGS="-arch arm64 -mios-simulator-version-min=${{ env.MIN_IOS_VERSION }} \
+            export SDKROOT="$DEVPATH/SDKs/$IPHONESDK"
+
+            export CC="$(xcrun -sdk iphonesimulator -find clang)"
+            export CXX="$(xcrun -sdk iphonesimulator -find clang++)"
+            export AR="$(xcrun -sdk iphonesimulator -find ar)"
+            export RANLIB="$(xcrun -sdk iphonesimulator -find ranlib)"
+
+            export CFLAGS="-arch arm64 -mios-simulator-version-min=$MIN_IOS \
               -I${{ github.workspace }}/libs/bcg729/include \
               -I${{ github.workspace }}/libs/ssl/include \
               -I${{ github.workspace }}/libs/opus/include \
-              -I${{ github.workspace }}/libs/h264/include"
-            export LDFLAGS="-arch arm64 \
+              -I${{ github.workspace }}/libs/h264/include \
+              -DPJ_SDK_NAME=\"${IPHONESDK}\" -isysroot $SDKROOT"
+
+            export LDFLAGS="-arch arm64 -mios-simulator-version-min=$MIN_IOS \
               -L${{ github.workspace }}/libs/bcg729/lib \
               -L${{ github.workspace }}/libs/ssl/lib \
               -L${{ github.workspace }}/libs/opus/lib \
-              -L${{ github.workspace }}/libs/h264/lib"
+              -L${{ github.workspace }}/libs/h264/lib \
+              -isysroot $SDKROOT -framework AudioToolbox -framework Foundation"
+
             ARCH="-arch arm64" ./configure-iphone \
+              --host=arm-apple-darwin \
               --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
               --with-ssl=${{ github.workspace }}/libs/ssl/ \
               --with-opus=${{ github.workspace }}/libs/opus/ \

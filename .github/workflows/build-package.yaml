@@ -488,13 +488,13 @@ jobs:
               platform="iPhoneSimulator"
               arch_flag="x86_64"
               sdkname="iphonesimulator"
-              sdk_min_flag="-m64 -mios-simulator-version-min=${MIN_IOS_VERSION}"
+              sdk_min_flag="-mios-simulator-version-min=${MIN_IOS_VERSION}"
               export MIN_IOS="${MIN_IOS_VERSION}" 
               SDKPATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
               SDKVER=$(xcrun --sdk iphonesimulator --show-sdk-version)
-              CFLAGS="-arch ${arch_flag} -O2 -m64 ${sdk_min_flag} -isysroot ${SDKPATH} \
+              CFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
                 -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE} "
-              LDFLAGS="-arch ${arch_flag} -O2 -m64 ${sdk_min_flag} -isysroot ${SDKPATH} \
+              LDFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
                 -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB} \
                 -framework AudioToolbox -framework Foundation"
 
@@ -503,13 +503,13 @@ jobs:
               platform="iPhoneSimulator"
               arch_flag="arm64"            # arm64s simulador -> arm64
               sdkname="iphonesimulator"
-              sdk_min_flag="-m64 -mios-simulator-version-min=${MIN_IOS_VERSION}"
+              sdk_min_flag="-mios-simulator-version-min=${MIN_IOS_VERSION}"
               export MIN_IOS="${MIN_IOS_VERSION}"    
               SDKPATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
               SDKVER=$(xcrun --sdk iphonesimulator --show-sdk-version)
-              CFLAGS="-arch ${arch_flag} -O2 -m64 ${sdk_min_flag} -isysroot ${SDKPATH} \
+              CFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
                 -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE} "
-              LDFLAGS="-arch ${arch_flag} -O2 -m64 ${sdk_min_flag} -isysroot ${SDKPATH} \
+              LDFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
                 -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB} \
                 -framework AudioToolbox -framework Foundation" 
               ;;
@@ -524,8 +524,7 @@ jobs:
               CFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
                 -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE} "
               LDFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
-                -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB} \
-                -framework AudioToolbox -framework Foundation"
+                -L${BCG_LIB} -L${SSL_LIB} -L${OPUS_LIB} -L${H264_LIB}"
               ;;
           esac
           
@@ -548,13 +547,30 @@ jobs:
           echo "CFLAGS=${CFLAGS}"
           echo "LDFLAGS=${LDFLAGS}"
 
-          # call configure-iphone with ARCH var
-          ARCH="-arch ${arch_flag}" ./configure-iphone \
-            --with-bcg729=${LIBS_ROOT}/bcg729/ \
-            --with-ssl=${LIBS_ROOT}/ssl/ \
-            --with-opus=${LIBS_ROOT}/opus/ \
-            --with-openh264=${LIBS_ROOT}/h264/ 
-
+          # call configure-iphone with ARCH var only when is not matrix.arch is not arm64s
+          case "${{ matrix.arch }}" in
+            x86_64)            
+              ARCH="-arch ${arch_flag}" ./configure-iphone \
+                --with-bcg729=${LIBS_ROOT}/bcg729/ \
+                --with-ssl=${LIBS_ROOT}/ssl/ \
+                --with-opus=${LIBS_ROOT}/opus/ \
+                --with-openh264=${LIBS_ROOT}/h264/ 
+            ;;
+            arm64s)              
+              ./configure-iphone \
+                --with-bcg729=${LIBS_ROOT}/bcg729/ \
+                --with-ssl=${LIBS_ROOT}/ssl/ \
+                --with-opus=${LIBS_ROOT}/opus/ \
+                --with-openh264=${LIBS_ROOT}/h264/ 
+            ;;
+            arm64)              
+              ARCH="-arch ${arch_flag}" ./configure-iphone \
+                --with-bcg729=${LIBS_ROOT}/bcg729/ \
+                --with-ssl=${LIBS_ROOT}/ssl/ \
+                --with-opus=${LIBS_ROOT}/opus/ \
+                --with-openh264=${LIBS_ROOT}/h264/ 
+            ;;
+          esac
           # build
           make dep
           make -j "$(sysctl -n hw.ncpu)"

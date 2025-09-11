@@ -488,10 +488,10 @@ jobs:
               platform="iPhoneSimulator"
               arch_flag="x86_64"
               sdkname="iphonesimulator"
-              sdk_min_flag="-mios-simulator-version-min=${MIN_IOS_VERSION}"
+              sdk_min_flag="-m64 -mios-simulator-version-min=${MIN_IOS_VERSION}"
               export MIN_IOS="${MIN_IOS_VERSION}" 
-              SDKPATH=$(xcrun --sdk ${sdkname} --show-sdk-path)
-              SDKVER=$(xcrun --sdk ${sdkname} --show-sdk-version)
+              SDKPATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
+              SDKVER=$(xcrun --sdk iphonesimulator --show-sdk-version)
               CFLAGS="-arch ${arch_flag} -O2 -m64 ${sdk_min_flag} -isysroot ${SDKPATH} \
                 -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE} "
               LDFLAGS="-arch ${arch_flag} -O2 -m64 ${sdk_min_flag} -isysroot ${SDKPATH} \
@@ -503,10 +503,10 @@ jobs:
               platform="iPhoneSimulator"
               arch_flag="arm64"            # arm64s simulador -> arm64
               sdkname="iphonesimulator"
-              sdk_min_flag="-mios-simulator-version-min=${MIN_IOS_VERSION}"
+              sdk_min_flag="-m64 -mios-simulator-version-min=${MIN_IOS_VERSION}"
               export MIN_IOS="${MIN_IOS_VERSION}"    
-              SDKPATH=$(xcrun --sdk ${sdkname} --show-sdk-path)
-              SDKVER=$(xcrun --sdk ${sdkname} --show-sdk-version)
+              SDKPATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
+              SDKVER=$(xcrun --sdk iphonesimulator --show-sdk-version)
               CFLAGS="-arch ${arch_flag} -O2 -m64 ${sdk_min_flag} -isysroot ${SDKPATH} \
                 -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE} "
               LDFLAGS="-arch ${arch_flag} -O2 -m64 ${sdk_min_flag} -isysroot ${SDKPATH} \
@@ -519,8 +519,8 @@ jobs:
               sdkname="iphoneos"
               sdk_min_flag="-miphoneos-version-min=${MIN_IOS_VERSION}"
               export MIN_IOS="${MIN_IOS_VERSION}" 
-              SDKPATH=$(xcrun --sdk ${sdkname} --show-sdk-path)
-              SDKVER=$(xcrun --sdk ${sdkname} --show-sdk-version)
+              SDKPATH=$(xcrun --sdk iphoneos --show-sdk-path)
+              SDKVER=$(xcrun --sdk iphoneos --show-sdk-version)
               CFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
                 -I${BCG_INCLUDE} -I${SSL_INCLUDE} -I${OPUS_INCLUDE} -I${H264_INCLUDE} "
               LDFLAGS="-arch ${arch_flag} -O2 ${sdk_min_flag} -isysroot ${SDKPATH} \
@@ -528,7 +528,8 @@ jobs:
                 -framework AudioToolbox -framework Foundation"
               ;;
           esac
-  
+          IPHONESDK=$(if [ "${{ matrix.arch }}" = "arm64" ]; then xcrun -sdk iphoneos --show-sdk-version; else xcrun -sdk iphonesimulator --show-sdk-version; fi)
+          export IPHONESDK
           # Resolve SDK path and version
           
           echo "platform=$platform arch_flag=$arch_flag sdk=$SDKPATH sdkver=$SDKVER"
@@ -556,7 +557,7 @@ jobs:
             --with-bcg729=${LIBS_ROOT}/bcg729/ \
             --with-ssl=${LIBS_ROOT}/ssl/ \
             --with-opus=${LIBS_ROOT}/opus/ \
-            --with-openh264=${LIBS_ROOT}/h264/ || $(cat config.log && exit 1)
+            --with-openh264=${LIBS_ROOT}/h264/ 
 
           # build
           make dep

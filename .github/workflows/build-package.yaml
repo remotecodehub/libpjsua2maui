@@ -389,7 +389,8 @@ jobs:
     strategy:
       matrix:
         arch: [x86_64, arm64]
-    runs-on: macos-14
+      fail-fast: false
+    runs-on: macos-latest
     needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
     name: pjsip + h264 + bcg729 + opus + ssl - ios
     permissions:

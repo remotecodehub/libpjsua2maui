@@ -10,7 +10,7 @@ on:
   
   
 permissions:
-  contents: read
+  contents: write
 
 env:
     BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
@@ -1060,12 +1060,20 @@ jobs:
               -NoDefaultExcludes
           fi
 
+      - name: Add GitHub NuGet Source
+        run: dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name github --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+
       - name: Push to nuget.org
         run: |
           cd ${{ github.workspace }}/src
           dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${API_KEY} --skip-duplicate
         env:
           API_KEY: ${{ secrets.API_KEY }}
+
+      - name: Push to GitHub Packages
+        run: |
+          cd ${{ github.workspace }}/src
+          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
       - name: Extract release notes from CHANGELOG.md
         id: changelog

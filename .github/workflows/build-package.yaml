@@ -1067,6 +1067,13 @@ jobs:
         env:
           API_KEY: ${{ secrets.API_KEY }}
 
+      - name: Upload nuget artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: libpjsua2maui.${{ env.VERSION }}.nupkg
+          path: ${{ github.workspace }}/src/libpjsua2maui.${{ env.VERSION }}.nupkg
+          overwrite: true
+
       - name: Extract release notes from CHANGELOG.md
         id: changelog
         run: |
@@ -1092,29 +1099,4 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload NuGet Package to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./src/libpjsua2maui.${{ env.VERSION }}.nupkg
-          asset_name: libpjsua2maui.${{ env.VERSION }}.nupkg
-          asset_content_type: application/octet-stream
-
-      - name: Upload Android Artifacts to Release
-        run: |
-          for arch in x86 x86_64 armeabi-v7a arm64-v8a; do
-            zip -r android-${arch}-${{ env.VERSION }}.zip ./artifacts/android-${arch}
-            gh release upload ${{ github.ref_name }} android-${arch}-${{ env.VERSION }}.zip --repo ${{ github.repository }}
-          done
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload iOS Artifacts to Release
-        run: |
-          for arch in x86_64 arm64 arm64s; do
-            zip -r ios-${arch}-${{ env.VERSION }}.zip ./artifacts/ios/pjsip-${arch}
-            gh release upload ${{ github.ref_name }} ios-${arch}-${{ env.VERSION }}.zip --repo ${{ github.repository }}
-          done
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ 

@@ -191,7 +191,7 @@ jobs:
         LIBCRYPTO_IOS=()
         LIBCRYPTO_IOSSIM=()
         export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
-        export SDKVERSION='$(xcrun -sdk ${{ matrix.platform }} --show-sdk-version)'
+        export SDKVERSION=$(xcrun -sdk ${{ matrix.platform }} --show-sdk-version)
         export IOS_MIN_SDK_VERSION=12.2
         export CONFIG_DISABLE_BITCODE=true
         cd ${{ env.OPENSSL_PATH }}
@@ -208,10 +208,7 @@ jobs:
           TARGET="ios-cross-arm64"
           PLATFORM="iPhoneOS"
         fi
-        
-        
-        # Extract ARCH from TARGET (part after last dash)
-        #ARCH=$(echo "${TARGET}" | sed -E 's|^.*\-([^\-]+)$|\1|g')
+         
         ARCH=${{ matrix.resolved_arch }}
         # Cross compile references, see Configurations/10-main.conf
         export CROSS_COMPILE="${{ env.DEVELOPER }}/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
@@ -267,9 +264,7 @@ jobs:
       with:
         name: openssl-${{ matrix.arch }}
         path: ${{ steps.build.outputs.artifact }}
-        overwrite: true
-      env:
-        IOS_MIN_SDK_VERSION: 12.2
+        overwrite: true 
 
   opus-ios:
     strategy:

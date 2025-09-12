@@ -201,6 +201,7 @@ jobs:
         export SDKVERSION
         export IOS_MIN_SDK_VERSION=12.2
         export CONFIG_DISABLE_BITCODE=true 
+        export CONFIG_OPTIONS="no-dso no-shared no-engine no-tests no-unit-test no-ssl3 no-comp enable-ec_nistp_64_gcc_128"
         cd ${{ env.OPENSSL_PATH }}
         
         chmod u+x ./Configure

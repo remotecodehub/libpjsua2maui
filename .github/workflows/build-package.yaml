@@ -146,6 +146,7 @@ jobs:
 
   openssl-ios:
     strategy:
+      fail-fast: false
       matrix:
         arch: [x86_64, arm64, arm64s]
     runs-on: macos-latest
@@ -198,55 +199,30 @@ jobs:
           TARGET="ios-cross-arm64"
           PLATFORM="iPhoneOS"
         fi
-        
-        
-        # Extract ARCH from TARGET (part after last dash)
-        #ARCH=$(echo "${TARGET}" | sed -E 's|^.*\-([^\-]+)$|\1|g')
-        ARCH=${{ matrix.arch }}
-        # Cross compile references, see Configurations/10-main.conf
-        export CROSS_COMPILE="${{ env.DEVELOPER }}/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
-        export CROSS_TOP="${{ env.DEVELOPER }}/Platforms/${PLATFORM}.platform/Developer"
-        export CROSS_SDK="${PLATFORM}${{ env.SDKVERSION }}.sdk"
+         # SDK version
+        SDKVERSION=$(xcrun --sdk ${PLATFORM,,} --show-sdk-version)
 
-        # Prepare TARGETDIR  
-        TARGETDIR="${{ env.OPENSSL_PATH }}/bin/${PLATFORM}${{env.SDKVERSION}}-${{ matrix.arch }}.sdk"
-        echo "artifact=${TARGETDIR}" >> "$GITHUB_OUTPUT"
-        mkdir -p "${TARGETDIR}"
-        ## Determine config options
-        # Add build target, --prefix and prevent async (references to getcontext(),
-        # setcontext() and makecontext() result in App Store rejections) and creation
-        # of shared libraries (default since 1.1.0)
-        LOCAL_CONFIG_OPTIONS="${TARGET} --prefix=${TARGETDIR} ${CONFIG_OPTIONS} no-async no-shared"
+        # Setup environment
+        export CROSS_TOP="$(xcode-select -p)/Platforms/${PLATFORM}.platform/Developer"
+        export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
+        export BUILD_THREADS=$(sysctl -n hw.ncpu)
+        export PATH="$CROSS_TOP/usr/bin:$PATH"
 
-        # Only relevant for 64 bit builds
-        # if [[ "${CONFIG_ENABLE_EC_NISTP_64_GCC_128}" == "true" && "${{ matrix.arch }}" == *64  ]]; then
-        #     LOCAL_CONFIG_OPTIONS="${LOCAL_CONFIG_OPTIONS} enable-ec_nistp_64_gcc_128"
-        # fi
+        # Output directory
+        TARGETDIR="${{ github.workspace }}/openssl-build/${PLATFORM}-${{ matrix.arch }}"
+        mkdir -p "$TARGETDIR"
 
-        # Run Configure
-        ./Configure ${LOCAL_CONFIG_OPTIONS} no-tests 
+        # Configure flags
+        ./Configure ${TARGET} \
+          --prefix="$TARGETDIR" \
+          no-async no-shared no-tests
 
-        # Run make
-        echo "  Make (using ${{ env.BUILD_THREADS }} thread(s))..." 
-        make -j "${{ env.BUILD_THREADS }}"  
+        make -j "$BUILD_THREADS"
+        make install_dev
 
+        echo "artifact=$TARGETDIR" >> "$GITHUB_OUTPUT"
+      shell: bash
 
-        # Run make install
-        set -e 
-        make install_dev  
-
-        # Remove source dir, add references to library files to relevant arrays
-        # Keep reference to first build target for include file
-        if [[ "${PLATFORM}" == iPhoneOS ]]; then
-            LIBSSL_IOS+=("${TARGETDIR}/lib/libssl.a")
-            LIBCRYPTO_IOS+=("${TARGETDIR}/lib/libcrypto.a")
-            OPENSSLCONF_SUFFIX="ios_${{matrix.arch}}"
-        elif [[ "${PLATFORM}" == iPhoneSimulator ]]; then
-            LIBSSL_IOSSIM+=("${TARGETDIR}/lib/libssl.a")
-            LIBCRYPTO_IOSSIM+=("${TARGETDIR}/lib/libcrypto.a")
-            OPENSSLCONF_SUFFIX="ios_${{ matrix.arch }}"
-        fi
-      shell: sh
       env:
         IOS_MIN_SDK_VERSION: 12.2  
         CONFIG_DISABLE_BITCODE: true
@@ -1039,7 +1015,7 @@ jobs:
       - name: Publicar pacote no GitHub Packages
         run: |
           cd ${{ github.workspace }}/src/
-          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "${{ env.NUGET_TOKEN }}" --skip-duplicate
+          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "${NUGET_TOKEN}" --skip-duplicate
         env:
           NUGET_TOKEN: ${{ secrets.GH_TOKEN }}
 

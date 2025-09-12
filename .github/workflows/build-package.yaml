@@ -200,7 +200,7 @@ jobs:
           PLATFORM="iPhoneOS"
         fi
          # SDK version
-        SDKVERSION=$(xcrun --sdk ${PLATFORM,,} --show-sdk-version)
+        SDKVERSION=$(xcrun --sdk ${PLATFORM} --show-sdk-version)
 
         # Setup environment
         export CROSS_TOP="$(xcode-select -p)/Platforms/${PLATFORM}.platform/Developer"

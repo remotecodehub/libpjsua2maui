@@ -44,10 +44,9 @@ jobs:
       contents: write
     steps:
         
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
+    - name: Checkout openh264 v2.3.0
+      run: |
+        git clone --depth 1 --branch v2.3.0 https://github.com/cisco/openh264.git lib/openh264
           
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
@@ -155,11 +154,11 @@ jobs:
       contents: write
     steps:
     
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
-        
+
+    - name: Checkout openssl 1.1.1s
+      run: |
+        git clone --recursive --depth 1 --branch OpenSSL_1_1_1s https://github.com/openssl/openssl.git lib/openssl
+                  
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -283,16 +282,10 @@ jobs:
       contents: write
     steps:
     
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-         submodules: 'true'
-         
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
-         
+    - name: Checkout opus v1.4
+      run: |
+        git clone --recursive --depth 1 --branch v1.4 https://github.com/xiph/opus.git lib/opus
+           
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -399,10 +392,10 @@ jobs:
       contents: write
     steps:
 
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        submodules: 'true'
+
+    - name: Checkout BCG729 v1.1.1
+      run: |
+        git clone --recursive --depth 1 --branch 1.1.1 https://gitlab.linphone.org/BC/public/bcg729.git lib/bcg729
 
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
@@ -481,7 +474,6 @@ jobs:
           resolved_arch: arm64
         - arch: x86_64
           resolved_arch: x86_64
-
       fail-fast: false
     runs-on: macos-latest
     needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
@@ -489,10 +481,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
+      - name: Checkout latest pjsip
+        run: | 
+          git clone --recursive --branch v2.15.1 --depth=1 https://github.com/pjsip/pjproject.git lib/pjsip
 
       - uses: actions/download-artifact@v4
         with:
@@ -514,24 +505,6 @@ jobs:
           name: bcg729-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/bcg729/
     
-      - name: Validate OpenH264 pkg-config
-        if: matrix.arch == 'arm64s'
-        run: |
-          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/h264/lib/pkgconfig
-          echo "OpenH264 version: $(pkg-config --modversion openh264)"
-          echo "OpenH264 libs: $(pkg-config --libs openh264)"
-          echo "OpenH264 cflags: $(pkg-config --cflags openh264)"
-        shell: bash
-
-      - name: Validate Opus pkg-config
-        if: matrix.arch == 'arm64s'
-        run: |
-          export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus/lib/pkgconfig
-          echo "Opus version: $(pkg-config --modversion opus)"
-          echo "Opus libs: $(pkg-config --libs opus)"
-          echo "Opus cflags: $(pkg-config --cflags opus)"
-        shell: bash
-
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -858,6 +831,7 @@ jobs:
 
         mv ${{ env.PJSUA_GENERATED_SO_PATH }}/*/* ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp ${{ github.workspace }}/output/openh264/libs/${{ matrix.arch }}/lib/libopenh264.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
+        cp ${{ github.workspace }}/output/bcg729/libs/${{ matrix.arch }}/lib/libbcg729.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp ${{ github.workspace }}/output/openssl/libs/${{ matrix.arch }}/lib/libssl.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp ${{ github.workspace }}/output/openssl/libs/${{ matrix.arch }}/lib/libcrypto.so ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp -r -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*  ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
@@ -909,15 +883,10 @@ jobs:
       BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/output/bcg729
 
   build-nupkg:
-    if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
     runs-on: macos-latest
     name: build-nupkg
     needs: [pjsip-android, pjsip-ios]
-    steps:
-#      - uses: maxim-lobanov/setup-xcode@v1
-#        with:
-#          xcode-version: latest-stable
-
+    steps: 
       - name: Checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
  
@@ -1067,6 +1036,13 @@ jobs:
         env:
           API_KEY: ${{ secrets.API_KEY }}
 
+      - name: Publicar pacote no GitHub Packages
+        run: |
+          cd ${{ github.workspace }}/src/
+          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "${{ env.NUGET_TOKEN }}" --skip-duplicate
+        env:
+          NUGET_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - name: Upload nuget artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -1076,6 +1052,7 @@ jobs:
 
       - name: Extract release notes from CHANGELOG.md
         id: changelog
+        if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
         run: |
           TAG=${GITHUB_REF#refs/tags/v}
           awk -v tag="## Version ${TAG}" '
@@ -1089,6 +1066,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Create GitHub Release
+        if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
         id: create_release
         uses: actions/create-release@v1
         with:

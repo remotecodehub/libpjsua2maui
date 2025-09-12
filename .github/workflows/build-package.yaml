@@ -490,7 +490,7 @@ jobs:
 
       - name: Checkout latest pjsip
         run: | 
-          git clone --recursive --branch v2.15.1 --depth=1 https://github.com/pjsip/pjproject.git lib/pjsip
+          git clone --recursive --branch 2.15.1 --depth=1 https://github.com/pjsip/pjproject.git lib/pjsip
 
       - uses: actions/download-artifact@v4
         with:

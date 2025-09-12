@@ -47,12 +47,12 @@ jobs:
     - name: Checkout openh264 v2.3.0
       run: |
         git clone --depth 1 --branch v2.3.0 https://github.com/cisco/openh264.git lib/openh264
-          
-    - name: Setup Xcode
+  
+    - name: Setup Xcode 26.0
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
-      
+        xcode-version: '26.0'
+        
     - name: Install deps
       run: |
         brew install nasm autoconf automake libtool 
@@ -116,27 +116,7 @@ jobs:
 
         echo "artifact=${h264_prefix}" >> "$GITHUB_OUTPUT"
       shell: bash
-
-
-    - name: Patch OpenH264 .pc for arm64s
-      if: matrix.arch == 'arm64s'
-      run: |
-        pc_file=$(find "${{ env.OPENH264_PATH }}/builds/iPhoneSimulator-${{ matrix.resolved_arch }}" -name '*.pc' | head -n 1)
-
-        if [ -f "$pc_file" ]; then
-          install_prefix="${{ github.workspace }}/libs/h264"
-          sed -i'' -e "s|^prefix=.*|prefix=${install_prefix}|" "$pc_file"
-          sed -i'' -e "s|^libdir=.*|libdir=${install_prefix}/lib|" "$pc_file"
-          sed -i'' -e "s|^includedir=.*|includedir=${install_prefix}/include|" "$pc_file"
-          echo "Patched OpenH264 pkg-config file for PJSIP:"
-          cat "$pc_file"
-        else
-          echo "OpenH264 .pc file not found"
-          exit 1
-        fi
-      shell: bash
-
-
+ 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -176,12 +156,12 @@ jobs:
     - name: Checkout openssl 1.1.1s
       run: |
         git clone --recursive --depth 1 --branch OpenSSL_1_1_1s https://github.com/openssl/openssl.git lib/openssl
-                  
-    - name: Setup Xcode
+           
+    - name: Setup Xcode 26.0
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
-    
+        xcode-version: '26.0'
+ 
     - name: Install deps
       run: |
         brew install nasm autoconf automake libtool 
@@ -284,16 +264,16 @@ jobs:
     permissions:
       contents: write
     steps:
-    
+ 
     - name: Checkout opus v1.4
       run: |
         git clone --recursive --depth 1 --branch v1.4 https://github.com/xiph/opus.git lib/opus
-           
-    - name: Setup Xcode
+      
+    - name: Setup Xcode 26.0
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
-    
+        xcode-version: '26.0'
+ 
     - name: Install deps
       run: |
         brew install nasm autoconf automake libtool 
@@ -394,17 +374,16 @@ jobs:
     permissions:
       contents: write
     steps:
-
-
+ 
     - name: Checkout BCG729 v1.1.1
       run: |
         git clone --recursive --depth 1 --branch 1.1.1 https://gitlab.linphone.org/BC/public/bcg729.git lib/bcg729
-
-    - name: Setup Xcode
+       
+    - name: Setup Xcode 26.0
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
-
+        xcode-version: '26.0'
+ 
     - name: Install deps
       run: |
         brew install nasm autoconf automake libtool
@@ -523,6 +502,11 @@ jobs:
         run: |
           brew install automake autoconf libtool pkg-config swig llvm
 
+      - name: Setup Xcode 26.0
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.0'
+ 
       - name: Build pjsip
         id: build-pj-ios
         run: |

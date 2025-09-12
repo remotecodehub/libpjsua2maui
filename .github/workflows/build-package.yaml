@@ -165,8 +165,6 @@ jobs:
     permissions:
       contents: write
     steps:
-    
-
     - name: Checkout openssl 1.1.1s
       run: |
         git clone --recursive --depth 1 --branch OpenSSL_1_1_1s https://github.com/openssl/openssl.git lib/openssl
@@ -202,12 +200,12 @@ jobs:
         # Determine platform
         if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
             PLATFORM="iPhoneSimulator"
-            TARGET="ios-sim-cross-x86_64"
+            TARGET="darwin64-x86_64-cc"
         elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
             TARGET="ios-sim-cross-arm64"
-            PLATFORM="iPhoneSimulator"
+            TARGET="darwin64-arm64-cc"
         else
-          TARGET="ios-cross-arm64"
+          TARGET="ios64-cross"
           PLATFORM="iPhoneOS"
         fi
          
@@ -231,6 +229,9 @@ jobs:
         if [[ "${CONFIG_ENABLE_EC_NISTP_64_GCC_128}" == "true" && "${{ matrix.resolved_arch }}" == *64  ]]; then
             LOCAL_CONFIG_OPTIONS="${LOCAL_CONFIG_OPTIONS} enable-ec_nistp_64_gcc_128"
         fi
+
+        export CFLAGS="-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mios-version-min=${IOS_MIN_SDK_VERSION}"
+        export LDFLAGS="-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
 
         # Run Configure
         ./Configure ${LOCAL_CONFIG_OPTIONS} no-tests 

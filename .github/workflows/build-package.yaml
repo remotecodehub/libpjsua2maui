@@ -237,9 +237,8 @@ jobs:
 
         # Run make
         echo "  Make (using ${{ env.BUILD_THREADS }} thread(s))..." 
-        make -j "${{ env.BUILD_THREADS }}"  
-
-
+        make build_libs -j "${{ env.BUILD_THREADS }}"  
+ 
         # Run make install
         set -e 
         make install_dev  
@@ -474,10 +473,16 @@ jobs:
         include:
         - arch: arm64
           resolved_arch: arm64
+          sdk: iphoneos
+          platform: iPhoneOS
         - arch: arm64s
           resolved_arch: arm64
+          sdk: iphonesimulator
+          platform: iPhoneSimulator
         - arch: x86_64
           resolved_arch: x86_64
+          sdk: iphonesimulator
+          platform: iPhoneSimulator
       fail-fast: false
     runs-on: macos-latest
     needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
@@ -497,6 +502,7 @@ jobs:
         with:
           name: openssl-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/ssl/
+          
       
       - uses: actions/download-artifact@v4
         with:
@@ -512,12 +518,7 @@ jobs:
         with:
           name: bcg729-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/bcg729/
-    
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
+     
       - name: Install dependencies
         run: |
           brew install automake autoconf libtool pkg-config swig llvm
@@ -529,26 +530,22 @@ jobs:
           mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
           cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
           cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
+          export SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
+          export IPHONESDK="${{ matrix.platform}}${SDKVERSION}.sdk" 
+          export DEVPATH="$(xcode-select -p)/Platforms/${{ matrix.platform }}.platform/Developer"
+          export SDKROOT="{$DEVPATH}/SDKs/${{ matrix.platform }}.sdk"
+          export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
 
           if [ "${{ matrix.arch }}" == "arm64" ]; then
-            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer"
-            export SDKROOT="$DEVPATH/SDKs/iPhoneOS.sdk"
-            export IPHONESDK="iPhoneOS18.5.sdk"
-            export MIN_IOS=-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}             
+            export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS}"
+            export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS}"
+            export MIN_IOS=-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}
           else
-            export CFLAGS="-O2 -m64"
-            export LDFLAGS="-O2 -m64"
-            export DEVPATH="$(xcode-select -p)/Platforms/iPhoneSimulator.platform/Developer"
+            export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS} -O2 -m64"
+            export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS} -O2 -m64"
             export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-            export SDKROOT="$DEVPATH/SDKs/iPhoneSimulator.sdk"
-            export IPHONESDK="iPhoneSimulator18.5.sdk" 
-            export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
           fi
-          if [ "${{ matrix.arch }}" == "arm64s" ]; then
-            export PKG_CONFIG_PATH=${{ github.workspace }}/libs/opus/lib/pkgconfig:${{ github.workspace }}/libs/h264/lib/pkgconfig
-          fi
-          export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS}"
-          export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS}"
+           
           ARCH="-arch ${{ matrix.resolved_arch }}" ./configure-iphone \
               --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
               --with-ssl=${{ github.workspace }}/libs/ssl/ \
@@ -581,7 +578,6 @@ jobs:
           cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.resolved_arch }}/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
           cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
           echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
-
         env:
           MIN_IOS_VERSION: 12.2
           BUILD_THREADS: $(sysctl -n hw.ncpu)

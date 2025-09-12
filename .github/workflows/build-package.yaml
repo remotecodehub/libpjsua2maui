@@ -152,19 +152,27 @@ jobs:
         include:
           - arch: x86_64
             resolved_arch: x86_64
-            platform: iphonesimulator
+            sdk: iphonesimulator
+            platform: iPhoneSimulator
+            target: darwin64-x86_64-cc
           - arch: arm64
             resolved_arch: arm64
-            platform: iphoneos
+            sdk: iphoneos
+            platform: iPhoneOS
+            target: ios64-cross
           - arch: arm64s
             resolved_arch: arm64
-            platform: iphonesimulator
-          
+            sdk: iphonesimulator
+            platform: iPhoneSimulator
+            target: darwin64-arm64-cc
     runs-on: macos-latest
     name: openssl-ios 
     permissions:
       contents: write
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
     - name: Checkout openssl 1.1.1s
       run: |
         git clone --recursive --depth 1 --branch OpenSSL_1_1_1s https://github.com/openssl/openssl.git lib/openssl
@@ -178,7 +186,7 @@ jobs:
       run: |
         brew install nasm autoconf automake libtool 
       shell: sh
-         
+        
     - name: Build OpenSSL
       id: build
       run: |
@@ -189,26 +197,16 @@ jobs:
         LIBCRYPTO_IOS=()
         LIBCRYPTO_IOSSIM=()
         export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
-        SDKVERSION=$(xcrun -sdk ${{ matrix.platform }} --show-sdk-version)
+        SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
         export SDKVERSION
         export IOS_MIN_SDK_VERSION=12.2
-        export CONFIG_DISABLE_BITCODE=true
-        export CONFIG_OPTIONS="no-dso no-engine no-tests no-unit-test no-ssl3 no-comp enable-ec_nistp_64_gcc_128"
+        export CONFIG_DISABLE_BITCODE=true 
         cd ${{ env.OPENSSL_PATH }}
         
         chmod u+x ./Configure
-        # Determine platform
-        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
-            PLATFORM="iPhoneSimulator"
-            TARGET="darwin64-x86_64-cc"
-        elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
-            TARGET="ios-sim-cross-arm64"
-            TARGET="darwin64-arm64-cc"
-        else
-          TARGET="ios64-cross"
-          PLATFORM="iPhoneOS"
-        fi
-         
+        
+        TARGET=${{ matrix.target }}
+        PLATFORM=${{ matrix.platform }}
         ARCH=${{ matrix.resolved_arch }}
         # Cross compile references, see Configurations/10-main.conf
         export CROSS_COMPILE="${{ env.DEVELOPER }}/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
@@ -226,9 +224,9 @@ jobs:
         LOCAL_CONFIG_OPTIONS="${TARGET} --prefix=${TARGETDIR} ${CONFIG_OPTIONS} no-async no-shared"
 
         # Only relevant for 64 bit builds
-        if [[ "${CONFIG_ENABLE_EC_NISTP_64_GCC_128}" == "true" && "${{ matrix.resolved_arch }}" == *64  ]]; then
-            LOCAL_CONFIG_OPTIONS="${LOCAL_CONFIG_OPTIONS} enable-ec_nistp_64_gcc_128"
-        fi
+        # if [[ "${CONFIG_ENABLE_EC_NISTP_64_GCC_128}" == "true" && "${{ matrix.resolved_arch }}" == *64  ]]; then
+        #     LOCAL_CONFIG_OPTIONS="${LOCAL_CONFIG_OPTIONS} enable-ec_nistp_64_gcc_128"
+        # fi
 
         export CFLAGS="-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mios-version-min=${IOS_MIN_SDK_VERSION}"
         export LDFLAGS="-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
@@ -486,6 +484,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      
+      - name: Checkout 
+        uses: actions/checkout@v5
+
       - name: Checkout latest pjsip
         run: | 
           git clone --recursive --branch v2.15.1 --depth=1 https://github.com/pjsip/pjproject.git lib/pjsip
@@ -596,7 +598,7 @@ jobs:
     steps:
        
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/libopenh264-output
@@ -629,7 +631,7 @@ jobs:
     steps:
         
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/openssl-output
@@ -663,7 +665,7 @@ jobs:
     steps:
         
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/bcg729-output
@@ -696,7 +698,7 @@ jobs:
     steps:
           
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
       
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/opus-output
@@ -735,7 +737,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v5
       with:
         submodules: 'true'
         

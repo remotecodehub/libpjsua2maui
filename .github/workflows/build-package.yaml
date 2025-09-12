@@ -1071,7 +1071,12 @@ jobs:
         id: changelog
         run: |
           TAG=${GITHUB_REF#refs/tags/v}
-          awk "/^## Version ${TAG}/,/^## Version /" CHANGELOG.md | head -n -1 > RELEASE_BODY.md
+          awk -v tag="## Version ${TAG}" '
+            $0 ~ tag { in_block=1; next }
+            in_block && /^## Version / { exit }
+            in_block && /^[[:space:]]*-/ { print }
+          ' CHANGELOG.md > RELEASE_BODY.md
+
           echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
           cat RELEASE_BODY.md >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV

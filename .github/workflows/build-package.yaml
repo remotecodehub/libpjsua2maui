@@ -36,7 +36,7 @@ jobs:
             resolved_arch: arm64
           - arch: x86_64
             resolved_arch: x86_64
-    runs-on: macos-15-large
+    runs-on: macos-15
     name: openh264-ios
     permissions:
       contents: write
@@ -143,7 +143,7 @@ jobs:
             sdk: iphonesimulator
             platform: iPhoneSimulator
             target: darwin64-arm64-cc
-    runs-on: macos-15-large
+    runs-on: macos-15
     name: openssl-ios 
     permissions:
       contents: write
@@ -257,7 +257,7 @@ jobs:
             resolved_arch: arm64
           - arch: x86_64
             resolved_arch: x86_64
-    runs-on: macos-15-large
+    runs-on: macos-15
     name: opus-ios 
     permissions:
       contents: write
@@ -367,7 +367,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [x86_64, arm64, arm64s]  
-    runs-on: macos-15-large
+    runs-on: macos-15
     name: bcg729-ios 
     permissions:
       contents: write
@@ -461,7 +461,7 @@ jobs:
           sdk: iphonesimulator
           platform: iPhoneSimulator
       fail-fast: false
-    runs-on: macos-15-large
+    runs-on: macos-15
     needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
     name: pjsip - ios
     permissions:
@@ -869,7 +869,7 @@ jobs:
       BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/output/bcg729
 
   build-nupkg:
-    runs-on: macos-15-large
+    runs-on: macos-15
     name: build-nupkg
     needs: [pjsip-android, pjsip-ios]
     steps: 

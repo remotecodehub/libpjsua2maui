@@ -149,6 +149,17 @@ jobs:
       fail-fast: false
       matrix:
         arch: [x86_64, arm64, arm64s]
+        include:
+          - arch: x86_64
+            resolved_arch: x86_64
+            platform: iphonesimulator
+          - arch: arm64
+            resolved_arch: arm64
+            platform: iphoneos
+          - arch: arm64s
+            resolved_arch: arm64
+            platform: iphonesimulator
+          
     runs-on: macos-latest
     name: openssl-ios 
     permissions:
@@ -180,6 +191,7 @@ jobs:
         LIBCRYPTO_IOS=()
         LIBCRYPTO_IOSSIM=()
         export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
+        export SDKVERSION='$(xcrun -sdk ${{ matrix.platform }} --show-sdk-version)'
         export IOS_MIN_SDK_VERSION=12.2
         export CONFIG_DISABLE_BITCODE=true
         cd ${{ env.OPENSSL_PATH }}
@@ -187,46 +199,68 @@ jobs:
         chmod u+x ./Configure
         # Determine platform
         if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
-          PLATFORM="iPhoneSimulator"
-          SDK="iphonesimulator"
-          TARGET="ios-sim-cross-x86_64"
+            PLATFORM="iPhoneSimulator"
+            TARGET="ios-sim-cross-x86_64"
         elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
-          TARGET="ios-sim-cross-arm64"
-          SDK="iphonesimulator"
-          PLATFORM="iPhoneSimulator"
+            TARGET="ios-sim-cross-arm64"
+            PLATFORM="iPhoneSimulator"
         else
           TARGET="ios-cross-arm64"
-          SDK="iphoneos"
           PLATFORM="iPhoneOS"
         fi
         
-        export SDKVERSION=$(xcrun --sdk ${SDK} --show-sdk-version)
-        # Setup environment
-        export CROSS_TOP="$(xcode-select -p)/Platforms/${PLATFORM}.platform/Developer"
+        
+        # Extract ARCH from TARGET (part after last dash)
+        #ARCH=$(echo "${TARGET}" | sed -E 's|^.*\-([^\-]+)$|\1|g')
+        ARCH=${{ matrix.resolved_arch }}
+        # Cross compile references, see Configurations/10-main.conf
+        export CROSS_COMPILE="${{ env.DEVELOPER }}/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
+        export CROSS_TOP="${{ env.DEVELOPER }}/Platforms/${PLATFORM}.platform/Developer"
         export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
-        export BUILD_THREADS=$(sysctl -n hw.ncpu)
-        export PATH="$CROSS_TOP/usr/bin:$PATH"
 
-        # Output directory
-        TARGETDIR="${{ github.workspace }}/openssl-build/${PLATFORM}-${{ matrix.arch }}"
-        mkdir -p "$TARGETDIR"
+        # Prepare TARGETDIR  
+        TARGETDIR="${{ env.OPENSSL_PATH }}/bin/${PLATFORM}${SDKVERSION}-${{ matrix.resolved_arch }}.sdk"
+        echo "artifact=${TARGETDIR}" >> "$GITHUB_OUTPUT"
+        mkdir -p "${TARGETDIR}"
+        ## Determine config options
+        # Add build target, --prefix and prevent async (references to getcontext(),
+        # setcontext() and makecontext() result in App Store rejections) and creation
+        # of shared libraries (default since 1.1.0)
+        LOCAL_CONFIG_OPTIONS="${TARGET} --prefix=${TARGETDIR} ${CONFIG_OPTIONS} no-async no-shared"
 
-        # Configure flags
-        ./Configure ${TARGET} \
-          --prefix="$TARGETDIR" \
-          no-async no-shared no-tests
+        # Only relevant for 64 bit builds
+        if [[ "${CONFIG_ENABLE_EC_NISTP_64_GCC_128}" == "true" && "${{ matrix.resolved_arch }}" == *64  ]]; then
+            LOCAL_CONFIG_OPTIONS="${LOCAL_CONFIG_OPTIONS} enable-ec_nistp_64_gcc_128"
+        fi
 
-        make -j "$BUILD_THREADS"
-        make install_dev
+        # Run Configure
+        ./Configure ${LOCAL_CONFIG_OPTIONS} no-tests 
 
-        echo "artifact=$TARGETDIR" >> "$GITHUB_OUTPUT"
+        # Run make
+        echo "  Make (using ${{ env.BUILD_THREADS }} thread(s))..." 
+        make -j "${{ env.BUILD_THREADS }}"  
+
+
+        # Run make install
+        set -e 
+        make install_dev  
+
+        # Remove source dir, add references to library files to relevant arrays
+        # Keep reference to first build target for include file
+        if [[ "${PLATFORM}" == iPhoneOS ]]; then
+            LIBSSL_IOS+=("${TARGETDIR}/lib/libssl.a")
+            LIBCRYPTO_IOS+=("${TARGETDIR}/lib/libcrypto.a")
+            OPENSSLCONF_SUFFIX="ios_${{matrix.arch}}"
+        elif [[ "${PLATFORM}" == iPhoneSimulator ]]; then
+            LIBSSL_IOSSIM+=("${TARGETDIR}/lib/libssl.a")
+            LIBCRYPTO_IOSSIM+=("${TARGETDIR}/lib/libcrypto.a")
+            OPENSSLCONF_SUFFIX="ios_${{ matrix.arch }}"
+        fi
       shell: bash
 
       env:
         DEVELOPER: $(xcode-select -print-path)
-        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
-        BUILD_THREADS: $(sysctl -n hw.ncpu) 
-        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version) 
+        BUILD_THREADS: $(sysctl -n hw.ncpu)  
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

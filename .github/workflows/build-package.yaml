@@ -42,9 +42,10 @@ jobs:
       contents: write
     steps:
         
-    - name: Checkout openh264 v2.3.0
-      run: |
-        git clone --depth 1 --branch v2.3.0 https://github.com/cisco/openh264.git lib/openh264
+    - name: Checkout
+      uses: actions/checkout@v5
+      with:
+        submodules: true
   
     - name: Setup Xcode 16.4
       uses: maxim-lobanov/setup-xcode@v1
@@ -132,17 +133,17 @@ jobs:
             resolved_arch: x86_64
             sdk: iphonesimulator
             platform: iPhoneSimulator
-            target: darwin64-x86_64-cc
+            target: ios-sim-cross-x86_64
           - arch: arm64
             resolved_arch: arm64
             sdk: iphoneos
             platform: iPhoneOS
-            target: ios64-cross
+            target: ios-cross-arm64
           - arch: arm64s
             resolved_arch: arm64
             sdk: iphonesimulator
             platform: iPhoneSimulator
-            target: darwin64-arm64-cc
+            target: ios-sim-cross-arm64
     runs-on: macos-15
     name: openssl-ios 
     permissions:
@@ -150,11 +151,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
-
-    - name: Checkout openssl 1.1.1s
-      run: |
-        git clone --recursive --depth 1 --branch OpenSSL_1_1_1s https://github.com/openssl/openssl.git lib/openssl
-           
+        
+    - name: Checkout
+      uses: actions/checkout@v5
+      with:
+        submodules: true
+ 
     - name: Setup Xcode 16.4
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -262,10 +264,11 @@ jobs:
     permissions:
       contents: write
     steps:
- 
-    - name: Checkout opus v1.4
-      run: |
-        git clone --recursive --depth 1 --branch v1.4 https://github.com/xiph/opus.git lib/opus
+        
+    - name: Checkout
+      uses: actions/checkout@v5
+      with:
+        submodules: true
       
     - name: Setup Xcode 16.4
       uses: maxim-lobanov/setup-xcode@v1
@@ -372,11 +375,12 @@ jobs:
     permissions:
       contents: write
     steps:
+        
+    - name: Checkout
+      uses: actions/checkout@v5
+      with:
+        submodules: true
  
-    - name: Checkout BCG729 v1.1.1
-      run: |
-        git clone --recursive --depth 1 --branch 1.1.1 https://gitlab.linphone.org/BC/public/bcg729.git lib/bcg729
-       
     - name: Setup Xcode 16.4
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -470,11 +474,9 @@ jobs:
       
       - name: Checkout 
         uses: actions/checkout@v5
-
-      - name: Checkout latest pjsip
-        run: | 
-          git clone --recursive --branch 2.15.1 --depth=1 https://github.com/pjsip/pjproject.git lib/pjsip
-
+        with:
+          submodules: true
+ 
       - uses: actions/download-artifact@v4
         with:
           name: openssl-${{ matrix.arch }}

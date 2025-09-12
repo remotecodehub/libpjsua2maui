@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version 2.15.1.2
+
+    - ❇️ Fix missing native lib of bcg729 missing on package for android targets
+    - 🎯 Moved Repo to Remote Code Hub organization
+
 ## Version 2.15.1.1
 
     - ✅ Removed Warnings of page size from android native libs on android builds

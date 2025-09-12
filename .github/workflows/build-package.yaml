@@ -180,28 +180,27 @@ jobs:
         LIBCRYPTO_IOS=()
         LIBCRYPTO_IOSSIM=()
         export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
-        export SDKVERSION
-        export IOS_MIN_SDK_VERSION
-        export TVOS_MIN_SDK_VERSION
-        export WATCHOS_MIN_SDK_VERSION
-        export CONFIG_DISABLE_BITCODE
+        export IOS_MIN_SDK_VERSION=12.2
+        export CONFIG_DISABLE_BITCODE=true
         cd ${{ env.OPENSSL_PATH }}
         
         chmod u+x ./Configure
         # Determine platform
         if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
-            PLATFORM="iPhoneSimulator"
-            TARGET="ios-sim-cross-x86_64"
+          PLATFORM="iPhoneSimulator"
+          SDK="iphonesimulator"
+          TARGET="ios-sim-cross-x86_64"
         elif [[ "${{ matrix.arch }}" == "arm64s" ]]; then
-            TARGET="ios-sim-cross-arm64"
-            PLATFORM="iPhoneSimulator"
+          TARGET="ios-sim-cross-arm64"
+          SDK="iphonesimulator"
+          PLATFORM="iPhoneSimulator"
         else
           TARGET="ios-cross-arm64"
+          SDK="iphoneos"
           PLATFORM="iPhoneOS"
         fi
-         # SDK version
-        SDKVERSION=$(xcrun --sdk ${PLATFORM} --show-sdk-version)
-
+        
+        export SDKVERSION=$(xcrun --sdk ${SDK} --show-sdk-version)
         # Setup environment
         export CROSS_TOP="$(xcode-select -p)/Platforms/${PLATFORM}.platform/Developer"
         export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
@@ -224,8 +223,6 @@ jobs:
       shell: bash
 
       env:
-        IOS_MIN_SDK_VERSION: 12.2  
-        CONFIG_DISABLE_BITCODE: true
         DEVELOPER: $(xcode-select -print-path)
         SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
         BUILD_THREADS: $(sysctl -n hw.ncpu) 
@@ -985,7 +982,7 @@ jobs:
 
           # Executa nuget pack com verbosity detalhada e captura saída
           output=$(nuget pack libpjsua2maui.nuspec \
-            -Version "${{ env.VERSION }}" \
+            -Version "${VERSION}" \
             -BasePath "${{ github.workspace }}/src" \
             -NoPackageAnalysis \
             -NoDefaultExcludes \
@@ -999,7 +996,7 @@ jobs:
           else
             echo "✅ Validação bem-sucedida. Gerando pacote determinístico..."
             nuget pack libpjsua2maui.nuspec \
-              -Version "${{ env.VERSION }}" \
+              -Version "${VERSION}" \
               -BasePath "${{ github.workspace }}/src" \
               -NoPackageAnalysis \
               -NoDefaultExcludes
@@ -1008,22 +1005,22 @@ jobs:
       - name: Push to nuget.org
         run: |
           cd ${{ github.workspace }}/src
-          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${API_KEY} --skip-duplicate
+          dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${API_KEY} --skip-duplicate
         env:
           API_KEY: ${{ secrets.API_KEY }}
 
       - name: Publicar pacote no GitHub Packages
         run: |
           cd ${{ github.workspace }}/src/
-          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "${NUGET_TOKEN}" --skip-duplicate
+          dotnet nuget push libpjsua2maui.${VERSION}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "${NUGET_TOKEN}" --skip-duplicate
         env:
           NUGET_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Upload nuget artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: libpjsua2maui.${{ env.VERSION }}.nupkg
-          path: ${{ github.workspace }}/src/libpjsua2maui.${{ env.VERSION }}.nupkg
+          name: libpjsua2maui.${VERSION}.nupkg
+          path: ${{ github.workspace }}/src/libpjsua2maui.${VERSION}.nupkg
           overwrite: true
 
       - name: Extract release notes from CHANGELOG.md
@@ -1037,10 +1034,6 @@ jobs:
             in_block && /^[[:space:]]*-/ { print }
           ' CHANGELOG.md > RELEASE_BODY.md
 
-          echo "RELEASE_BODY<<EOF" >> $GITHUB_ENV
-          cat RELEASE_BODY.md >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
       - name: Create GitHub Release
         if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
         id: create_release
@@ -1048,7 +1041,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           release_name: ${{ github.ref_name }}
-          body: ${{ env.RELEASE_BODY }}
+          body_path: RELEASE_BODY.md
           draft: false
           prerelease: false
         env:

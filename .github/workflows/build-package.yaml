@@ -1033,7 +1033,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Validate and Pack NuGet (deterministic)
-        shell: zsh
+        shell: sh
         run: |
           cd "${{ github.workspace }}/src"
           echo "🔍 Validando .nuspec com nuget pack (modo dry-run)..."
@@ -1059,16 +1059,6 @@ jobs:
               -NoPackageAnalysis \
               -NoDefaultExcludes
           fi
-      
-      - name: Pack NuGet (deterministic)
-        shell: zsh
-        run: |
-          cd "${{ github.workspace }}/src"
-          nuget pack libpjsua2maui.nuspec \
-            -Version "${{ env.VERSION }}" \
-            -BasePath "${{ github.workspace }}/src" \
-            -NoDefaultExcludes \
-            -NoPackageAnalysis
 
       - name: Add GitHub NuGet Source
         run: dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name github --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text

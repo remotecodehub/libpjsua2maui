@@ -1,6 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LibVersion>2.15.1.1</LibVersion>
+    <LibVersion>2.15.1.2</LibVersion>
     <NuGetPathUnix>$(NuGetPackageRoot.Replace('\', '/'))</NuGetPathUnix>
   </PropertyGroup>
  
@@ -43,15 +43,18 @@
 
 
   <!-- iOS Static Libraries -->
-  <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+  <ItemGroup Condition="$(TargetFramework.Contains('.0-ios'))">
     <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native/libpjsua2.a">
       <Link>Platforms/iOS/lib/arm64/libpjsua2.a</Link>
+      <Visible>True</Visible>
     </None>
     <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native/libpjsua2.a">
       <Link>Platforms/iOS/lib/arm64s/libpjsua2.a</Link>
+      <Visible>True</Visible>
     </None>
     <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native/libpjsua2.a">
       <Link>Platforms/iOS/lib/x86_64/libpjsua2.a</Link>
+      <Visible>True</Visible>
     </None>
   </ItemGroup>
 

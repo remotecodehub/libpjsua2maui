@@ -529,10 +529,10 @@ jobs:
           fi
            
           ARCH="-arch ${{ matrix.resolved_arch }}" ./configure-iphone \
-              --with-bcg729=${{ github.workspace }}/libs/bcg729/ \
-              --with-ssl=${{ github.workspace }}/libs/ssl/ \
-              --with-opus=${{ github.workspace }}/libs/opus/ \
-              --with-openh264=${{ github.workspace }}/libs/h264/
+              --with-bcg729=${{ github.workspace }}/libs/bcg729 \
+              --with-ssl=${{ github.workspace }}/libs/ssl \
+              --with-opus=${{ github.workspace }}/libs/opus \
+              --with-openh264=${{ github.workspace }}/libs/h264
           echo "FLAGS AFTER CONFIGURE:"
           echo ""
           echo "CFLAGS=${CFLAGS}"

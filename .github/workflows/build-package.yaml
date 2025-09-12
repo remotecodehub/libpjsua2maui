@@ -533,7 +533,7 @@ jobs:
           export SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
           export IPHONESDK="${{ matrix.platform}}${SDKVERSION}.sdk" 
           export DEVPATH="$(xcode-select -p)/Platforms/${{ matrix.platform }}.platform/Developer"
-          export SDKROOT="{$DEVPATH}/SDKs/${{ matrix.platform }}.sdk"
+          export SDKROOT="${DEVPATH}/SDKs/${{ matrix.platform }}.sdk"
           export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
 
           if [ "${{ matrix.arch }}" == "arm64" ]; then

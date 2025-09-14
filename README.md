@@ -22,3 +22,7 @@ dotnet add package libpjsua2maui
 ## Usage
 
 - [Setup of package](./src/README.md#usage/)
+
+## Changelog
+
+- [CHANGELOG](./CHANGELOG.md)

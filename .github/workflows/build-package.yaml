@@ -1038,27 +1038,4 @@ jobs:
           path: ${{ github.workspace }}/src/libpjsua2maui.${VERSION}.nupkg
           overwrite: true
 
-      - name: Extract release notes from CHANGELOG.md
-        id: changelog
-        if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
-        run: |
-          TAG=${GITHUB_REF#refs/tags/v}
-          awk -v tag="## Version ${TAG}" '
-            $0 ~ tag { in_block=1; next }
-            in_block && /^## Version / { exit }
-            in_block && /^[[:space:]]*-/ { print }
-          ' CHANGELOG.md > RELEASE_BODY.md
-
-      - name: Create GitHub Release
-        if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
-        id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          body_path: RELEASE_BODY.md
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
  

@@ -36,7 +36,7 @@
   <ItemGroup Condition="$(TargetFramework.Contains('android'))">
     <AndroidJavaSource
       Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCamera*.java">
-      <Link>Platforms/Android/org/pjsip/PjCamera2.java</Link>
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
       <Bind />
     </AndroidJavaSource>
   </ItemGroup>

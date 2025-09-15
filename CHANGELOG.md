@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 2.15.1.3
+
+    - ❇️ Fix missing java sources not linked to consumer project from package on android targets
+
 ## Version 2.15.1.2
 
     - ❇️ Fix missing native lib of bcg729 missing on package for android targets

@@ -998,10 +998,10 @@ jobs:
           dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
 
       - name: Build MAUI Android
-        run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net9.0-android --no-restore
+        run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android --no-restore
         
       - name: Build MAUI iOS
-        run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net9.0-ios --no-restore
+        run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios --no-restore
       
       - name: Set VERSION variable
         if: startsWith(github.ref, 'refs/tags/')

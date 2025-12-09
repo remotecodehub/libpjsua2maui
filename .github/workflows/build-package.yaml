@@ -981,6 +981,18 @@ jobs:
       - name: Restore Dependencies
         run: | 
           cd ${{ github.workspace }}/src/
+          echo "⏳ Limpando workloads anteriores..."
+          dotnet workload uninstall maui --ignore-failed-sources || true
+          dotnet workload uninstall android --ignore-failed-sources || true
+          dotnet workload uninstall ios --ignore-failed-sources || true
+
+          echo "⏳ Instalando workloads MAUI 10..."
+          dotnet workload install maui --source https://api.nuget.org/v3/index.json --skip-manifest-update
+          dotnet workload install android --source https://api.nuget.org/v3/index.json --skip-manifest-update
+          dotnet workload install ios --source https://api.nuget.org/v3/index.json --skip-manifest-update
+
+          echo "⏳ Atualizando todos os workloads..."
+          dotnet workload update
           dotnet workload restore $(find . -name "*.sln" | head -n 1)
           dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
           dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj

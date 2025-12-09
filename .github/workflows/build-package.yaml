@@ -871,13 +871,18 @@ jobs:
       BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/output/bcg729
 
   build-nupkg:
-    runs-on: macos-15
+    runs-on: macos-26
     name: build-nupkg
     needs: [pjsip-android, pjsip-ios]
     steps: 
       - name: Checkout
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
- 
+        uses: actions/checkout@v5
+    
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          
       - name: Setup nuget 
         run: brew install nuget
  

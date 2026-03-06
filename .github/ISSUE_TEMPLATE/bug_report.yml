@@ -1,0 +1,83 @@
+name: 🐞 Bug Report
+description: Create a new bug report.
+title: '🐞 [BUG]: <title>'
+labels: [Bug, Needs Triage]
+body:
+
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: 'Please [search :mag: the issues](https://github.com/remotecodehub/libpjsua2maui/issues) to check if this bug has already been reported.'
+      options:
+      - label: I have searched the existing issues
+        required: true
+  
+  - type: input
+    attributes:
+      label: libpjsua2maui version
+      description: What libpjsua2maui version are you running?
+      placeholder: Output of `dotnet list package | grep libpjsua2maui` at the root of your project (or in Windows `dotnet list package | findstr libpjsua2maui`)
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Is this issue reproducible using the latest package?
+      description: |
+        You can retrieve the latest libpjsua2maui version number by running `dotnet package search libpjsua2maui`. If you are not up to date, please try to reproduce your issue after updating all affected code.
+      options:
+      - label: I confirm the issue is still reproducible with the latest package versions
+
+  - type: textarea
+    attributes:
+      label: Current Behavior
+      description: Describe the problem you are experiencing. **Please do not paste your logs here.** Screenshots are welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: Describe what you expect to happen instead.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: pjsua2 Log
+      description: |
+        Please create a [Gist](https://gist.github.com) with your _full_ pjsua2 log and link it here. Alternatively, you can directly attach your logfile in the "Further Information" field below.
+
+        :warning: _Remember to redact or remove any sensitive information!_
+      placeholder: 'https://gist.github.com/...'
+
+  - type: textarea
+    attributes:
+      label: Environment Details
+      description: |
+        Please provide additional information about your environment; feel free to remove any items which are not relevant.
+
+        :warning: _Remember to redact or remove any sensitive information!_
+      value: |
+          - Last package version(s) which did _not_ exhibit the problem:
+          - Platform and version of device under test:
+          - Real device or emulator/simulator:
+
+  - type: textarea
+    attributes:
+      label: Minimal Reproducible Example
+      description: |
+        Please provide [the smallest, complete code snippet](https://stackoverflow.com/help/minimal-reproducible-example) that libpjsua2maui's maintainers can run to reproduce the issue. An easy way to get started is to create a new maui app project, install the package according to your needs. Failing this, any sort of reproduction steps are better than nothing!
+
+        If the result is more than a screenful of text _or_ requires multiple files, please:
+
+        - _Attach_ (do not paste) it to this textarea, _or_
+        - Put it in a [Gist](https://gist.github.com) and paste the link, _or_
+        - Provide a link to a new or existing public repository exhibiting the issue
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Further Information
+      description: If needed, please provide additional information about your issue (attachments, links, references, etc.).

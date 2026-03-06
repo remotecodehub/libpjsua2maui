@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net9.0-android</TargetFramework>
+		<TargetFramework>net10.0-android</TargetFramework>
 		<RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
 		<UseMaui>true</UseMaui>
 		<TargetPlatformMinVersion>21</TargetPlatformMinVersion>
@@ -15,9 +15,9 @@
   </PropertyGroup>
 	<PropertyGroup>
 		<PackageId>libpjsua2maui.android</PackageId>
-	    <Version>2.15.1.3</Version>
-    <AssemblyVersion>2.15.1.3</AssemblyVersion>
-    <FileVersion>2.15.1.3</FileVersion>
+	    <Version>2.16</Version>
+    <AssemblyVersion>2.16</AssemblyVersion>
+    <FileVersion>2.16</FileVersion>
 		<Title>PJSIP bindings for .NET MAUI</Title>
 	    <Authors>Weslley Murdock</Authors>
 	    <Company>Remote Code Hub</Company>
@@ -26,19 +26,19 @@
 		<PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
 		<Description>PJSIP libpjsua2 bindings for .NET MAUI
 			Provides PJSIP bindings for .NET MAUI.
-			Pjsip version used is 2.15.1, using thirdy party libs such as openh264, openssl, opus and bcg729
+			Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
 			#NOTES
 			Min Android version : 9.0 (API 28)
-			Target Android version : 14.0 (API 33)
+			Target Android version : 16.0 (API 36)
 			
 			This library enables working with the pjsip SIP stack implementation for make voip
 			calls.
 			For this release see notes -
-			https://github.com/weslleymurdock/pjsua2maui/blob/main/README.md and
-			https://github.com/weslleymurdock/pjsua2maui/blob/main/CHANGELOG.md
+			https://github.com/remotecodehub/libpjsua2maui/blob/main/README.md and
+			https://github.com/remotecodehub/libpjsua2maui/blob/main/CHANGELOG.md
 		</Description>
-		<PackageProjectUrl>https://github.com/weslleymurdock/libpjsua2maui</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/weslleymurdock/libpjsua2maui.git</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/remotecodehub/libpjsua2maui</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/remotecodehub/libpjsua2maui/libpjsua2maui.git</RepositoryUrl>
 	</PropertyGroup>
 	<ItemGroup>
 	  <AndroidResource Remove="org\pjsip\**" />

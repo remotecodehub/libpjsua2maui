@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version 2.16
+
+    - ⬆️ upgrade pjsip version
+    - ⬆️ upgrade .net version of package
+        
 ## Version 2.15.1.3
 
     - ❇️ Fix missing java sources not linked to consumer project from package on android targets

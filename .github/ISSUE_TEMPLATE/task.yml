@@ -1,0 +1,45 @@
+name: 💡 Task
+description: An task (of many) from a feature.
+title: "💡 [TASK]: <title>"
+labels: [Enhancement]
+body:
+
+  - type: markdown
+    attributes:
+      value: "## User Story"
+
+  - type: dropdown
+    id: user_type
+    attributes:
+      label: "As a:"
+      description: "Select the user type."
+      options:
+        - "Developer"
+        - "Contributor"
+        - "End User"
+    validations:
+      required: true
+
+
+  - type: textarea
+    id: user_story
+    attributes:
+      label: ", I"
+      description: A clear description of requisite for the task in user story form. Ex. As a developer, i wanna use the library X with support to platform Y [...].
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "## Tasks"
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: " "
+      description: "Add tasks for complete this requisite (one per-line)."
+      value: |
+        - [ ] Task 1
+        - [ ] Task 2
+    validations:
+      required: true

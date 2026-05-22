@@ -149,7 +149,7 @@ jobs:
 
         sdk_path="${xcode_dev_path}/Platforms/${{ matrix.os_platform }}.platform/Developer/SDKs/${{ matrix.os_platform }}.sdk"
 
-        build_dir="${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk"
+        build_dir="${{ github.workspace }}/${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk"
         rm -rf "$build_dir" CMakeFiles CMakeCache.txt
 
         mkdir -p "$build_dir"
@@ -1890,7 +1890,7 @@ jobs:
         id: cache-libs
         with:
           path: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          key: ${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
+          key: ${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - uses: actions/checkout@v6
       - name: Clone PJSIP

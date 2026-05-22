@@ -8,14 +8,15 @@
         <owners>Remote Code Hub</owners>
         <projectUrl>http://github.com/remotecodehub/libpjsua2maui</projectUrl>
         <description>
-            PJSIP bindings for .NET MAUI using version 2.16 with openh264, openssl, opus,
-            and bcg729.
-            The builds of native libraries targets iOS devices (arm64), iOS simulators (arm64, x86_64),
-            android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
+PJSIP bindings for .NET MAUI using version 2.16 with openh264, openssl, opus,
+and bcg729.
+The builds of native libraries targets iOS devices (arm64), iOS simulators (arm64, x86_64),
+android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
         </description>
         <releaseNotes>
-            - ❇️ Added macosx support
-            - 🐞 Bugfix: Android java classes not found
+- 🧩 Feature: Add MacOSX support (both arm64 and x86_64)
+- 🐞 BugFix: Android java classes not found at startup fixed
+- ⬆️ Upgrade: Using ios/macosx sdk version 26.2 as version target
         </releaseNotes>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <license type="expression">GPL-3.0-only</license>
@@ -97,6 +98,7 @@
 
         <!-- README -->
         <file src="README.md" target="." />
+        <file src="..\docs\README.md" target="docs" />
         <!-- LICENSE -->
         <file src="LICENSE" target="." />
         <!-- ICON -->

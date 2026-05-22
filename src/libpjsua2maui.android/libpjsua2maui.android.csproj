@@ -10,31 +10,28 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<RootNamespace>pjsua2maui.pjsua2</RootNamespace>
 		<AssemblyName>pjsua2maui.android</AssemblyName>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
-  </PropertyGroup>
-	<PropertyGroup>
-		<PackageId>libpjsua2maui.android</PackageId>
-	    <Version>2.16</Version>
-    <AssemblyVersion>2.16</AssemblyVersion>
-    <FileVersion>2.16</FileVersion>
+		<SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+  		<PackageId>libpjsua2maui.android</PackageId>
+	    <Version>2.16.0.1</Version>
+		<AssemblyVersion>2.16.0.1</AssemblyVersion>
+		<FileVersion>2.16.0.1</FileVersion>
 		<Title>PJSIP bindings for .NET MAUI</Title>
 	    <Authors>Weslley Murdock</Authors>
 	    <Company>Remote Code Hub</Company>
 		<Copyright>Copyright ©2026 Remote Code Hub</Copyright>
 		<PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
-		<Description>PJSIP libpjsua2 bindings for .NET MAUI
-			Provides PJSIP bindings for .NET MAUI.
-			Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
-			#NOTES
-			Min Android version : 9.0 (API 28)
-			Target Android version : 16.0 (API 36)
-			
-			This library enables working with the pjsip SIP stack implementation for make voip
-			calls.
-			For this release see notes -
-			https://github.com/remotecodehub/libpjsua2maui/blob/main/README.md and
-			https://github.com/remotecodehub/libpjsua2maui/blob/main/CHANGELOG.md
+		<Description>##PJSIP libpjsua2 bindings for .NET MAUI
+Provides PJSIP bindings for .NET MAUI.
+Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
+#NOTES
+Min Android version : 9.0 (API 28)
+Target Android version : 16.0 (API 36)
+
+This library enables working with the pjsip SIP stack implementation for make voip
+calls.
+For this release see notes -
+https://github.com/remotecodehub/libpjsua2maui/blob/main/README.md and
+https://github.com/remotecodehub/libpjsua2maui/blob/main/CHANGELOG.md
 		</Description>
 		<PackageProjectUrl>https://github.com/remotecodehub/libpjsua2maui</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/remotecodehub/libpjsua2maui/libpjsua2maui.git</RepositoryUrl>
@@ -48,10 +45,18 @@
 	  <None Remove="org\pjsip\**" />
 	</ItemGroup>
 	<ItemGroup>
-	  <None Update="LICENSE">
-	    <PackagePath>\</PackagePath>
-	    <Pack>True</Pack>
-	  </None>
+        <None Update="..\LICENSE">
+            <PackagePath>\</PackagePath>
+            <Pack>True</Pack>
+        </None>
+        <None Update="..\README.md">
+            <PackagePath>\</PackagePath>
+            <Pack>True</Pack>
+        </None>
+        <None Update="..\..\docs\README.md">
+            <PackagePath>\docs</PackagePath>
+            <Pack>True</Pack>
+        </None>
 	</ItemGroup>
 	
 </Project>

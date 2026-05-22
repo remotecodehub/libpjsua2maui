@@ -34,9 +34,7 @@ jobs:
 
   bcg729-android:
     runs-on: ubuntu-latest
-    
     steps:
-        
       - name: Checkout repository
         uses: actions/checkout@v6
 
@@ -59,7 +57,7 @@ jobs:
           docker cp bcg729-build:/root/outputs/libs ${{ github.workspace }}/bcg729-output
  
       - name: Upload bcg729 Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bcg729-android
           path: ./bcg729-output 
@@ -139,7 +137,7 @@ jobs:
         echo "artifact=${{ env.BCG729_PATH }}/$build_dir/" >> "$GITHUB_OUTPUT"
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: bcg729-${{ matrix.arch }}
         path: ${{ steps.build.outputs.artifact }}
@@ -270,7 +268,7 @@ jobs:
           docker cp openh264-build:/root/outputs/libs ${{ github.workspace }}/libopenh264-output
            
       - name: Upload OpenH264 Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: openh264-android
           path: ${{ github.workspace }}/libopenh264-output
@@ -369,12 +367,11 @@ jobs:
       shell: bash
  
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: openh264-${{ matrix.arch }}
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
-
 
   openh264-mac:
     runs-on: macos-26
@@ -513,7 +510,7 @@ jobs:
           
 
       - name: Upload openssl Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: openssl-android
           path: ./openssl-output
@@ -637,7 +634,7 @@ jobs:
         BUILD_THREADS: $(sysctl -n hw.ncpu)  
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: openssl-${{ matrix.arch }}
         path: ${{ steps.build.outputs.artifact }}
@@ -794,7 +791,7 @@ jobs:
           docker cp opus-build:/root/outputs/ ${{ github.workspace }}/opus-output
 
       - name: Upload opus Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: opus-android
           path: ${{ github.workspace }}/opus-output 
@@ -910,7 +907,7 @@ jobs:
 
         
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: opus-${{ matrix.arch }}
         path: ${{ steps.build.outputs.artifact }}
@@ -1160,21 +1157,21 @@ jobs:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
     - name: Upload pjsip artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: pjsip-android-${{ matrix.arch }}
         path: ${{ steps.build-pj.outputs.artifact }}
         overwrite: true
 
     - name: Upload csharp artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: csharp-${{ matrix.arch }}
         path: ${{ steps.build-pj.outputs.csharp }}
         overwrite: true
   
     - name: Upload java artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: java-${{ matrix.arch }}
         path: ${{ steps.build-pj.outputs.java }}
@@ -1318,7 +1315,7 @@ jobs:
           BUILD_THREADS: $(sysctl -n hw.ncpu)
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pjsip-${{ matrix.arch }}
           path: ${{ steps.build-pj-ios.outputs.artifact }}
@@ -1509,7 +1506,7 @@ jobs:
   build-nupkg:
     runs-on: macos-26
     name: build-nupkg
-    needs: [pjsip-android, pjsip-ios]
+    needs: [pjsip-android, pjsip-ios, pjsip-mac]
     steps: 
       - name: Checkout
         uses: actions/checkout@v6
@@ -1580,58 +1577,110 @@ jobs:
         with:
           name: pjsip-arm64s
           path: ./artifacts/ios/pjsip-arm64s
-        
+
+      - uses: actions/download-artifact@v8
+        name: Download pjsip macos (arm64)
+        with:
+          name: pjsip-MacOSX${{ env.SDKVERSION }}-arm64.sdk
+          path: ${{ env.PJ_PATH }}
+        env:
+          PJ_PATH: ${{ github.workspace }}/artifacts/mac/pjsip-arm64
+
+      - uses: actions/download-artifact@v8
+        name: Download pjsip macos (x64)
+        with:
+          name: pjsip-MacOSX${{ env.SDKVERSION }}-x86_64.sdk
+          path: ${{ env.PJ_PATH }}
+        env:
+          PJ_PATH: ${{ github.workspace }}/artifacts/mac/pjsip-x86_64
+
       - name: Prepare Dirs
         run: |
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/armeabi-v7a
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/arm64-v8a
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.so/lib/org/pjsip
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/arm64s
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64s
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
+ 
+          # Move managed classes to projects directory
           mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip/
           mv ${{ github.workspace }}/artifacts/android/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
-          mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86
-          mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.so/lib/x86_64
-          mv ${{ github.workspace }}/artifacts/android-armeabi-v7a/* ${{ github.workspace }}/src/libpjsua2.so/lib/armeabi-v7a
-          mv ${{ github.workspace }}/artifacts/android-arm64-v8a/* ${{ github.workspace }}/src/libpjsua2.so/lib/arm64-v8a
-          mv ${{ github.workspace }}/artifacts/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
-          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/arm64s
-          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
-          cd  ${{ github.workspace }}/src/libpjsua2.a/lib/x86_64
-          libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
-          rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a
-          cd ${{ github.workspace }}/src/libpjsua2.a/lib/arm64s
-          libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
-          rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a
-          cd ${{ github.workspace }}/src/libpjsua2.a/lib/arm64
-          libtool -static -o libpjsua2.a libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a libpjsua2.a
-          rm -rf libbcg729.a libcrypto.a libssl.a libopenh264.a libopus.a
+          mv ${{ github.workspace }}/artifacts/mac/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
           
+          # Move android libs to packaging directory
+          mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
+          mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
+          mv ${{ github.workspace }}/artifacts/android-armeabi-v7a/* ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
+          mv ${{ github.workspace }}/artifacts/android-arm64-v8a/* ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
+          
+          # Move ios libs to packaging directory
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
+          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
+          
+          # Move mac libs to packaging directory
+          mv ${{ github.workspace }}/artifacts/mac/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
+          mv ${{ github.workspace }}/artifacts/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
+          
+          cd  ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
+          mkdir tmp
+          mv *.a tmp
+          libtool -static -o libpjsua2.a ./tmp/*.a 
+          rm -rf tmp
+          cd ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
+          mkdir tmp
+          mv *.a tmp
+          libtool -static -o libpjsua2.a ./tmp/*.a 
+          rm -rf tmp
+          cd ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
+          mkdir tmp
+          mv *.a tmp
+          libtool -static -o libpjsua2.a ./tmp/*.a 
+          rm -rf tmp
+          cd ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
+          mkdir tmp
+          mv *.a tmp
+          libtool -static -o libpjsua2.a ./tmp/*.a 
+          rm -rf tmp
+          cd ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
+          mkdir tmp
+          mv *.a tmp
+          libtool -static -o libpjsua2.a ./tmp/*.a 
+          rm -rf tmp
+        env:
+          BUILT_OUTPUT_PATH: ${{ github.workspace }}/pjsip-MacOSX${{ env.SDKVERSION }}.sdk         
+      
       - name: Restore Dependencies
+        working-directory: src
         run: | 
-          cd ${{ github.workspace }}/src/
-          echo "⏳ Limpando workloads anteriores..."
+          echo "⏳ Cleaning old workloads..."
           dotnet workload uninstall maui --ignore-failed-sources || true
           dotnet workload uninstall android --ignore-failed-sources || true
           dotnet workload uninstall ios --ignore-failed-sources || true
+          dotnet workload uninstall maccatalyst --ignore-failed-sources || true
 
-          echo "⏳ Instalando workloads MAUI 10..."
+          echo "⏳ Installing workloads MAUI 10..."
           dotnet workload install maui --source https://api.nuget.org/v3/index.json --skip-manifest-update
           dotnet workload install android --source https://api.nuget.org/v3/index.json --skip-manifest-update
           dotnet workload install ios --source https://api.nuget.org/v3/index.json --skip-manifest-update
+          dotnet workload install maccatalyst --source https://api.nuget.org/v3/index.json --skip-manifest-update
 
-          echo "⏳ Atualizando todos os workloads..."
+          echo "⏳ Updating all workloads..."
           dotnet workload update
-          dotnet workload restore $(find . -name "*.sln" | head -n 1)
+          dotnet workload restore $(find . -name "*.slnx" | head -n 1)
           dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
           dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
+          dotnet restore libpjsua2maui.mac/libpjsua2maui.mac.csproj
 
       - name: Build MAUI Android
         run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android --no-restore
@@ -1639,12 +1688,24 @@ jobs:
       - name: Build MAUI iOS
         run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios --no-restore
       
+      - name: Build MAUI MacOSX
+        run: dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -f net10.0-maccatalyst --no-restore
+      
       - name: Set VERSION variable
-        if: startsWith(github.ref, 'refs/tags/')
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+        run: |
+          NUSPEC_PATH="${{ github.workspace }}/src/libpjsua2maui.nuspec"
+          
+          VERSION=$(xmllint --xpath "//*[local-name()='version']/text()" "$NUSPEC_PATH" 2>/dev/null | xargs)
+          
+          if [ -n "$VERSION" ]; then
+            echo "Found version: $VERSION"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          else
+            echo "Error: Tag <version> not found at .nuspec file"
+            exit 1
+          fi
 
-      - name: Validate and Pack NuGet (deterministic)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Validate and Pack NuGet 
         shell: sh
         run: |
           cd "${{ github.workspace }}/src"
@@ -1672,6 +1733,16 @@ jobs:
           fi
         env: 
           VERSION: ${{ env.VERSION }}
+
+      - name: Upload nuget artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: libpjsua2maui.${{ env.VERSION }}.nupkg
+          path: ${{ github.workspace }}/src/*.nupkg
+          overwrite: true
+        env: 
+          VERSION: ${{ env.VERSION }}
+
       - name: Push to nuget.org
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -1688,14 +1759,4 @@ jobs:
           dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key "${NUGET_TOKEN}" --skip-duplicate
         env:
           NUGET_TOKEN: ${{ secrets.GH_TOKEN }}
-          VERSION: ${{ env.VERSION }}
-
-      - name: Upload nuget artifacts
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v4
-        with:
-          name: libpjsua2maui.${{ env.VERSION }}.nupkg
-          path: ${{ github.workspace }}/src/*.nupkg
-          overwrite: true
-        env: 
           VERSION: ${{ env.VERSION }}

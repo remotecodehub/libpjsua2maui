@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version 2.16.0.1
+
+    - 🧩 Feature: Add MacOSX support (both arm64 and x86_64)
+    - 🐞 BugFix: Android java classes not found at startup fixed
+    - ⬆️ Upgrade: Using ios/macosx sdk version 26.2 as version target
+        
 ## Version 2.16
 
     - ⬆️ upgrade pjsip version

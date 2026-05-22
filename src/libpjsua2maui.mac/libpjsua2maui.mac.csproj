@@ -1,13 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0-ios</TargetFramework>
+        <TargetFramework>net10.0-maccatalyst</TargetFramework>
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
-        <AssemblyName>pjsua2maui.ios</AssemblyName>
+        <AssemblyName>pjsua2maui.mac</AssemblyName>
         <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
-        <PackageId>libpjsua2maui.ios</PackageId>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+        <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
+        <PackageId>libpjsua2maui.mac</PackageId>
         <Version>2.16.0.1</Version>
         <AssemblyVersion>2.16.0.1</AssemblyVersion>
         <FileVersion>2.16.0.1</FileVersion>
@@ -20,8 +22,8 @@
 Provides .NET for ios bindings for libpjsua2 by pjsip.
 Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
 #NOTES
-Min iOS version : 12.2
-Target iOS version : 26.2
+Min MacOSX version : 14.0
+Target MacOSX version : 26.2
 
 This library enables working with the pjsip SIP stack implementation for make voip
 calls.

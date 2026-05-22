@@ -1,7 +1,9 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LibVersion>2.15.1.2</LibVersion>
-    <NuGetPathUnix>$(NuGetPackageRoot.Replace('\', '/'))</NuGetPathUnix>
+    <LibVersion>2.16.0.1</LibVersion> 
+    <NuGetPathUnix Condition="'$(MSBuildRuntimeType)' == 'Core' AND '$(OS)' != 'Windows_NT'">$(NuGetPackageRoot.Replace('\',
+      '/'))</NuGetPathUnix>
+    <NuGetPathUnix Condition="'$(NuGetPathUnix)' == ''">$(NuGetPackageRoot)</NuGetPathUnix>
   </PropertyGroup>
  
   <!-- Android Native Libraries -->
@@ -35,10 +37,26 @@
   <!-- Android Java Bindings -->
   <ItemGroup Condition="$(TargetFramework.Contains('android'))">
     <AndroidJavaSource
-      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCamera*.java">
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCamera.java">
       <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
       <Bind />
     </AndroidJavaSource>
+   <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCamera2.java">
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
+      <Bind />
+    </AndroidJavaSource>
+   <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCameraInfo.java">
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
+      <Bind />
+    </AndroidJavaSource>
+   <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCameraInfo2.java">
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
+      <Bind />
+    </AndroidJavaSource>
+
   </ItemGroup>
 
 
@@ -95,4 +113,28 @@
     </NativeReference>
   </ItemGroup>
 
+  <!-- MacOSX Native Linking -->
+  <ItemGroup
+    Condition="($(RuntimeIdentifier.StartsWith('maccatalyst-arm64'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native/libpjsua2.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <SmartLink>False</SmartLink>
+      <IsCxx>True</IsCxx>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
+    </NativeReference>
+  </ItemGroup>
+
+  <ItemGroup
+    Condition="('$(RuntimeIdentifier.StartsWith('maccatalyst-x86_64')))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native/libpjsua2.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <SmartLink>False</SmartLink>
+      <IsCxx>True</IsCxx>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
+    </NativeReference>
+  </ItemGroup>
 </Project>

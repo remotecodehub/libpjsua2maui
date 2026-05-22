@@ -247,7 +247,7 @@ jobs:
           SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
 
-  build-bcg729:
+  bcg729-win:
     name: Build BCG729 Static (x64)
     runs-on: windows-2022
 
@@ -572,6 +572,101 @@ jobs:
         env:
           SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+
+  openh264-win:
+    name: Build OpenH264 Static (x64)
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+            arch: x64
+
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
+
+      - name: Create directories
+        shell: pwsh
+        run: |
+            New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
+            New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+            New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+
+      - name: Clone OpenH264
+        shell: pwsh
+        run: |
+            git clone `
+            --branch "${env:OPENH264_VERSION}" `
+            --depth 1 `
+            https://github.com/cisco/openh264.git `
+            openh264
+
+
+      - name: Configure MSVC
+        shell: cmd
+        run: |
+            call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
+            echo Visual Studio environment loaded
+            where cl
+            where msbuild
+
+      - name: Build OpenH264
+        shell: cmd
+        working-directory: openh264
+        run: |
+            set ARCH=x86_64
+
+            make OS=msvc ARCH=%ARCH% BUILDTYPE=Release ^
+            ENABLE64BIT=Yes ^
+            DEBUGSYMBOLS=False 
+
+            IF %ERRORLEVEL% NEQ 0 (
+            exit /b %ERRORLEVEL%
+            )
+
+      - name: Prepare artifact structure
+        shell: pwsh
+        run: |
+            $target = "install/openh264/x64"
+
+            New-Item -ItemType Directory -Force -Path "$target\bin" | Out-Null
+            New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
+            New-Item -ItemType Directory -Force -Path "$target\include\wels" | Out-Null
+
+      - name: Collect static libraries
+        shell: pwsh
+        run: |
+            $target = "install/openh264/x64/lib"
+
+            Get-ChildItem openh264 -Recurse -Filter *.lib |
+            Copy-Item -Destination $target -Force
+
+      - name: Collect headers
+        shell: pwsh
+        run: |
+            $target = "install/openh264/x64/include/wels"
+
+            Get-ChildItem openh264/codec/api/wels -Filter *.h |
+            Copy-Item -Destination $target -Force
+
+      - name: List generated files
+        if: always()
+        shell: pwsh
+        run: |
+            Get-ChildItem "install/openh264" -Recurse
+
+      - name: Upload OpenH264 artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: openh264-x64
+            path: |
+              install/openh264/x64/**/*
+            if-no-files-found: warn
 
   openssl-android:
     runs-on: ubuntu-latest

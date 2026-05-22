@@ -38,7 +38,7 @@ jobs:
     steps:
         
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/bcg729-output
@@ -77,7 +77,7 @@ jobs:
     steps:
         
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: true
  
@@ -249,7 +249,7 @@ jobs:
     steps:
        
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/libopenh264-output
@@ -295,7 +295,7 @@ jobs:
     steps:
         
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: true
   
@@ -491,7 +491,7 @@ jobs:
     steps:
         
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/openssl-output
@@ -546,10 +546,10 @@ jobs:
       contents: write
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
         
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: true
  
@@ -774,7 +774,7 @@ jobs:
     steps:
           
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/opus-output
@@ -819,7 +819,7 @@ jobs:
     steps:
         
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: true
       
@@ -1046,7 +1046,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         submodules: 'true'
         
@@ -1087,22 +1087,22 @@ jobs:
           libc6-dev"
         sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
     
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: openssl-android
         path: ${{ github.workspace }}/output/openssl
       
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: openh264-android
         path: ${{ github.workspace }}/output/openh264/
         
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: opus-android
         path: ${{ github.workspace }}/output/opus/
         
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: bcg729-android
         path: ${{ github.workspace }}/output/bcg729/
@@ -1224,27 +1224,27 @@ jobs:
     steps:
       
       - name: Checkout 
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: true
  
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: openssl-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/ssl/
           
       
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: openh264-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/h264/
       
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: opus-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/opus/
       
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: bcg729-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/bcg729/
@@ -1512,71 +1512,71 @@ jobs:
     needs: [pjsip-android, pjsip-ios]
     steps: 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
     
       - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
           
       - name: Setup nuget 
         run: brew install nuget
  
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v5
         with:
           distribution: 'microsoft'
           java-version: '17'
           
       - name: Download Android x86 Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: pjsip-android-x86
           path: ./artifacts/android-x86
       
       - name: Download Android x86_64 Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: pjsip-android-x86_64
           path: ./artifacts/android-x86_64
           
       - name: Download Android arm Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: pjsip-android-armeabi-v7a
           path: ./artifacts/android-armeabi-v7a
       
       - name: Download Android arm64 Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: pjsip-android-arm64-v8a
           path: ./artifacts/android-arm64-v8a
 
       - name: Download Android java Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: java-x86_64
           path: ./artifacts/java
       
       - name: Download Android csharp Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: csharp-x86_64
           path: ./artifacts/android/csharp
       
       - name: Download ios Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: pjsip-x86_64
           path: ./artifacts/ios/pjsip-x86_64
       
       - name: Download ios arm64 Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: pjsip-arm64
           path: ./artifacts/ios/pjsip-arm64
 
       - name: Download ios arm64s Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: pjsip-arm64s
           path: ./artifacts/ios/pjsip-arm64s

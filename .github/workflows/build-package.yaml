@@ -1045,7 +1045,7 @@ jobs:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }} 
 
   openssl-win:
-    name: Build OpenSSL Static (x64)
+    name: openssl-win (x64)
     runs-on: windows-2022
     steps:
       - name: Checkout
@@ -1056,7 +1056,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          key: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+          key: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - name: Setup MSVC
         if: steps.cache-libs.outputs.cache-hit != 'true'

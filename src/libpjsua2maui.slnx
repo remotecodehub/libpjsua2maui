@@ -2,4 +2,5 @@
   <Project Path="libpjsua2maui.android/libpjsua2maui.android.csproj" />
   <Project Path="libpjsua2maui.ios/libpjsua2maui.ios.csproj" />
   <Project Path="libpjsua2maui.mac/libpjsua2maui.mac.csproj" />
+  <Project Path="libpjsua2maui.win/libpjsua2maui.win.csproj" />
 </Solution>

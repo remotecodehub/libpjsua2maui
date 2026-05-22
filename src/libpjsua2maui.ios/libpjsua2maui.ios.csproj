@@ -17,8 +17,7 @@
         <Title>PJSIP bindings for .NET MAUI</Title>
         <Authors>Weslley Murdock</Authors>
         <Company>Remote Code Hub</Company>
-        <Copyright>Copyright ©2025 Remote Code Hub</Copyright>
-        <PackageOutputPath Condition="'$(PackageOutputPath)'==''">$HOME/Nuget</PackageOutputPath>
+        <Copyright>Copyright ©2026 Remote Code Hub</Copyright>
         <PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
         <Description>
             PJSIP pjsua2 bindings for pjsua2

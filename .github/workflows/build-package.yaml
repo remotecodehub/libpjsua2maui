@@ -29,6 +29,12 @@ env:
   BCG729_VERSION: 1.1.1
   MIN_MACOSX_VERSION: 14.0
   SDKVERSION: 26.2
+  BUILD_TYPE: Release
+
+  ROOT_DIR: ${{ github.workspace }}
+  ARTIFACTS_DIR: ${{ github.workspace }}\artifacts
+  LOGS_DIR: ${{ github.workspace }}\logs
+  INSTALL_DIR: ${{ github.workspace }}\install
 
 jobs:
 
@@ -241,11 +247,96 @@ jobs:
           SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
 
+  build-bcg729:
+    name: Build BCG729 Static (x64)
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+            arch: x64
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Configure MSVC
+        shell: cmd
+        run: |
+            call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
+            echo Visual Studio environment loaded
+            where cl
+            where msbuild
+
+      - name: Create directories
+        shell: pwsh
+        run: |
+            New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+            New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+
+      - name: Clone BCG729
+        shell: pwsh
+        run: |
+            git clone `
+            --branch "${env:BCG729_VERSION}" `
+            --depth 1 `
+            https://github.com/BelledonneCommunications/bcg729.git `
+            bcg729
+
+      - name: Build bcg729
+        shell: cmd
+        working-directory: bcg729
+        run: |
+          call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
+
+          cmake -S . ^
+                -B build ^
+                -G "Visual Studio 17 2022" ^
+                -A x64 ^
+                -DBUILD_SHARED_LIBS=OFF ^
+                -DENABLE_UNIT_TESTS=OFF ^
+                -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
+                -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL ^
+                -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729
+
+          cmake --build build --config Release --target INSTALL
+
+          echo ===== VERIFY CRT =====
+          dumpbin /directives ..\deps\bcg729\lib\bcg729.lib | findstr DEFAULTLIB
+            
+
+      - name: Normalize artifacts
+        shell: pwsh
+        run: |
+            $target = "${env:INSTALL_DIR}\bcg729\x64"
+
+            New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
+            New-Item -ItemType Directory -Force -Path "$target\include\bcg729" | Out-Null
+
+            Get-ChildItem bcg729/build -Recurse -Filter *.lib |
+            Copy-Item -Destination "$target\lib" -Force
+
+            Get-ChildItem bcg729/include -Recurse -Filter *.h |
+            Copy-Item -Destination "$target\include\bcg729" -Force
+
+      - name: List generated files
+        shell: pwsh
+        run: |
+            Get-ChildItem "${env:INSTALL_DIR}\bcg729" -Recurse
+ 
+      - name: Upload BCG729 artifacts 
+        uses: actions/upload-artifact@v4
+        with:
+            name: bcg729-win-x64
+            path: deps/bcg729/**/*
+            if-no-files-found: warn
+          
   openh264-android:
     runs-on: ubuntu-latest
-    
     steps:
-       
       - name: Checkout repository
         uses: actions/checkout@v6
 

@@ -3,7 +3,7 @@
     <metadata>
         <id>libpjsua2maui</id>
         <title>libpjsua2maui</title>
-        <version>2.16</version>
+        <version>2.16.0.1</version>
         <authors>Weslley Murdock</authors>
         <owners>Remote Code Hub</owners>
         <projectUrl>http://github.com/remotecodehub/libpjsua2maui</projectUrl>
@@ -25,7 +25,11 @@
         <icon>icon.png</icon>
         <repository type="git" url="https://github.com/remotecodehub/libpjsua2maui" />
         <references>
-            <group targetFramework="net10.0-ios18.5">
+            <group targetFramework="net10.0-maccatalyst26.2">
+                <reference file="pjsua2maui.mac.pdb" />
+                <reference file="pjsua2maui.mac.dll" />
+            </group>
+            <group targetFramework="net10.0-ios26.2">
                 <reference file="pjsua2maui.ios.pdb" />
                 <reference file="pjsua2maui.ios.dll" />
             </group>
@@ -38,7 +42,8 @@
         
 
         <dependencies>
-            <group targetFramework="net10.0-ios18.5" />
+            <group targetFramework="net10.0-ios26.2" />
+            <group targetFramework="net10.0-maccatalyst26.2" />
             <group targetFramework="net10.0-android36.0" />
         </dependencies>
     </metadata>
@@ -48,31 +53,42 @@
         <file src="libpjsua2maui.targets" target="build\libpjsua2maui.targets" />
 
         <!-- Native iOS -->
-        <file src="libpjsua2.a\lib\x86_64\libpjsua2.a"
+        <file src="libpjsua2.ios.a\lib\x86_64\libpjsua2.a"
             target="runtimes\iossimulator-x64\native\libpjsua2.a" />
-        <file src="libpjsua2.a\lib\arm64s\libpjsua2.a"
+        <file src="libpjsua2.ios.a\lib\arm64s\libpjsua2.a"
             target="runtimes\iossimulator-arm64\native\libpjsua2.a" />
-        <file src="libpjsua2.a\lib\arm64\libpjsua2.a"
+        <file src="libpjsua2.ios.a\lib\arm64\libpjsua2.a"
             target="runtimes\ios-arm64\native\libpjsua2.a" />
+
+        <!-- Native MacOSX -->
+        <file src="libpjsua2.mac.a\lib\x86_64\libpjsua2.a"
+            target="runtimes\maccatalyst-x64\native\libpjsua2.a" />
+        <file src="libpjsua2.mac.a\lib\arm64\libpjsua2.a"
+            target="runtimes\maccatalyst-arm64\native\libpjsua2.a" />
+
 
         <!-- Native Android -->
         <!-- armeabi-v7a -->
-        <file src="libpjsua2.so\lib\armeabi-v7a\*" target="runtimes\android-arm\native\" />
+        <file src="libpjsua2.android.so\lib\armeabi-v7a\*" target="runtimes\android-arm\native\" />
         <!-- arm64-v8a -->
-        <file src="libpjsua2.so\lib\arm64-v8a\*" target="runtimes\android-arm64\native\" />
+        <file src="libpjsua2.android.so\lib\arm64-v8a\*" target="runtimes\android-arm64\native\" />
         <!-- x86 -->
-        <file src="libpjsua2.so\lib\x86\*" target="runtimes\android-x86\native\" />
+        <file src="libpjsua2.android.so\lib\x86\*" target="runtimes\android-x86\native\" />
         <!-- x86_64 -->
-        <file src="libpjsua2.so\lib\x86_64\*" target="runtimes\android-x86_64\native\" />
+        <file src="libpjsua2.android.so\lib\x86_64\*" target="runtimes\android-x86_64\native\" />
 
         <!-- Java bindings -->
         <file src="libpjsua2maui.android\org\pjsip\*.java" target="contentFiles\any\android\org\pjsip\" />
 
         <!-- Managed assemblies -->
         <file src="libpjsua2maui.ios\bin\Release\net10.0-ios\pjsua2maui.ios.*"
-            target="lib\net10.0-ios18.5\" />
+            target="lib\net10.0-maccatalyst26.2\" />
         <file src="libpjsua2maui.ios\bin\Release\net10.0-ios\pjsua2maui.ios.*"
-            target="ref\net10.0-ios18.5\" />
+            target="ref\net10.0-maccatalyst26.2\" />
+        <file src="libpjsua2maui.ios\bin\Release\net10.0-ios\pjsua2maui.ios.*"
+            target="lib\net10.0-ios26.2\" />
+        <file src="libpjsua2maui.ios\bin\Release\net10.0-ios\pjsua2maui.ios.*"
+            target="ref\net10.0-ios26.2\" />
         <file src="libpjsua2maui.android\bin\Release\net10.0-android\pjsua2maui.android.*"
             target="lib\net10.0-android36.0\" />
         <file src="libpjsua2maui.android\bin\Release\net10.0-android\pjsua2maui.android.*"
@@ -80,6 +96,8 @@
 
         <!-- README -->
         <file src="README.md" target="." />
+        <!-- LICENSE -->
+        <file src="LICENSE" target="." />
         <!-- ICON -->
         <file src="icon.png" target="." />
     </files>

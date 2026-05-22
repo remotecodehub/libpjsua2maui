@@ -2655,45 +2655,34 @@ jobs:
             Get-ChildItem . -Recurse
 
       - name: Build PJSUA2
-        shell: cmd
+        shell: pwsh
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: pjproject
         run: |
-            setlocal EnableDelayedExpansion
+          # Define os paths absolutos mapeados das dependências
+          $Bcg729Inc = "${env:GITHUB_WORKSPACE}/deps/bcg729/include"
+          $Bcg729Lib = "${env:GITHUB_WORKSPACE}/deps/bcg729/lib"
+          $OpusInc   = "${env:GITHUB_WORKSPACE}/deps/opus/include"
+          $OpusLib   = "${env:GITHUB_WORKSPACE}/deps/opus/lib"
+          $H264Inc   = "${env:GITHUB_WORKSPACE}/deps/openh264/include"
+          $H264Lib   = "${env:GITHUB_WORKSPACE}/deps/openh264/lib"
+          $SslInc    = "${env:GITHUB_WORKSPACE}/deps/openssl/include"
+          $SslLib    = "${env:GITHUB_WORKSPACE}/deps/openssl/lib"
 
-            call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
-            echo Visual Studio environment loaded
-            where cl
-            where msbuild
+          # Em vez de quebrar as variáveis originais, anexamos de forma segura ao escopo do processo do runner
+          $env:INCLUDE = "${OpusInc};${Bcg729Inc};${H264Inc};${SslInc};" + $env:INCLUDE
+          $env:LIB     = "${OpusLib};${Bcg729Lib};${H264Lib};${SslLib};" + $env:LIB
 
-            set "BCG729_INC=%GITHUB_WORKSPACE%\deps\bcg729\include"
-            set "BCG729_LIB=%GITHUB_WORKSPACE%\deps\bcg729\lib"
-            set "OPUS_INC=%GITHUB_WORKSPACE%\deps\opus\include"
-            set "OPUS_LIB=%GITHUB_WORKSPACE%\deps\opus\lib"
-            set "OPENH264_INC=%GITHUB_WORKSPACE%\deps\openh264\include"
-            set "OPENH264_LIB=%GITHUB_WORKSPACE%\deps\openh264\lib"
-            set "OPENSSL_INC=%GITHUB_WORKSPACE%\deps\openssl\include"
-            set "OPENSSL_LIB=%GITHUB_WORKSPACE%\deps\openssl\lib"
-        
-            set "CFLAGS=/I!OPENSSL_INC! /I!OPUS_INC! /I!BCG729_INC! /I!OPENH264_INC!"
-            set "LDFLAGS=/LIBPATH:!OPENSSL_LIB! /LIBPATH:!OPUS_LIB! /LIBPATH:!BCG729_LIB! /LIBPATH:!OPENH264_LIB!"
-            echo CFLAGS=!CFLAGS!
-            echo LDFLAGS=!LDFLAGS!
-
-            set "LIB=!OPUS_LIB!;!BCG729_LIB!;!OPENH264_LIB!;!OPENSSL_LIB!;!LIB!"
-            set "INCLUDE=!OPUS_INC!;!BCG729_INC!;!OPENH264_INC!;!OPENSSL_INC!;!INCLUDE!"
-            echo "LIB="
-            echo !LIB!
-            echo "INC="
-            echo !INCLUDE!
-
-            msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj ^
-                /p:PlatformToolset=v143 ^
-                /p:Configuration=Release ^
-                /p:Platform=x64 ^
-                /p:WindowsTargetPlatformVersion=10.0 ^
-                /p:AdditionalOptions="/bigobj" 
-         
+          Write-Host "Executando MSBuild com caminhos de sistema preservados..."
+          
+          # Executa o MSBuild diretamente (já exposto globalmente pelo passo 'Setup MSVC')
+          msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj `
+              /p:PlatformToolset=v143 `
+              /p:Configuration=Release `
+              /p:Platform=x64 `
+              /p:WindowsTargetPlatformVersion=10.0 `
+              /p:AdditionalOptions="/bigobj"
+              
       - name: Setup .NET 10.0.x
         if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: actions/setup-dotnet@v5

@@ -85,6 +85,7 @@
       <ForceLoad>True</ForceLoad>
       <SmartLink>False</SmartLink>
       <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
       <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native -lpjsua2 -ld_classic</LinkerFlags>
     </NativeReference>
   </ItemGroup>
@@ -96,6 +97,7 @@
       <ForceLoad>True</ForceLoad>
       <SmartLink>False</SmartLink>
       <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
       <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
     </NativeReference>
   </ItemGroup>
@@ -107,6 +109,7 @@
       <ForceLoad>True</ForceLoad>
       <SmartLink>False</SmartLink>
       <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
       <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
     </NativeReference>
   </ItemGroup>
@@ -119,6 +122,7 @@
       <ForceLoad>True</ForceLoad>
       <SmartLink>False</SmartLink>
       <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
       <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
     </NativeReference>
   </ItemGroup>
@@ -130,10 +134,12 @@
       <ForceLoad>True</ForceLoad>
       <SmartLink>False</SmartLink>
       <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
       <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
     </NativeReference>
   </ItemGroup>
 
+  <!-- Windows Native Linking -->
   <ItemGroup Condition="'$(IsWin)' == 'true'">
     <None Condition="'$(Platform)' == 'x64'"
       Include="$(NuGetPackageRoot)libpjsua2maui\$(LibVersion)\runtimes\win-x64\native\pjsua2.dll">

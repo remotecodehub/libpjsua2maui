@@ -56,12 +56,11 @@
       <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
       <Bind />
     </AndroidJavaSource>
-
   </ItemGroup>
 
 
   <!-- iOS Static Libraries -->
-  <ItemGroup Condition="$(TargetFramework.Contains('.0-ios'))">
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('ios'))">
     <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native/libpjsua2.a">
       <Link>Platforms/iOS/lib/arm64/libpjsua2.a</Link>
       <Visible>True</Visible>
@@ -77,8 +76,7 @@
   </ItemGroup>
 
   <!-- iOS Native Linking -->
-  <ItemGroup
-    Condition="('$(Platform)' == 'iPhoneSimulator') AND $(RuntimeIdentifier.StartsWith('iossimulator-x64'))">
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('iossimulator-x64'))">
     <NativeReference
       Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native/libpjsua2.a">
       <Kind>Static</Kind>
@@ -89,8 +87,7 @@
     </NativeReference>
   </ItemGroup>
 
-  <ItemGroup
-    Condition="('$(Platform)' == 'iPhoneSimulator') AND $(RuntimeIdentifier.StartsWith('iossimulator-arm64'))">
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('iossimulator-arm64'))">
     <NativeReference
       Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native/libpjsua2.a">
       <Kind>Static</Kind>
@@ -101,8 +98,7 @@
     </NativeReference>
   </ItemGroup>
 
-  <ItemGroup
-    Condition="('$(Platform)' == 'iPhone') OR ('$(RuntimeIdentifier)' == 'ios') OR $(RuntimeIdentifier.StartsWith('ios-')) OR $(RuntimeIdentifier.StartsWith('ios.'))">
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('ios-arm64'))">
     <NativeReference
       Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native/libpjsua2.a">
       <Kind>Static</Kind>
@@ -114,8 +110,7 @@
   </ItemGroup>
 
   <!-- MacOSX Native Linking -->
-  <ItemGroup
-    Condition="($(RuntimeIdentifier.StartsWith('maccatalyst-arm64'))">
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('maccatalyst-arm64'))">
     <NativeReference
       Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native/libpjsua2.a">
       <Kind>Static</Kind>
@@ -126,8 +121,7 @@
     </NativeReference>
   </ItemGroup>
 
-  <ItemGroup
-    Condition="('$(RuntimeIdentifier.StartsWith('maccatalyst-x86_64')))">
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('maccatalyst-x86_64'))">
     <NativeReference
       Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native/libpjsua2.a">
       <Kind>Static</Kind>

@@ -1706,7 +1706,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: pjsip-android-${{ matrix.arch }}
-        path: ${{ steps.build-pj.outputs.artifact }}
+        path: ${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}
         overwrite: true
  
     env:

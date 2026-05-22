@@ -358,6 +358,7 @@ jobs:
             Copy-Item -Destination "$target\include\bcg729" -Force
 
       - name: List generated files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
             Get-ChildItem "${env:INSTALL_DIR}\bcg729" -Recurse
@@ -729,7 +730,7 @@ jobs:
             Copy-Item -Destination $target -Force
 
       - name: List generated files
-        if: always()
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
             Get-ChildItem "install/openh264" -Recurse
@@ -1137,7 +1138,7 @@ jobs:
             cp -v "${env:INSTALL_DIR}\openssl\x64\lib\libssl.lib" "${env:INSTALL_DIR}\openssl\x64\lib\ssl.lib"
       
       - name: List generated files
-        if: always()
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: | 
             Get-ChildItem "${env:INSTALL_DIR}\openssl" -Recurse
@@ -1540,7 +1541,7 @@ jobs:
             cp -v "${env:INSTALL_DIR}\opus\x64\lib\opus.lib" "${env:INSTALL_DIR}\opus\x64\lib\libopus.a"
       
       - name: List generated files
-        if: always()
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
             Get-ChildItem "${env:INSTALL_DIR}\opus" -Recurse

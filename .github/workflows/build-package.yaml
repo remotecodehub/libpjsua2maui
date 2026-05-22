@@ -2081,7 +2081,7 @@ jobs:
           path: |
             src/libpjsua2.win.dll/**/*
             src/libpjsua2maui.win/bin/**/*
-          key: opus-${{ env.OPUS_VERSION }}-win-x64
+          key: pjsip-${{ env.OPUS_VERSION }}-win-x64
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1

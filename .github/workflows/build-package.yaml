@@ -1608,7 +1608,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
           mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64s
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
  
           # Move managed classes to projects directory

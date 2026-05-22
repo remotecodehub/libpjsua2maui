@@ -634,7 +634,7 @@ jobs:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
 
   openh264-win:
-    name: Build OpenH264 Static (x64)
+    name: openh264-win (x64)
     runs-on: windows-2022
 
     steps:
@@ -1864,7 +1864,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: pjsip-${{ matrix.arch }}
-          path: ${{ steps.build-pj-ios.outputs.artifact }}
+          path: ${{ github.workspace }}/pjsip-${{matrix.arch}}
           overwrite: true
        
   pjsip-mac:
@@ -2416,30 +2416,63 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: pjproject
         run: |
-          # Define os paths absolutos mapeados das dependências
-          $Bcg729Inc = "${env:GITHUB_WORKSPACE}/deps/bcg729/include"
-          $Bcg729Lib = "${env:GITHUB_WORKSPACE}/deps/bcg729/lib"
-          $OpusInc   = "${env:GITHUB_WORKSPACE}/deps/opus/include"
-          $OpusLib   = "${env:GITHUB_WORKSPACE}/deps/opus/lib"
-          $H264Inc   = "${env:GITHUB_WORKSPACE}/deps/openh264/include"
-          $H264Lib   = "${env:GITHUB_WORKSPACE}/deps/openh264/lib"
-          $SslInc    = "${env:GITHUB_WORKSPACE}/deps/openssl/include"
-          $SslLib    = "${env:GITHUB_WORKSPACE}/deps/openssl/lib"
+          # 1. Mapeia os paths das suas dependências baixadas
+          $DepsDir    = "${env:GITHUB_WORKSPACE}/deps"
+          $OpusInc    = "${DepsDir}/opus/include"
+          $OpusLib    = "${DepsDir}/opus/lib"
+          $Bcg729Inc  = "${DepsDir}/bcg729/include"
+          $Bcg729Lib  = "${DepsDir}/bcg729/lib"
+          $H264Inc    = "${DepsDir}/openh264/include"
+          $H264Lib    = "${DepsDir}/openh264/lib"
+          $SslInc     = "${DepsDir}/openssl/include"
+          $SslLib     = "${DepsDir}/openssl/lib"
 
-          # Em vez de quebrar as variáveis originais, anexamos de forma segura ao escopo do processo do runner
-          $env:INCLUDE = "${OpusInc};${Bcg729Inc};${H264Inc};${SslInc};" + $env:INCLUDE
-          $env:LIB     = "${OpusLib};${Bcg729Lib};${H264Lib};${SslLib};" + $env:LIB
-
-          Write-Host "Executando MSBuild com caminhos de sistema preservados..."
+          Write-Host "=== Mapeando Infraestrutura do Windows SDK nativo ==="
+          # O GitHub Actions disponibiliza essas variáveis através do passo 'ilammy/msvc-dev-cmd'
+          # Se o projeto do PJSIP bloquear a herança automática, nós passamos por cima manualmente:
+          $SdkInc   = $env:WindowsSdkDir + "Include\" + $env:WindowsSDKVersion
+          $UcrtInc  = "${SdkInc}\ucrt"
+          $SharedInc = "${SdkInc}\shared"
+          $UmInc    = "${SdkInc}\um"
           
-          # Executa o MSBuild diretamente (já exposto globalmente pelo passo 'Setup MSVC')
+          # Caminho da C Runtime do próprio compilador MSVC
+          $MsvcInc  = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\include"
+
+          Write-Host "Injetando caminhos do compilador e dependências no ambiente..."
+          # Montamos a árvore de INCLUDE garantindo que a C Runtime básica venha PRIMEIRO
+          $NewInclude = @(
+              $MsvcInc,
+              $UcrtInc,
+              $SharedInc,
+              $UmInc,
+              $OpusInc,
+              $Bcg729Inc,
+              $H264Inc,
+              $SslInc
+          ) -join ";"
+
+          # Atualiza a variável INCLUDE do processo atual
+          $env:INCLUDE = $NewInclude + ";" + $env:INCLUDE
+          
+          # Faz o mesmo para as bibliotecas de linkagem (.lib)
+          $SdkLib   = $env:WindowsSdkDir + "Lib\" + $env:WindowsSDKVersion
+          $UcrtLib  = "${SdkLib}\ucrt\x64"
+          $UmLib    = "${SdkLib}\um\x64"
+          $MsvcLib  = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\lib\x64"
+
+          $env:LIB = @($MsvcLib, $UcrtLib, $UmLib, $OpusLib, $Bcg729Lib, $H264Lib, $SslLib) -join ";" + ";" + $env:LIB
+
+          Write-Host "=== Iniciando Compilação Compilador com Escopo Isolado ==="
+          # Rodamos o MSBuild garantindo que ele herde o ambiente e mire a versão correta do SDK
+          # Usamos /p:InheritMergeIDs para forçar o MSBuild a aceitar as variáveis externas
           msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj `
               /p:PlatformToolset=v143 `
               /p:Configuration=Release `
               /p:Platform=x64 `
-              /p:WindowsTargetPlatformVersion=10.0 `
-              /p:AdditionalOptions="/bigobj"
-
+              /p:WindowsTargetPlatformVersion="$($env:WindowsSDKVersion.TrimEnd('\'))" `
+              /p:AdditionalOptions="/bigobj" `
+              /p:UseEnv=true
+              
       - name: Setup .NET 10.0.x
         if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: actions/setup-dotnet@v5

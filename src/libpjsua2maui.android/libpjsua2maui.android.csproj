@@ -4,14 +4,17 @@
 		<TargetFramework>net10.0-android</TargetFramework>
 		<RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
 		<UseMaui>true</UseMaui>
-		<TargetPlatformMinVersion>21</TargetPlatformMinVersion>
-		<SingleProject>true</SingleProject>
+		<SingleProject>false</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>21</TargetPlatformMinVersion>
 		<RootNamespace>pjsua2maui.pjsua2</RootNamespace>
 		<AssemblyName>pjsua2maui.android</AssemblyName>
 		<SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
-  		<PackageId>libpjsua2maui.android</PackageId>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>libpjsua2maui.android</PackageId>
 	    <Version>2.16.0.1</Version>
 		<AssemblyVersion>2.16.0.1</AssemblyVersion>
 		<FileVersion>2.16.0.1</FileVersion>
@@ -36,14 +39,7 @@ https://github.com/remotecodehub/libpjsua2maui/blob/main/CHANGELOG.md
 		<PackageProjectUrl>https://github.com/remotecodehub/libpjsua2maui</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/remotecodehub/libpjsua2maui/libpjsua2maui.git</RepositoryUrl>
 	</PropertyGroup>
-	<ItemGroup>
-	  <AndroidResource Remove="org\pjsip\**" />
-	  <Compile Remove="org\pjsip\**" />
-	  <EmbeddedResource Remove="org\pjsip\**" />
-	  <MauiCss Remove="org\pjsip\**" />
-	  <MauiXaml Remove="org\pjsip\**" />
-	  <None Remove="org\pjsip\**" />
-	</ItemGroup>
+	
 	<ItemGroup>
         <None Update="..\LICENSE">
             <PackagePath>\</PackagePath>

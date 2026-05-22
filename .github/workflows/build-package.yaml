@@ -41,10 +41,17 @@ jobs:
   bcg729-android:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
+      - uses: actions/checkout@v6
+      
+      - name: Cache BCG729 Built SDK
+        id: cache-libs
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: bcg729-${{ env.BCG729_VERSION }}-android
+    
       - name: Create Output Directory
+        
         run: mkdir -p ${{ github.workspace }}/bcg729-output
 
       - name: Set Permissions for Output Directory
@@ -73,18 +80,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x86_64, arm64, arm64s]  
+        arch: [x86_64, arm64, arm64s]
+        include: 
+          - lib_name: bcg729
+          - platform: ios
+
     runs-on: macos-15
     name: bcg729-ios 
     permissions:
       contents: write
     steps:
         
-    - name: Checkout
-      uses: actions/checkout@v6
+    - uses: actions/checkout@v6
       with:
         submodules: true
- 
+       
+    - name: Cache BCG729 Built SDK
+      id: cache-libs
+      uses: actions/cache@v5
+      with:
+        path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+        key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+    
     - name: Setup Xcode 16.4
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -166,12 +183,11 @@ jobs:
       
       - name: Cache BCG729 Built SDK
         id: cache-libs
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
-      - uses: actions/checkout@v6
       - name: Clone BCG729
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
@@ -484,7 +500,6 @@ jobs:
           path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
       
-      - uses: actions/checkout@v6
       - name: Clone OpenH264
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
@@ -846,7 +861,6 @@ jobs:
           path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
-      - uses: actions/checkout@v6
       - name: Clone OpenSSL
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
@@ -951,7 +965,7 @@ jobs:
           SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }} 
 
-  build-openssl:
+  openssl-win:
     name: Build OpenSSL Static (x64)
     runs-on: windows-2022
 
@@ -1214,9 +1228,8 @@ jobs:
           path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
-      - uses: actions/checkout@v6
-        if: steps.cache-libs.outputs.cache-hit != 'true'
       - name: Clone Opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           # Clonando explicitamente a versão 1.4 conforme solicitado
           git clone --branch v1.4 https://github.com/xiph/opus.git
@@ -1882,6 +1895,623 @@ jobs:
         env:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
    
+  pjsip-win:
+    name: Build PJSIP (x64)
+    runs-on: windows-2022
+    needs: [bcg729-win, openh264-win, openssl-win, opus-win]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
+             
+      - name: Validate SWIG
+        shell: pwsh
+        run: |
+          swig -version
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Create directories
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+
+      - name: Download OpenSSL
+        uses: actions/download-artifact@v4
+        with:
+          name: openssl-win-x64
+          path: deps/openssl
+
+      - name: Download Opus
+        uses: actions/download-artifact@v4
+        with:
+          name: opus-win-x64
+          path: deps/opus
+   
+      - name: Download BCG729
+        uses: actions/download-artifact@v4
+        with:
+          name: bcg729-win-x64
+          path: deps/bcg729
+
+      - name: Download OpenH264
+        uses: actions/download-artifact@v4
+        with:
+          name: openh264-win-x64
+          path: deps/openh264
+  
+      - name: Clone PJSIP
+        shell: pwsh
+        run: |
+          git clone --branch "${env:PJSIP_VERSION}" --depth 1 https://github.com/pjsip/pjproject.git pjproject
+
+      - name: Create config_site.h
+        shell: pwsh
+        run: |
+          $config = @"
+          #include <pj/config_site_sample.h>
+          #define PJ_HAS_IPV6                       1
+          #define PJ_HAS_SSL_SOCK                   1
+          #define PJ_SSL_SOCK_IMP                   PJ_SSL_SOCK_IMP_OPENSSL
+          #define PJSIP_HAS_TLS_TRANSPORT           1
+          #define PJMEDIA_AUDIO_DEV_HAS_PORTAUDIO   0
+          #define PJMEDIA_HAS_VIDEO                 1
+          #define PJMEDIA_HAS_OPENH264_CODEC        1
+          #define PJMEDIA_HAS_OPUS_CODEC            1
+          #define PJMEDIA_HAS_BCG729                1
+          #define PJ_DLL                            1
+          #define PJ_EXPORTING                      1
+          #define PJ_EXPORT_SPECIFIER               __declspec(dllexport)
+          #define PJ_IMPORT_SPECIFIER               __declspec(dllimport)
+
+          "@
+
+          New-Item -ItemType Directory -Force -Path "pjproject/pjlib/include/pj" | Out-Null
+          Set-Content -Path "pjproject/pjlib/include/pj/config_site.h" -Value $config
+
+      - name: Patch SWIG C# vcxproj linker settings
+        working-directory: pjproject
+        shell: pwsh
+        run: |
+          $projects = Get-ChildItem -Recurse -Filter *.vcxproj
+
+          foreach ($proj in $projects) {
+              Write-Host "Patching $($proj.FullName)"
+
+              [xml]$xml = Get-Content $proj.FullName
+
+              $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+              $ns.AddNamespace("msb", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+              $links = $xml.SelectNodes("//msb:ItemDefinitionGroup/msb:Link", $ns)
+
+              foreach ($link in $links) {
+
+                  #
+                  # Remove legacy duplicate OpenSSL libs
+                  #
+                  $depsNode = $link.SelectSingleNode("msb:AdditionalDependencies", $ns)
+
+                  if ($depsNode -ne $null) {
+
+                      $deps = $depsNode.InnerText.Split(';') |
+                          ForEach-Object { $_.Trim() } |
+                          Where-Object { $_ -ne "" }
+
+                      $filtered = @()
+                      $hasModernOpenSsl = $false
+
+                      foreach ($d in $deps) {
+                          if ($d -ieq "libssl.lib" -or $d -ieq "libcrypto.lib") {
+                              $hasModernOpenSsl = $true
+                          }
+                      }
+
+                      foreach ($d in $deps) {
+
+                          #
+                          # Remove duplicate legacy ssl/crypto
+                          #
+                          if ($hasModernOpenSsl -and (
+                              $d -ieq "ssl.lib" -or
+                              $d -ieq "crypto.lib"
+                          )) {
+                              Write-Host "Removing duplicate dependency: $d"
+                              continue
+                          }
+
+                          #
+                          # Avoid duplicated entries
+                          #
+                          if ($filtered -notcontains $d) {
+                              $filtered += $d
+                          }
+                      }
+
+                      $depsNode.InnerText = ($filtered -join ';')
+                  }
+
+                  #
+                  # Remove IgnoreSpecificDefaultLibraries
+                  #
+                  $ignoreNode = $link.SelectSingleNode("msb:IgnoreSpecificDefaultLibraries", $ns)
+
+                  if ($ignoreNode -ne $null) {
+                      Write-Host "Removing IgnoreSpecificDefaultLibraries"
+                      $link.RemoveChild($ignoreNode) | Out-Null
+                  }
+
+                  #
+                  # Remove NODEFAULTLIB from AdditionalOptions
+                  #
+                  $optsNode = $link.SelectSingleNode("msb:AdditionalOptions", $ns)
+
+                  if ($optsNode -ne $null) {
+
+                      $opts = $optsNode.InnerText
+
+                      $opts = $opts -replace '/NODEFAULTLIB:msvcrt\.lib', ''
+                      $opts = $opts -replace '/NODEFAULTLIB', ''
+
+                      $opts = ($opts -split '\s+' | Where-Object { $_ -ne "" }) -join ' '
+
+                      $optsNode.InnerText = $opts
+                  }
+              }
+
+              $xml.Save($proj.FullName)
+          }
+
+      - name: Patch PJSIP codec project
+        shell: pwsh
+        run: |
+
+            $proj = "pjproject\pjmedia\build\pjmedia_codec.vcxproj"
+
+            [xml]$xml = Get-Content $proj
+
+            $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+            $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+            $items = $xml.SelectNodes("//ns:ItemDefinitionGroup/ns:ClCompile", $ns)
+
+            foreach ($item in $items)
+            {
+                $existing = $item.SelectSingleNode("ns:AdditionalIncludeDirectories", $ns)
+
+                $includeValue = @(
+                    "`$(ProjectDir)..\..\..\deps\opus\include",
+                    "`$(ProjectDir)..\..\..\deps\bcg729\include",
+                    "`$(ProjectDir)..\..\..\deps\openh264\include",
+                    "`$(ProjectDir)..\..\..\deps\openssl\include",
+                    "%(AdditionalIncludeDirectories)"
+                ) -join ";"
+
+                if ($null -eq $existing)
+                {
+                    $newNode = $xml.CreateElement(
+                        "AdditionalIncludeDirectories",
+                        $xml.Project.NamespaceURI
+                    )
+
+                    $newNode.InnerText = $includeValue
+
+                    $item.AppendChild($newNode) | Out-Null
+                }
+                else
+                {
+                    $existing.InnerText = "$includeValue;$($existing.InnerText)"
+                }
+            }
+
+            $xml.Save($proj)
+
+            Write-Host "pjmedia_codec.vcxproj patched successfully"
+
+      - name: Patch library directories
+        shell: pwsh
+        run: |
+            $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
+
+            foreach ($proj in $projects)
+            {
+                Write-Host "Patching $($proj.FullName)"
+
+                [xml]$xml = Get-Content $proj
+
+                $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+                $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+                #
+                # PATCH ItemDefinitionGroup/Link
+                #
+                $linkNodes = $xml.SelectNodes("//ns:ItemDefinitionGroup/ns:Link", $ns)
+
+                foreach ($node in $linkNodes)
+                {
+                    $libNode = $node.SelectSingleNode("ns:AdditionalLibraryDirectories", $ns)
+
+                    if ($null -eq $libNode)
+                    {
+                        $libNode = $xml.CreateElement("AdditionalLibraryDirectories", $xml.Project.NamespaceURI)
+                        $node.AppendChild($libNode) | Out-Null
+                    }
+
+                    $existing = $libNode.InnerText
+
+                    $libNode.InnerText = @(
+                        "`$(SolutionDir)..\..\..\deps\openssl\lib",
+                        "`$(SolutionDir)..\..\..\deps\opus\lib",
+                        "`$(SolutionDir)..\..\..\deps\bcg729\lib",
+                        "`$(SolutionDir)..\..\..\deps\openh264\lib",
+                        $existing,
+                        "`$(AdditionalLibraryDirectories)",
+                        "%(AdditionalLibraryDirectories)"
+                    ) -join ";"
+                }
+
+                #
+                # PATCH ItemDefinitionGroup/ClCompile
+                #
+                $compileNodes = $xml.SelectNodes("//ns:ItemDefinitionGroup/ns:ClCompile", $ns)
+
+                foreach ($node in $compileNodes)
+                {
+                    $includeNode = $node.SelectSingleNode("ns:AdditionalIncludeDirectories", $ns)
+
+                    if ($null -eq $includeNode)
+                    {
+                        $includeNode = $xml.CreateElement("AdditionalIncludeDirectories", $xml.Project.NamespaceURI)
+                        $node.AppendChild($includeNode) | Out-Null
+                    }
+
+                    $existing = $includeNode.InnerText
+
+                    $includeNode.InnerText = @(
+                        "`$(SolutionDir)..\..\..\deps\openssl\include",
+                        "`$(SolutionDir)..\..\..\deps\opus\include",
+                        "`$(SolutionDir)..\..\..\deps\bcg729\include",
+                        "`$(SolutionDir)..\..\..\deps\openh264\include",
+                        $existing,
+                        "`$(AdditionalIncludeDirectories)",
+                        "%(AdditionalIncludeDirectories)"
+                    ) -join ";"
+                }
+
+                $xml.Save($proj.FullName)
+            }
+
+      - name: Retarget Windows SDK
+        shell: pwsh
+        run: |
+            $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
+
+            foreach ($proj in $projects)
+            {
+                Write-Host "Retargeting $($proj.FullName)"
+
+                [xml]$xml = Get-Content $proj
+
+                $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+                $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+                $nodes = $xml.SelectNodes("//ns:WindowsTargetPlatformVersion", $ns)
+
+                foreach ($node in $nodes)
+                {
+                    $node.InnerText = "10.0"
+                }
+
+                $xml.Save($proj.FullName)
+            }
+
+      - name: Enable bigobj for SWIG wrapper
+        shell: pwsh
+        run: |
+            $proj = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+
+            [xml]$xml = Get-Content $proj
+
+            $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+            $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+            $nodes = $xml.SelectNodes("//ns:ClCompile", $ns)
+
+            foreach ($node in $nodes)
+            {
+                $optNode = $node.SelectSingleNode("ns:AdditionalOptions", $ns)
+
+                if ($null -eq $optNode)
+                {
+                    $optNode = $xml.CreateElement("AdditionalOptions", $xml.Project.NamespaceURI)
+                    $node.AppendChild($optNode) | Out-Null
+                }
+
+                if ($optNode.InnerText -notmatch "/bigobj")
+                {
+                    $optNode.InnerText = "/bigobj %(AdditionalOptions)"
+                }
+            }
+
+            $xml.Save($proj)            
+  
+      - name: Patch SWIG linker settings
+        shell: pwsh
+        run: |
+            $proj = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+
+            [xml]$xml = Get-Content $proj
+
+            $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+            $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+            $links = $xml.SelectNodes("//ns:Link", $ns)
+
+            foreach ($link in $links)
+            {
+                $deps = $link.SelectSingleNode("ns:AdditionalDependencies", $ns)
+
+                if ($null -eq $deps)
+                {
+                    $deps = $xml.CreateElement("AdditionalDependencies", $xml.Project.NamespaceURI)
+                    $link.AppendChild($deps) | Out-Null
+                }
+
+                $deps.InnerText = @(
+                    "opus.lib",
+                    "bcg729.lib",
+                    "openh264.lib",
+                    "ssl.lib",
+                    "crypto.lib",
+                    "ws2_32.lib",
+                    "crypt32.lib",
+                    "iphlpapi.lib",
+                    "secur32.lib",
+                    "%(AdditionalDependencies)"
+                ) -join ";"
+            }
+
+            $xml.Save($proj)
+
+      - name: Patch references
+        shell: pwsh
+        run: |
+            Get-ChildItem pjproject -Recurse `
+                -Include *.vcxproj,*.props,*.targets,*.mak,*.mk,*.xml |
+            ForEach-Object {
+
+                $content = Get-Content $_.FullName -Raw
+
+                $updated = $content `
+                    -replace 'libbcg729\.a', 'bcg729.lib' `
+                    -replace 'libcrypto\.a', 'crypto.lib' `
+                    -replace 'libssl\.a', 'ssl.lib' `
+                    -replace 'libopus\.a', 'opus.lib' `
+                    -replace 'libopenh264\.a', 'openh264.lib'
+
+                if ($updated -ne $content)
+                {
+                    Set-Content $_.FullName $updated -NoNewline
+                    Write-Host "Patched $($_.FullName)"
+                }
+            }
+                
+      - name: Patch linker dependencies and static defines
+        shell: pwsh
+        run: |
+            $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
+
+            foreach ($proj in $projects)
+            {
+                Write-Host "Patching $($proj.FullName)"
+
+                [xml]$xml = Get-Content $proj.FullName
+
+                $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+                $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+                #
+                # PATCH LINKER SETTINGS
+                #
+                $linkNodes = $xml.SelectNodes("//ns:Link", $ns)
+
+                foreach ($node in $linkNodes)
+                {
+                    #
+                    # AdditionalDependencies
+                    #
+                    $depNode = $node.SelectSingleNode("ns:AdditionalDependencies", $ns)
+
+                    if ($null -eq $depNode)
+                    {
+                        $depNode = $xml.CreateElement("AdditionalDependencies", $xml.Project.NamespaceURI)
+                        $node.AppendChild($depNode) | Out-Null
+                    }
+
+                    $currentDeps = $depNode.InnerText
+
+                    $libs = @(
+                        "bcg729.lib",
+                        "opus.lib",
+                        "openh264.lib",
+                        "libssl.lib",
+                        "libcrypto.lib"
+                    )
+
+                    foreach ($lib in $libs)
+                    {
+                        if ($currentDeps -notmatch [regex]::Escape($lib))
+                        {
+                            $currentDeps = "$lib;$currentDeps"
+                        }
+                    }
+
+                    if ($currentDeps -notmatch "%\(AdditionalDependencies\)")
+                    {
+                        $currentDeps += ";%(AdditionalDependencies)"
+                    }
+
+                    $depNode.InnerText = $currentDeps
+                }
+
+                #
+                # PATCH COMPILER DEFINES
+                #
+                $compileNodes = $xml.SelectNodes("//ns:ClCompile", $ns)
+
+                foreach ($node in $compileNodes)
+                {
+                    $defsNode = $node.SelectSingleNode("ns:PreprocessorDefinitions", $ns)
+
+                    if ($null -eq $defsNode)
+                    {
+                        $defsNode = $xml.CreateElement("PreprocessorDefinitions", $xml.Project.NamespaceURI)
+                        $node.AppendChild($defsNode) | Out-Null
+                    }
+
+                    $currentDefs = $defsNode.InnerText
+
+                    $defs = @(
+                        "BCG729_STATIC"
+                    )
+
+                    foreach ($def in $defs)
+                    {
+                        if ($currentDefs -notmatch [regex]::Escape($def))
+                        {
+                            $currentDefs = "$def;$currentDefs"
+                        }
+                    }
+
+                    if ($currentDefs -notmatch "%\(PreprocessorDefinitions\)")
+                    {
+                        $currentDefs += ";%(PreprocessorDefinitions)"
+                    }
+
+                    $defsNode.InnerText = $currentDefs
+                }
+
+                $xml.Save($proj.FullName)
+            }            
+
+      - name: Force bcg729 static headers
+        shell: pwsh
+        run: |
+            $headers = @(
+                "deps/bcg729/include/bcg729/encoder.h",
+                "deps/bcg729/include/bcg729/decoder.h"
+            )
+
+            foreach ($header in $headers)
+            {
+                Write-Host "Patching $header"
+
+                $content = Get-Content $header -Raw
+
+                $content = $content -replace `
+                    "#define BCG729_VISIBILITY __declspec\(dllimport\)", `
+                    "#define BCG729_VISIBILITY"
+
+                $content = $content -replace `
+                    "#define BCG729_VISIBILITY __declspec\(dllexport\)", `
+                    "#define BCG729_VISIBILITY"
+
+                Set-Content $header $content
+            }            
+
+      - name: Patch namespace in swig command
+        shell: pwsh
+        run: |
+            $projectFile = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+
+            $oldNs = 'pjsua2xamarin'
+            $newNs = 'pjsua2maui'
+
+            (Get-Content $projectFile) `
+            -replace [regex]::Escape($oldNs), $newNs |
+            Set-Content $projectFile
+
+      - name: Validate Deps
+        working-directory: deps
+        shell: pwsh
+        run: |
+            Get-ChildItem . -Recurse
+
+      - name: Build PJSUA2
+        shell: cmd
+        working-directory: pjproject
+        run: |
+            setlocal EnableDelayedExpansion
+
+            call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
+            echo Visual Studio environment loaded
+            where cl
+            where msbuild
+
+            set "BCG729_INC=%GITHUB_WORKSPACE%\deps\bcg729\include"
+            set "BCG729_LIB=%GITHUB_WORKSPACE%\deps\bcg729\lib"
+            set "OPUS_INC=%GITHUB_WORKSPACE%\deps\opus\include"
+            set "OPUS_LIB=%GITHUB_WORKSPACE%\deps\opus\lib"
+            set "OPENH264_INC=%GITHUB_WORKSPACE%\deps\openh264\include"
+            set "OPENH264_LIB=%GITHUB_WORKSPACE%\deps\openh264\lib"
+            set "OPENSSL_INC=%GITHUB_WORKSPACE%\deps\openssl\include"
+            set "OPENSSL_LIB=%GITHUB_WORKSPACE%\deps\openssl\lib"
+        
+            set "CFLAGS=/I!OPENSSL_INC! /I!OPUS_INC! /I!BCG729_INC! /I!OPENH264_INC!"
+            set "LDFLAGS=/LIBPATH:!OPENSSL_LIB! /LIBPATH:!OPUS_LIB! /LIBPATH:!BCG729_LIB! /LIBPATH:!OPENH264_LIB!"
+            echo CFLAGS=!CFLAGS!
+            echo LDFLAGS=!LDFLAGS!
+
+            set "LIB=!OPUS_LIB!;!BCG729_LIB!;!OPENH264_LIB!;!OPENSSL_LIB!;!LIB!"
+            set "INCLUDE=!OPUS_INC!;!BCG729_INC!;!OPENH264_INC!;!OPENSSL_INC!;!INCLUDE!"
+            echo "LIB="
+            echo !LIB!
+            echo "INC="
+            echo !INCLUDE!
+
+            msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj ^
+                /p:PlatformToolset=v143 ^
+                /p:Configuration=Release ^
+                /p:Platform=x64 ^
+                /p:WindowsTargetPlatformVersion=10.0 ^
+                /p:AdditionalOptions="/bigobj" 
+       
+      - name: Collect PJSIP artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "src/pjsua2.dll/lib" | Out-Null
+          
+          if (Test-Path "pjproject/pjsip-apps/src/swig/output") {
+            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.cs src/pjsua2maui.win/pjsua2maui/pjsua2/ -ErrorAction SilentlyContinue
+            Copy-Item pjproject/pjsip-apps/src/swig/output/pjsua2.* src/pjsua2.dll/lib -Recurse -Force
+          }
+
+          Get-ChildItem .\install -Recurse
+
+      - name: Upload PJSIP artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pjsip-win-x64
+          path: |
+            install/pjsip/**/*
+          if-no-files-found: warn
+
   nupkg:
     runs-on: macos-26
     name: libpjsua2.nupkg 

@@ -11,17 +11,24 @@ permissions:
   contents: write
 
 env:
-    BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
-    OPENH264_PATH: ${{ github.workspace }}/lib/openh264
-    OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
-    OPUS_PATH: ${{ github.workspace }}/lib/opus
-    PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
-    MIN_IOS_VERSION: 12.2
-    DOTNET_NOLOGO: true                     # Disable the .NET logo
-    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Disable the .NET first time experience
-    DOTNET_CLI_TELEMETRY_OPTOUT: true       # Disable sending .NET CLI telemetry
-    PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
-    SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output    
+  BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
+  OPENH264_PATH: ${{ github.workspace }}/lib/openh264
+  OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
+  OPUS_PATH: ${{ github.workspace }}/lib/opus
+  PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
+  MIN_IOS_VERSION: 12.2
+  DOTNET_NOLOGO: true                     # Disable the .NET logo
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Disable the .NET first time experience
+  DOTNET_CLI_TELEMETRY_OPTOUT: true       # Disable sending .NET CLI telemetry
+  PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
+  SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output    
+  PJSIP_VERSION: 2.16
+  OPENSSL_VERSION: OpenSSL_1_1_1s
+  OPENH264_VERSION: v2.3.0
+  OPUS_VERSION: v1.4
+  BCG729_VERSION: 1.1.1
+  MIN_MACOSX_VERSION: 14.0
+  SDKVERSION: 26.2
 
 jobs:
 
@@ -140,6 +147,102 @@ jobs:
       env:
         SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
  
+  bcg729-mac:
+    runs-on: macos-26
+    name: bcg729-mac
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+          - platform: MacOSX
+          - lib_name: bcg729
+          - sdk: macosx
+    steps:
+      
+      - name: Cache BCG729 Built SDK
+        id: cache-libs
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+
+      - uses: actions/checkout@v6
+      - name: Clone BCG729
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          git clone --branch $BCG729_VERSION https://github.com/BelledonneCommunications/bcg729.git 
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install autoconf automake cmake libtool llvm nasm 
+        shell: sh
+
+      - name: Build BCG729 for MacCatalyst
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: bcg729
+        shell: sh
+        run: |
+          echo "-- Building BCG729 for iOS"
+          echo "-- Building arch ${{ matrix.arch }}"
+          xcode_dev_path=$(xcode-select -print-path)
+          os_platform="MacOSX"
+          sdk_path="${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk"
+          mkdir -p ../logs
+          mkdir -p ../../install
+
+          cmake .                                                               \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5                                  \
+            -DCMAKE_BUILD_TYPE=Release                                          \
+            -DCMAKE_SYSTEM_NAME=Darwin                                          \
+            -DCMAKE_C_COMPILER=$(which clang)                                   \
+            -DCMAKE_MAKE_PROGRAM:PATH=$(which make)                             \
+            -DCMAKE_SKIP_INSTALL_RPATH=ON                                       \
+            -DCMAKE_C_FLAGS="-target ${{ matrix.arch }}-apple-ios14.0-macabi"   \
+            -DBUILD_SHARED_LIBS=OFF                                             \
+            -DENABLE_SHARED=OFF                                                 \
+            -DENABLE_STATIC=ON                                                  \
+            -DCMAKE_INSTALL_PREFIX=${{ env.BUILT_SDK_PATH }}                    \
+            -DCMAKE_OSX_SYSROOT="$sdk_path"                                     \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}                        \
+            > ../logs/${{ matrix.lib_name }}-config-${{ matrix.arch }}.log 
+
+          make -j$(sysctl -n hw.logicalcpu) \
+            > ../logs/${{ matrix.lib_name }}-build-${{ matrix.arch }}.log 
+
+          make install \
+            > ../logs/${{ matrix.lib_name }}-install-${{ matrix.arch }}.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: failure()
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          path: |
+            logs/*.log        
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+        
+      - uses: actions/upload-artifact@v7
+        name: Upload BCG ${{ matrix.arch }} artifact 
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX}}
+          path: |
+            ${{ env.BUILT_SDK_PATH }}
+            logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+
   openh264-android:
     runs-on: ubuntu-latest
     
@@ -271,6 +374,116 @@ jobs:
         name: openh264-${{ matrix.arch }}
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true
+
+
+  openh264-mac:
+    runs-on: macos-26
+    name: openh264-mac
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+          - platform: MacOSX
+          - lib_name: openh264
+          - sdk: macosx
+    steps:
+      
+      - name: Cache H264 Built SDK
+        id: cache-libs
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: ${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+      
+      - uses: actions/checkout@v6
+      - name: Clone OpenH264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          git clone --branch v2.3.0 https://github.com/cisco/openh264.git
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install autoconf automake cmake libtool llvm nasm 
+        shell: sh
+
+      - name: Build OpenH264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        id: build
+        working-directory: openh264
+        run: |
+          mkdir -p ../logs
+          target_triple="${{ matrix.arch }}-apple-ios${{ env.MIN_MACOSX_VERSION }}-macabi"
+          version_min="-target ${target_triple}"        
+          
+          export OS="darwin"
+          sdk_path=$(xcrun --sdk ${{ matrix.sdk }} --show-sdk-path)
+          developer_path=$(xcode-select -p)
+
+          h264_makefile="Makefile"
+          h264_makefile_bak="Makefile.bak" 
+          h264_prefix="${{ env.BUILT_SDK_PATH }}"
+          
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            export ARCH="arm64"
+            # SOCI=No disables production of dylib
+            EXTRA_MAKE_ARGS="USE_ASM=Yes SOCI=No"
+          else
+            export ARCH="x86_64"
+            # USE_ASM=No disables files include and search from x86/ folder
+            # SOCI=No disables production of dylib
+            EXTRA_MAKE_ARGS="USE_ASM=No SOCI=No"
+          fi
+          
+          echo "Building OpenH264 for ${{ matrix.arch }} (${{ matrix.platform }}, OS=$OS, SDK=${{ matrix.sdk }}, Target=$target_triple)"
+
+          cp "${h264_makefile}" "${h264_makefile_bak}"
+          sed -i.deleteme "s|^PREFIX=.*|PREFIX=${h264_prefix}|" "${h264_makefile}"
+          rm -f ${h264_makefile}.deleteme
+          
+          export CFLAGS="-arch ${{ matrix.arch }} ${version_min} -isysroot ${sdk_path}"
+          export LDFLAGS="-arch ${{ matrix.arch }} ${version_min} -isysroot ${sdk_path}"
+          export SYSROOT="${sdk_path}"
+
+          # Compilação aplicando as flags mapeadas
+          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No libopenh264.a > ../logs/${{ matrix.lib_name }}-config-${{ matrix.arch }}.log 2>&1 || exit 1
+
+          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No install-static install-headers > ../logs/${{ matrix.lib_name }}-install-${{ matrix.arch }}.log 2>&1 || exit 1
+
+          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No clean > ../logs/${{ matrix.lib_name }}-clean-${{ matrix.arch }}.log 2>&1 || exit 1
+
+          mv "${h264_makefile_bak}" "${h264_makefile}"
+
+        shell: bash
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: failure()
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          path: |
+            logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+            
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}
+          path: |
+            ${{ env.BUILT_SDK_PATH }}
+            logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
 
   openssl-android:
     runs-on: ubuntu-latest
@@ -430,6 +643,131 @@ jobs:
         path: ${{ steps.build.outputs.artifact }}
         overwrite: true 
 
+  openssl-mac:
+    runs-on: macos-26
+    name: openssl-mac
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+          - platform: MacOSX
+          - lib_name: openssl
+          - sdk: macosx
+    steps:
+      
+      - name: Cache H264 Built SDK
+        id: cache-libs
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+
+      - uses: actions/checkout@v6
+      - name: Clone OpenSSL
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          git clone --branch $OPENSSL_VERSION https://github.com/openssl/openssl.git --recursive
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install nasm autoconf automake libtool 
+        shell: sh
+          
+      - name: Build OpenSSL
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: openssl
+        shell: bash 
+        run: |
+          mkdir -p ../logs
+          TARGET="darwin64-${{ matrix.arch }}-cc"
+          HOST_TARGET="${{ matrix.arch }}-apple-ios14.0-macabi"
+          
+          export CC="clang -target $HOST_TARGET"
+          export CFLAGS="-fPIC"
+
+ 
+          INCLUDE_DIR=""
+          OPENSSLCONF_ALL=()
+          LIBSSL_IOS=()
+          LIBSSL_IOSSIM=()
+          LIBCRYPTO_IOS=()
+          LIBCRYPTO_IOSSIM=()
+          export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
+          export SDKVERSION=${{ env.SDKVERSION }}
+          export MACOSX_MIN_SDK_VERSION=14.0
+          export CONFIG_DISABLE_BITCODE=true 
+          export CONFIG_OPTIONS="no-dso no-shared no-engine no-tests no-unit-test no-ssl3 no-comp enable-ec_nistp_64_gcc_128"
+                    
+          chmod u+x ./Configure
+          
+          PLATFORM=MacOSX
+          ARCH=${{ matrix.arch }}
+          # Cross compile references, see Configurations/10-main.conf
+          export CROSS_COMPILE="${{ env.DEVELOPER }}/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
+          export CROSS_TOP="${{ env.DEVELOPER }}/Platforms/MacOSX.platform/Developer"
+          export CROSS_SDK="MacOSX${SDKVERSION}.sdk"
+
+          # Prepare TARGET_DIR  
+          mkdir -p "${{ env.BUILT_SDK_PATH }}"
+          ## Determine config options
+          # Add build target, --prefix and prevent async (references to getcontext(),
+          # setcontext() and makecontext() result in App Store rejections) and creation
+          # of shared libraries (default since 1.1.0)
+          LOCAL_CONFIG_OPTIONS="${TARGET} --prefix=${{ env.BUILT_SDK_PATH }} ${CONFIG_OPTIONS} no-async no-shared"
+
+          # Only relevant for 64 bit builds
+          if [[ "${CONFIG_ENABLE_EC_NISTP_64_GCC_128}" == "true" ]]; then
+              LOCAL_CONFIG_OPTIONS="${LOCAL_CONFIG_OPTIONS} enable-ec_nistp_64_gcc_128"
+          fi
+
+          export CFLAGS="-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mios-version-min=${MACOSX_MIN_SDK_VERSION}"
+          export LDFLAGS="-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
+
+          # Run Configure
+          ./Configure ${LOCAL_CONFIG_OPTIONS} no-tests > ../logs/openssl-config-${{ matrix.arch }}.log 
+
+          # Run make
+          echo "  Make (using ${{ env.BUILD_THREADS }} thread(s))..." 
+          make build_libs -j "${{ env.BUILD_THREADS }}"  > ../logs/openssl-build-${{ matrix.arch }}.log
+  
+          # Run make install
+          set -e 
+          make install_dev >> ../logs/openssl-install-${{ matrix.arch }}.log  
+  
+        env:
+          DEVELOPER: $(xcode-select -print-path)
+          BUILD_THREADS: $(sysctl -n hw.logicalcpu)  
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: failure()
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          path: |
+            logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - name: Upload OpenSSL Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}
+          path: |
+            ${{ env.BUILT_SDK_PATH }}
+            logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }} 
+        
   opus-android:
     runs-on: ubuntu-latest
       
@@ -579,7 +917,122 @@ jobs:
         overwrite: true
       env:
         SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
- 
+         
+  opus-mac:
+    runs-on: macos-26
+    name: opus-mac
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+          - platform: MacOSX
+          - lib_name: opus   
+          - sdk: macosx 
+    steps:
+      
+      - name: Cache H264 Built SDK
+        id: cache-libs
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+
+      - uses: actions/checkout@v6
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+      - name: Clone Opus
+        run: |
+          # Clonando explicitamente a versão 1.4 conforme solicitado
+          git clone --branch v1.4 https://github.com/xiph/opus.git
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install nasm autoconf automake libtool 
+        shell: sh
+          
+      - name: Build Opus
+        id: build  # Adicionado o ID 'build' para que o '${{ steps.build.outputs.artifact }}' funcione no upload
+        working-directory: opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ../logs
+
+          opus_version="1.4"
+          opus_opt_cflags="-O3 -ffast-math -flto -g"
+          opus_opt_ldflags="-flto"
+          DEVELOPER=$(xcode-select -print-path)
+          SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
+          PLATFORM="MacOSX"
+          
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/include"
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/lib"
+
+          echo "-- Building Opus for ${{ matrix.arch }} on ${PLATFORM} (Mac Catalyst)"
+
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            HOST="arm-apple-darwin"
+            TARGET="arm64-apple-ios14.0-macabi"
+            opus_opt_cflags="-O3 -ffast-math -flto -g -Wno-cast-align"
+          else
+            HOST="x86_64-apple-darwin"
+            TARGET="x86_64-apple-ios14.0-macabi"
+            opus_opt_cflags="-O3 -ffast-math -flto -g"
+          fi
+
+          ./autogen.sh
+
+          ISYSROOT="${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${SDKVERSION}.sdk"
+
+          CC="clang"                                                                                                          \
+          ./configure                                                                                                         \
+            --host=$HOST                                                                                                      \
+            --disable-shared                                                                                                  \
+            --with-pic                                                                                                        \
+            --disable-extra-programs                                                                                          \
+            --disable-doc                                                                                                     \
+            --enable-static                                                                                                   \
+            --enable-float-approx                                                                                             \
+            --prefix="${{ env.BUILT_SDK_PATH }}"                                                                                           \
+            LDFLAGS="${opus_opt_ldflags} -target $TARGET -isysroot ${ISYSROOT} -L${{ env.BUILT_SDK_PATH }}/lib"                            \
+            CFLAGS="${opus_opt_cflags} -target $TARGET -arch ${{ matrix.arch }} -isysroot ${ISYSROOT} -I${{ env.BUILT_SDK_PATH }}/include" \
+            > ../logs/opus-config-${{ matrix.arch }}.log 
+
+          make -j$(sysctl -n hw.logicalcpu) \
+            > ../logs/opus-build-${{ matrix.arch }}.log 
+
+          make install \
+            >> ../logs/opus-build-${{ matrix.arch }}.log 
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: failure()
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          path: |
+            logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          
+      - uses: actions/upload-artifact@v7
+        name: Upload opus artifact
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}
+          path: |
+            ${{ env.BUILT_SDK_PATH }}
+            logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+      
   pjsip-android:
     runs-on: ubuntu-latest
     strategy:
@@ -870,6 +1323,188 @@ jobs:
           name: pjsip-${{ matrix.arch }}
           path: ${{ steps.build-pj-ios.outputs.artifact }}
           overwrite: true
+       
+  pjsip-mac:
+    runs-on: macos-26
+    needs: [bcg729-mac, openh264-mac, openssl-mac, opus-mac]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+        - lib_name: pjsip
+        - platform: MacOSX
+        - sdk: macosx
+    steps:
+      - uses: actions/checkout@v6
+      - name: Clone PJSIP
+        run: |
+          git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git
+        env:  
+          PJSIP_VERSION: 2.16
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        run: |
+          brew install nasm autoconf automake libtool swig pkg-config llvm
+        shell: sh
+
+      - uses: actions/download-artifact@v8
+        name: Download bcg729 macos
+        with:
+          name: ${{ env.BCG_SDK_NAME }}
+          path: ${{ github.workspace }}/libs/bcg729
+        env:
+          BCG_SDK_NAME: bcg729-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+     
+      - uses: actions/download-artifact@v8
+        name: Download H264 macos
+        with:
+          name: ${{ env.H264_SDK_NAME }}
+          path: ${{ github.workspace }}/libs/h264
+        env:
+          H264_SDK_NAME: openh264-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+       
+      - uses: actions/download-artifact@v8
+        name: Download SSL macos
+        with:
+          name: ${{ env.SSL_SDK_NAME }}
+          path: ${{ github.workspace }}/libs/ssl
+        env:
+          SSL_SDK_NAME: openssl-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+      
+      - uses: actions/download-artifact@v8
+        name: Download opus macos (${{ matrix.arch }})
+        with:
+          name: ${{ env.OPUS_SDK_NAME }}
+          path: ${{ github.workspace }}/libs/opus
+        env:
+          OPUS_SDK_NAME: opus-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - name: Copy config_site.h to PJSIP
+        run: |
+          TARGET_CONFIG_DIR="pjproject/pjlib/include/pj"
+          mkdir -p "$TARGET_CONFIG_DIR"
+          cp "${{ github.workspace }}/res/pj/pjsua2maui/config_site.h" "$TARGET_CONFIG_DIR/config_site.h"
+          
+      - name: Build PJSIP
+        id: build-pjsip-mac
+        working-directory: pjproject
+        run: |
+          mkdir -p ../logs
+          # O pulo do gato: Caminhos para os frameworks e includes do Catalyst dentro do SDK do Mac
+          CATALYST_SYSTEM_INCLUDES="$SDKPATH/System/iOSSupport/usr/include"
+          export ARCH=${{ matrix.arch }}
+          export TARGET="${{ matrix.arch }}-apple-ios14.0-macabi"
+          export CC="clang -target $TARGET"
+          export CXX="clang++ -target $TARGET"
+          export SDKVERSION=${{ env.SDKVERSION }}
+          export MACOSXSDK="${{ matrix.platform}}${SDKVERSION}.sdk" 
+          export SDKPATH=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-path)
+          CATALYST_SYSTEM_FRAMEWORKS="$SDKPATH/System/iOSSupport/System/Library/Frameworks"
+          CATALYST_SYSTEM_INCLUDES="$SDKPATH/System/iOSSupport/usr/include"
+          export CFLAGS="${CFLAGS} -I${{ env.BCG_ROOT }}/include -I${{ env.H264_ROOT }}/include -I${{ env.SSL_ROOT }}/include -I${{ env.OPUS_ROOT }}/include "
+          export LDFLAGS="${LDFLAGS} -L${{ env.BCG_ROOT }}/lib -lbcg729 -L${{ env.H264_ROOT }}/lib -lopenh264 -L${{ env.SSL_ROOT }}/lib -lssl -lcrypto -L${{ env.OPUS_ROOT }}/lib -lopus"
+          if [[ '${{ matrix.arch }}' == 'arm64' ]]; then
+            export CFLAGS="-arch arm64 -target arm64-apple-ios14.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS" 
+            export CXXFLAGS="-arch arm64 -target arm64-apple-ios14.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export LDFLAGS="-arch arm64 -target arm64-apple-ios14.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
+          else
+            export CFLAGS="-arch x86_64 -target x86_64-apple-ios14.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export CXXFLAGS="-arch x86_64 -target x86_64-apple-ios14.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export LDFLAGS="-arch x86_64 -target x86_64-apple-ios14.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
+          fi
+
+          ./configure                            \
+            --host=${{ matrix.arch }}-apple-darwin            \
+            --disable-shared                     \
+            --with-bcg729=${{ env.BCG_ROOT }}    \
+            --with-ssl=${{ env.SSL_ROOT }}       \
+            --with-opus=${{ env.OPUS_ROOT }}     \
+            --with-openh264=${{ env.H264_ROOT }} \
+            CFLAGS="$CFLAGS"                     \
+            LDFLAGS="$LDFLAGS"                   \
+            CXXFLAGS="$CXXFLAGS" > ../logs/pjsip-config-${{ matrix.arch }}.log || exit 1
+
+          echo "FLAGS AFTER CONFIGURE:"
+          echo "CFLAGS=${CFLAGS}"
+          echo "LDFLAGS=${LDFLAGS}"
+          
+          export CFLAGS=$(echo "$CFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
+          export LDFLAGS=$(echo "$LDFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
+
+          echo "starting make dep"
+
+          make dep > ../logs/pjsip-dep-${{ matrix.arch }}.log || exit 1 
+
+          echo 'Done make dep' >> ../logs/pjsip-dep-${{ matrix.arch }}.log
+
+          echo "starting make"
+
+          make lib > ../logs/pjsip-build-${{ matrix.arch }}.log || exit 1
+
+          echo 'Done make lib' >> ../logs/pjsip-build-${{ matrix.arch }}.log
+
+          cd ./pjsip-apps/src/swig/csharp/pjsua2maui/
+          
+          cp -v -f ${{ github.workspace}}/res/pj/pjsua2maui/Makefile . 
+
+          echo "starting make mac"
+
+          make mac -j$(sysctl -n hw.logicalcpu) > ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log || exit 1
+          
+          echo 'Done make mac' >> ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log
+          
+          OUTPUT_DIR="${{ env.BUILT_SDK_PATH }}"
+          mkdir -p "$OUTPUT_DIR/lib"
+          mkdir -p "$OUTPUT_DIR/cs"
+          mkdir -p "$OUTPUT_DIR/tmp"
+
+          cp -v -f ${{ env.BCG_ROOT }}/**/*.a "$OUTPUT_DIR/tmp/" || true
+          cp -v -f ${{ env.H264_ROOT }}/**/*.a "$OUTPUT_DIR/tmp/" || true
+          cp -v -f ${{ env.OPUS_ROOT }}/**/*.a "$OUTPUT_DIR/tmp/" || true
+          cp -v -f ${{ env.SSL_ROOT }}/**/*.a "$OUTPUT_DIR/tmp/" || true
+          
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/${{ matrix.arch }}/libpjsua2.a "$OUTPUT_DIR/tmp/" || true
+          
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cs "$OUTPUT_DIR/cs/"
+
+          libtool -static -o "$OUTPUT_DIR/lib/libpjsua2.a" "$OUTPUT_DIR"/tmp/*.a
+
+          rm -rf "$OUTPUT_DIR/tmp"
+        shell: bash
+        env:
+          BCG_SDK_NAME: bcg729-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          H264_SDK_NAME: openh264-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          OPUS_SDK_NAME: opus-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          SSL_SDK_NAME: openssl-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BCG_ROOT: ${{ github.workspace }}/libs/bcg729
+          H264_ROOT: ${{ github.workspace }}/libs/h264
+          OPUS_ROOT: ${{ github.workspace }}/libs/opus
+          SSL_ROOT: ${{ github.workspace }}/libs/ssl
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: failure()
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          path: logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - uses: actions/upload-artifact@v7
+        name: Upload pjsip artifact
+        with:
+          name: ${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: |
+            ${{ env.BUILT_SDK_PATH }}
+        env:
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
    
   build-nupkg:
     runs-on: macos-26

@@ -522,7 +522,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: openh264-${{ matrix.arch }}
-        path: ${{ steps.build.outputs.artifact }}
+        path: ${{ env.OPENH264_PATH }}/builds/${{ matrix.platform }}-${{ matrix.resolved_arch }}
         overwrite: true
 
   openh264-mac:

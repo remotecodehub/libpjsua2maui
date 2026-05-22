@@ -86,14 +86,20 @@ jobs:
         arch: [x86_64, arm64, arm64s]
         include: 
           - lib_name: bcg729
-          - platform: ios
-
+          - arch: x86_64
+            platform: iossimulator
+            os_platform: iPhoneSimulator
+          - arch: arm64s
+            platform: iossimulator
+            os_platform: iPhoneSimulator
+          - arch: arm64
+            platform: ios
+            os_platform: iPhoneOS
     runs-on: macos-15
     name: bcg729-ios 
     permissions:
       contents: write
-    steps:
-        
+    steps:       
     - uses: actions/checkout@v6
       with:
         submodules: true
@@ -102,7 +108,7 @@ jobs:
       id: cache-libs
       uses: actions/cache@v5
       with:
-        path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+        path: ${{ github.workspace }}/${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk
         key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
     
     - name: Setup Xcode 26.4
@@ -141,9 +147,9 @@ jobs:
             ;;
         esac
 
-        sdk_path="${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk"
+        sdk_path="${xcode_dev_path}/Platforms/${{ matrix.os_platform }}.platform/Developer/SDKs/${{ matrix.os_platform }}.sdk"
 
-        build_dir="${os_platform}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk"
+        build_dir="${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk"
         rm -rf "$build_dir" CMakeFiles CMakeCache.txt
 
         mkdir -p "$build_dir"
@@ -162,13 +168,12 @@ jobs:
         make || exit 1
         make install
 
-        echo "artifact=${{ env.BCG729_PATH }}/$build_dir/" >> "$GITHUB_OUTPUT"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v7
       with:
         name: bcg729-${{ matrix.arch }}
-        path: ${{ steps.build.outputs.artifact }}
+        path: ${{ github.workspace }}/${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk
         overwrite: true
       env:
         SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}

@@ -917,7 +917,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: openssl-${{ matrix.arch }}
-        path: ${{ steps.build.outputs.artifact }}
+        path: ${{ env.OPENSSL_PATH }}/bin/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
         overwrite: true 
 
   openssl-mac:
@@ -1320,7 +1320,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: opus-${{ matrix.arch }}
-        path: ${{ steps.build.outputs.artifact }}
+        path: ${{ github.workspace }}/opus/build/${{ matrix.platform}}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
         overwrite: true
       env:
         SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}

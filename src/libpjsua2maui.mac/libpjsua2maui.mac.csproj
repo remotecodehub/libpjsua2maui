@@ -6,12 +6,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
         <AssemblyName>pjsua2maui.mac</AssemblyName>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
         <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
-    </PropertyGroup>
-    <PropertyGroup>
         <PackageId>libpjsua2maui.mac</PackageId>
         <Version>2.16.0.1</Version>
         <AssemblyVersion>2.16.0.1</AssemblyVersion>

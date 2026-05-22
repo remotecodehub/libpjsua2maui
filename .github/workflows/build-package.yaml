@@ -2396,7 +2396,7 @@ jobs:
                 Set-Content $header $content
             }            
 
-      - name: Patch namespace in swig command
+      - name: Patch c# namespace
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
@@ -2415,61 +2415,51 @@ jobs:
         shell: pwsh
         run: |
             Get-ChildItem . -Recurse
-
-      - name: Build PJSUA2
+    
+      - name: Build 
         shell: pwsh
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: pjproject
         run: |
           # 1. Mapeia os paths das suas dependências baixadas
           $DepsDir    = "${env:GITHUB_WORKSPACE}/deps"
-          $OpusInc    = "${DepsDir}/opus/include"
           $OpusLib    = "${DepsDir}/opus/lib"
-          $Bcg729Inc  = "${DepsDir}/bcg729/include"
           $Bcg729Lib  = "${DepsDir}/bcg729/lib"
-          $H264Inc    = "${DepsDir}/openh264/include"
           $H264Lib    = "${DepsDir}/openh264/lib"
-          $SslInc     = "${DepsDir}/openssl/include"
           $SslLib     = "${DepsDir}/openssl/lib"
+          $OpusInc    = "${DepsDir}/opus/include"
+          $Bcg729Inc  = "${DepsDir}/bcg729/include"
+          $H264Inc    = "${DepsDir}/openh264/include"
+          $SslInc     = "${DepsDir}/openssl/include"
 
           Write-Host "=== Mapeando Infraestrutura do Windows SDK nativo ==="
-          # O GitHub Actions disponibiliza essas variáveis através do passo 'ilammy/msvc-dev-cmd'
-          # Se o projeto do PJSIP bloquear a herança automática, nós passamos por cima manualmente:
-          $SdkInc   = $env:WindowsSdkDir + "Include\" + $env:WindowsSDKVersion
-          $UcrtInc  = "${SdkInc}\ucrt"
-          $SharedInc = "${SdkInc}\shared"
-          $UmInc    = "${SdkInc}\um"
+          $SdkInc     = $env:WindowsSdkDir + "Include\" + $env:WindowsSDKVersion
+          $UcrtInc    = "${SdkInc}\ucrt"
+          $SharedInc  = "${SdkInc}\shared"
+          $UmInc      = "${SdkInc}\um"
+          $MsvcInc    = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\include"
+
+          # Montagem robusta do INCLUDE
+          $IncludePaths = @($MsvcInc, $UcrtInc, $SharedInc, $UmInc, $OpusInc, $Bcg729Inc, $H264Inc, $SslInc)
+          if ($env:INCLUDE) { $IncludePaths += $env:INCLUDE }
+          $env:INCLUDE = $IncludePaths -join ";"
           
-          # Caminho da C Runtime do próprio compilador MSVC
-          $MsvcInc  = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\include"
+          # 2. Mapeamento das pastas de bibliotecas de linkagem (.lib)
+          $SdkLib     = $env:WindowsSdkDir + "Lib\" + $env:WindowsSDKVersion
+          $UcrtLib    = "${SdkLib}\ucrt\x64"
+          $UmLib      = "${SdkLib}\um\x64"
+          $MsvcLib    = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\lib\x64"
 
-          Write-Host "Injetando caminhos do compilador e dependências no ambiente..."
-          # Montamos a árvore de INCLUDE garantindo que a C Runtime básica venha PRIMEIRO
-          $NewInclude = @(
-              $MsvcInc,
-              $UcrtInc,
-              $SharedInc,
-              $UmInc,
-              $OpusInc,
-              $Bcg729Inc,
-              $H264Inc,
-              $SslInc
-          ) -join ";"
+          # Criamos uma lista limpa e unimos estritamente com ponto e vírgula ao final
+          $LibPaths = @($OpusLib, $Bcg729Lib, $H264Lib, $SslLib, $MsvcLib, $UcrtLib, $UmLib)
+          if ($env:LIB) { $LibPaths += $env:LIB }
+          $env:LIB = $LibPaths -join ";"
 
-          # Atualiza a variável INCLUDE do processo atual
-          $env:INCLUDE = $NewInclude + ";" + $env:INCLUDE
-          
-          # Faz o mesmo para as bibliotecas de linkagem (.lib)
-          $SdkLib   = $env:WindowsSdkDir + "Lib\" + $env:WindowsSDKVersion
-          $UcrtLib  = "${SdkLib}\ucrt\x64"
-          $UmLib    = "${SdkLib}\um\x64"
-          $MsvcLib  = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\lib\x64"
+          Write-Host "=== DEBUG: Verificando se o path do Opus está contido em env:LIB ==="
+          Write-Host $env:LIB
 
-          $env:LIB = @($MsvcLib, $UcrtLib, $UmLib, $OpusLib, $Bcg729Lib, $H264Lib, $SslLib) -join ";" + ";" + $env:LIB
-
-          Write-Host "=== Iniciando Compilação Compilador com Escopo Isolado ==="
-          # Rodamos o MSBuild garantindo que ele herde o ambiente e mire a versão correta do SDK
-          # Usamos /p:InheritMergeIDs para forçar o MSBuild a aceitar as variáveis externas
+          Write-Host "=== Iniciando Compilação com Variáveis de Ambiente Corrigidas ==="
+          # O parâmetro /p:UseEnv=true obriga o Linker a usar o nosso $env:LIB corrigido
           msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj `
               /p:PlatformToolset=v143 `
               /p:Configuration=Release `
@@ -2477,7 +2467,6 @@ jobs:
               /p:WindowsTargetPlatformVersion="$($env:WindowsSDKVersion.TrimEnd('\'))" `
               /p:AdditionalOptions="/bigobj" `
               /p:UseEnv=true
-
       - name: Setup .NET 10.0.x
         if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: actions/setup-dotnet@v5

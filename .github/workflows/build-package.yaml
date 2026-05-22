@@ -1596,7 +1596,7 @@ jobs:
 
       - name: Prepare Dirs
         run: |
-          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
@@ -1612,7 +1612,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
  
           # Move managed classes to projects directory
-          mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2maui.android/org/pjsip/
+          mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip/
           mv ${{ github.workspace }}/artifacts/android/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           mv ${{ github.workspace }}/artifacts/mac/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
@@ -1706,31 +1706,16 @@ jobs:
           fi
 
       - name: Validate and Pack NuGet 
-        shell: sh
+        working-directory: ${{ github.workspace }}/src
         run: |
-          cd "${{ github.workspace }}/src"
-          echo "🔍 Validando .nuspec com nuget pack (modo dry-run)..."
-
-          output=$(nuget pack libpjsua2maui.nuspec \
+          
+          nuget pack libpjsua2maui.nuspec \
             -Version "${{ env.VERSION }}" \
             -BasePath "${{ github.workspace }}/src" \
             -NoPackageAnalysis \
             -NoDefaultExcludes \
-            -Verbosity detailed 2>&1)
+            -Verbosity detailed 
 
-          if echo "$output" | grep -q "error"; then
-            echo "❌ Erro ao validar .nuspec. Detalhes:"
-            echo "$output"
-            exit 1
-          else
-            echo "$output"
-            echo "✅ Validação bem-sucedida. Gerando pacote determinístico..."
-            nuget pack libpjsua2maui.nuspec \
-              -Version "${{ env.VERSION }}" \
-              -BasePath "${{ github.workspace }}/src" \
-              -NoPackageAnalysis \
-              -NoDefaultExcludes
-          fi
         env: 
           VERSION: ${{ env.VERSION }}
 
@@ -1752,7 +1737,7 @@ jobs:
           API_KEY: ${{ secrets.API_KEY }}
           VERSION: ${{ env.VERSION }}
 
-      - name: Publicar pacote no GitHub Packages
+      - name: Push to GitHub Packages
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           cd ${{ github.workspace }}/src/

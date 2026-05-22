@@ -27,29 +27,38 @@ android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
         <icon>icon.png</icon>
         <repository type="git" url="https://github.com/remotecodehub/libpjsua2maui" />
         <references>
+            <group targetFramework="net10.0-android36.0">
+                <reference file="pjsua2maui.android.dll" />
+                <reference file="pjsua2maui.android.xml" />
+            </group>
             <group targetFramework="net10.0-maccatalyst26.2">
                 <reference file="pjsua2maui.mac.dll" />
             </group>
             <group targetFramework="net10.0-ios26.2">
                 <reference file="pjsua2maui.ios.dll" />
             </group>
-            <group targetFramework="net10.0-android36.0">
-                <reference file="pjsua2maui.android.dll" />
-                <reference file="pjsua2maui.android.xml" />
+            <group targetFramework="net10.0-windows10.0.19041">
+                <reference file="pjsua2maui.win.dll" />
             </group>
         </references>
-        
 
         <dependencies>
+            <group targetFramework="net10.0-android36.0" />
             <group targetFramework="net10.0-ios26.2" />
             <group targetFramework="net10.0-maccatalyst26.2" />
-            <group targetFramework="net10.0-android36.0" />
+            <group targetFramework="net10.0-windows10.0.19041.0" />
         </dependencies>
     </metadata>
 
     <files>
         <!-- Targets -->
         <file src="libpjsua2maui.targets" target="build\libpjsua2maui.targets" />
+        
+        <!-- Native Android -->
+        <file src="libpjsua2.android.so\lib\armeabi-v7a\*" target="runtimes\android-arm\native\" />
+        <file src="libpjsua2.android.so\lib\arm64-v8a\*" target="runtimes\android-arm64\native\" />
+        <file src="libpjsua2.android.so\lib\x86\*" target="runtimes\android-x86\native\" />
+        <file src="libpjsua2.android.so\lib\x86_64\*" target="runtimes\android-x86_64\native\" />
 
         <!-- Native iOS -->
         <file src="libpjsua2.ios.a\lib\x86_64\libpjsua2.a"
@@ -65,21 +74,14 @@ android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
         <file src="libpjsua2.mac.a\lib\arm64\libpjsua2.a"
             target="runtimes\maccatalyst-arm64\native\libpjsua2.a" />
 
+        <!-- Native Windows -->
+        <file src="libpjsua2.win.dll\lib\x64\pjsua2.dll"
+            target="runtimes\win-x64\native\pjsua2.dll" />
 
-        <!-- Native Android -->
-        <!-- armeabi-v7a -->
-        <file src="libpjsua2.android.so\lib\armeabi-v7a\*" target="runtimes\android-arm\native\" />
-        <!-- arm64-v8a -->
-        <file src="libpjsua2.android.so\lib\arm64-v8a\*" target="runtimes\android-arm64\native\" />
-        <!-- x86 -->
-        <file src="libpjsua2.android.so\lib\x86\*" target="runtimes\android-x86\native\" />
-        <!-- x86_64 -->
-        <file src="libpjsua2.android.so\lib\x86_64\*" target="runtimes\android-x86_64\native\" />
-
-        <!-- Java bindings -->
+        <!-- Managed Java bindings -->
         <file src="libpjsua2.android.so\org\pjsip\*" target="contentFiles\any\android\org\pjsip\" />
 
-        <!-- Managed assemblies -->
+        <!-- Managed C# assemblies -->
         <file src="libpjsua2maui.mac\bin\Release\net10.0-maccatalyst\pjsua2maui.mac.*"
             target="lib\net10.0-maccatalyst26.2\" />
         <file src="libpjsua2maui.mac\bin\Release\net10.0-maccatalyst\pjsua2maui.mac.*"
@@ -92,6 +94,10 @@ android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
             target="lib\net10.0-android36.0\" />
         <file src="libpjsua2maui.android\bin\Release\net10.0-android\pjsua2maui.android.*"
             target="ref\net10.0-android36.0\" />
+        <file src="libpjsua2maui.win\bin\Release\net10.0-windows10.0.19041.0\publish\pjsua2maui.win.*" 
+            target="lib\net10.0-windows10.0.19041\" />
+        <file src="libpjsua2maui.win\bin\Release\net10.0-windows10.0.19041.0\publish\pjsua2maui.win.*"
+            target="ref\net10.0-windows10.0.19041\" />
 
         <!-- README -->
         <file src="README.md" target="." />

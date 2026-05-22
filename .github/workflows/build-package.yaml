@@ -47,25 +47,29 @@ jobs:
         id: cache-libs
         uses: actions/cache@v5
         with:
-          path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: ${{ github.workspace }}/bcg729-output
           key: bcg729-${{ env.BCG729_VERSION }}-android
     
       - name: Create Output Directory
-        
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: mkdir -p ${{ github.workspace }}/bcg729-output
 
       - name: Set Permissions for Output Directory
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: chmod -R 777 ${{ github.workspace }}/bcg729-output
 
       - name: Build Docker Image
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           docker build -t bcg729-builder ${{ github.workspace }}/res/docker/bcg729
         
       - name: Run Docker Container 
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           docker run --name bcg729-build bcg729-builder
           
       - name: Extract Artifacts from Container
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           docker cp bcg729-build:/root/outputs/libs ${{ github.workspace }}/bcg729-output
  
@@ -102,18 +106,20 @@ jobs:
         path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
         key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
     
-    - name: Setup Xcode 16.4
+    - name: Setup Xcode 26.4
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '16.4'
+        xcode-version: '26.3'
  
     - name: Install deps
+      if: steps.cache-libs.outputs.cache-hit != 'true'
       run: |
         brew install nasm autoconf automake libtool
       shell: sh
 
     - name: Build bcg729 for iOS
       id: build
+      if: steps.cache-libs.outputs.cache-hit != 'true'
       run: |
         echo "Building BCG729 for iOS"
         xcode_dev_path=$(xcode-select -print-path)
@@ -2490,32 +2496,56 @@ jobs:
                 /p:Platform=x64 ^
                 /p:WindowsTargetPlatformVersion=10.0 ^
                 /p:AdditionalOptions="/bigobj" 
-       
+         
+      - name: Setup .NET 10.0.x
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+          
+      - name: Restore Dependencies
+        working-directory: src/libpjsua2maui.win
+        run: | 
+          dotnet workload install maui --source https://api.nuget.org/v3/index.json --skip-manifest-update
+          dotnet workload install windows --source https://api.nuget.org/v3/index.json --skip-manifest-update
+          dotnet workload update
+          dotnet workload restore libpjsua2maui.win.csproj
+          dotnet restore libpjsua2maui.win.csproj
+
+      - name: Build win managed dll
+        
+        run: |
+          dotnet build libpjsua2maui.win.csproj -c Release --no-restore
       - name: Collect PJSIP artifacts
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path "src/pjsua2.dll/lib" | Out-Null
-          
+          New-Item -ItemType Directory -Force -Path "src/libpjsua2.win.dll/lib/x64" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2" | Out-Null
           if (Test-Path "pjproject/pjsip-apps/src/swig/output") {
-            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.cs src/pjsua2maui.win/pjsua2maui/pjsua2/ -ErrorAction SilentlyContinue
-            Copy-Item pjproject/pjsip-apps/src/swig/output/pjsua2.* src/pjsua2.dll/lib -Recurse -Force
+            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2 -ErrorAction SilentlyContinue
+            Copy-Item pjproject/pjsip-apps/src/swig/output/*.dll src/libpjsua2.win.dll/lib/x64 -Recurse -Force
           }
-
+          
           Get-ChildItem .\install -Recurse
+          Get-ChildItem .\src\libpjsua2.win.dll\ -Recurse
+
+      - name: Build Managed Library
+        working-directory: src/libpjsua2maui.win
+        run: | 
+          dotnet publish libpjsua2maui.win.csproj -c Release --no-restore 
 
       - name: Upload PJSIP artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pjsip-win-x64
           path: |
-            install/pjsip/**/*
+            src/libpjsua2.win.dll/**/*
+            src/libpjsua2maui.win/**/*
           if-no-files-found: warn
 
   nupkg:
     runs-on: macos-26
     name: libpjsua2.nupkg 
-    needs: [pjsip-android, pjsip-ios, pjsip-mac]
+    needs: [pjsip-android, pjsip-ios, pjsip-mac, pjsip-win]
     steps: 
       - name: Checkout
         uses: actions/checkout@v6
@@ -2603,12 +2633,19 @@ jobs:
         env:
           PJ_PATH: ${{ github.workspace }}/artifacts/mac/pjsip-x86_64
 
+      - name: Download win x64 Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: pjsip-win-x64
+          path: ./artifacts/win/pjsip-x64
+      
       - name: Prepare Dirs
         run: |
           mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.win/bin
           mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
           mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
@@ -2619,6 +2656,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64
  
           # Move managed classes to projects directory
           mv ${{ github.workspace }}/artifacts/java/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip/
@@ -2626,6 +2664,9 @@ jobs:
           mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           mv ${{ github.workspace }}/artifacts/mac/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
           
+          # Move managed assemblies to projects directory
+          mv -v ${{ github.workspace }}/artifacts/win/pjsip-x64/bin ${{ github.workspace }}/src/libpjsua2maui.win/bin
+
           # Move android libs to packaging directory
           mv ${{ github.workspace }}/artifacts/android-x86/* ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
           mv ${{ github.workspace }}/artifacts/android-x86_64/* ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
@@ -2641,6 +2682,9 @@ jobs:
           mv ${{ github.workspace }}/artifacts/mac/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
           mv ${{ github.workspace }}/artifacts/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
           
+          # Move win libs to packaging directory
+          mv -v ${{ github.workspace }}/artifacts/win/pjsip-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
+
           cd  ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
           mkdir tmp
           mv *.a tmp

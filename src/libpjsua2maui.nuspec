@@ -14,11 +14,12 @@
             android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
         </description>
         <releaseNotes>
-            - ❇️ Upgrade pjsip version
+            - ❇️ Added macosx support
+            - 🐞 Bugfix: Android java classes not found
         </releaseNotes>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <license type="expression">GPL-3.0-only</license>
-        <copyright>Copyright ©2025 Remote Code Hub</copyright>
+        <copyright>Copyright ©2026 Remote Code Hub</copyright>
         <tags>sip voip pjsip maui native</tags>
         <readme>README.md</readme>
         <iconUrl>https://raw.githubusercontent.com/remotecodehub/libpjsua2maui/main/src/icon.png</iconUrl>

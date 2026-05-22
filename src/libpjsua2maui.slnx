@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="libpjsua2maui.android/libpjsua2maui.android.csproj" />
+  <Project Path="libpjsua2maui.ios/libpjsua2maui.ios.csproj" />
+</Solution>

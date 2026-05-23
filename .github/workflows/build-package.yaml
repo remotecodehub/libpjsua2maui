@@ -2487,7 +2487,7 @@ jobs:
           
       - name: Restore Dependencies
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: src/libpjsua2maui.win
+        working-directory: src\libpjsua2maui.win
         run: | 
           dotnet workload install maui --source https://api.nuget.org/v3/index.json --skip-manifest-update
           dotnet workload install windows --source https://api.nuget.org/v3/index.json --skip-manifest-update
@@ -2496,7 +2496,7 @@ jobs:
           dotnet restore libpjsua2maui.win.csproj
 
       - name: Build win managed dll     
-        working-directory: src/libpjsua2maui.win
+        working-directory: src\libpjsua2maui.win
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           dotnet publish libpjsua2maui.win.csproj -c Release --no-restore

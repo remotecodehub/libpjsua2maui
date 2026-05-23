@@ -270,8 +270,13 @@ jobs:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
   bcg729-win:
-    name: bcg729-win
+    name: bcg729-win (${{ matrix.arch }})
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -281,24 +286,23 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/deps/bcg729
-          key: bcg729-${{ env.BCG729_VERSION }}-win-x64
+          key: bcg729-${{ env.BCG729_VERSION }}-win-${{ matrix.arch }}
     
       - name: Setup MSVC
         if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: ilammy/msvc-dev-cmd@v1
         with:
-            arch: x64
+          arch: ${{ matrix.arch }}
 
       - name: Setup CMake
         uses: lukka/get-cmake@latest
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
-      - name: Configure MSVC
+      - name: Verify Compiler
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-            call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
-            echo Visual Studio environment loaded
+            echo Visual Studio environment loaded for ${{ matrix.arch }}
             where cl
             where msbuild
 
@@ -313,26 +317,20 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            git clone `
-            --branch "${env:BCG729_VERSION}" `
-            --depth 1 `
-            https://github.com/BelledonneCommunications/bcg729.git `
-            bcg729
+            git clone --branch "${env:BCG729_VERSION}" --depth 1 https://github.com/BelledonneCommunications/bcg729.git bcg729
 
       - name: Build bcg729
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: cmd
         working-directory: bcg729
         run: |
-          call "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
-
           cmake -S . ^
                 -B build ^
                 -G "Visual Studio 17 2022" ^
-                -A x64 ^
+                -A ${{ matrix.arch }} ^
                 -DBUILD_SHARED_LIBS=OFF ^
                 -DENABLE_UNIT_TESTS=OFF ^
-                -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
+                -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ^
                 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL ^
                 -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729
 
@@ -346,7 +344,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $target = "${env:INSTALL_DIR}\bcg729\x64"
+            $target = "${env:INSTALL_DIR}\bcg729\${{ matrix.arch }}"
 
             New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
             New-Item -ItemType Directory -Force -Path "$target\include\bcg729" | Out-Null
@@ -366,9 +364,9 @@ jobs:
       - name: Upload BCG729 artifacts 
         uses: actions/upload-artifact@v4
         with:
-            name: bcg729-win-x64
-            path: deps/bcg729/**/*
-            if-no-files-found: warn
+          name: bcg729-win-${{ matrix.arch }}
+          path: deps/bcg729/**/*
+
           
   openh264-android:
     runs-on: ubuntu-latest
@@ -747,7 +745,7 @@ jobs:
             name: openh264-win-x64
             path: |
               install/openh264/x64/**/*
-            if-no-files-found: warn
+
 
   openssl-android:
     runs-on: ubuntu-latest
@@ -1157,7 +1155,7 @@ jobs:
             name: openssl-win-x64
             path: |
               install/openssl/x64/**/*
-            if-no-files-found: warn
+
       
   opus-android:
     runs-on: ubuntu-latest   
@@ -1558,7 +1556,7 @@ jobs:
             name: opus-win-x64
             path: |
               install/opus/x64/**/*
-            if-no-files-found: warn
+
 
   pjsip-android:
     runs-on: ubuntu-latest

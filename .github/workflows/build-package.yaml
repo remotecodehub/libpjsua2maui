@@ -264,7 +264,7 @@ jobs:
         with:
           name: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: |
-            ${{ env.BUILT_SDK_PATH }}
+            ${{ env.BUILT_SDK_PATH }}/**/*
             logs/*.log
         env:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}--${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk

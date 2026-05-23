@@ -271,7 +271,6 @@ jobs:
   bcg729-win:
     name: bcg729-win
     runs-on: windows-2022
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -1934,7 +1933,7 @@ jobs:
           name: ${{ env.OPUS_SDK_NAME }}
           path: ${{ github.workspace }}/libs/opus
         env:
-          OPUS_SDK_NAME: opus-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
       - name: Copy config_site.h to PJSIP
         if: steps.cache-libs.outputs.cache-hit != 'true'

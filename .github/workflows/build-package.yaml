@@ -2037,7 +2037,7 @@ jobs:
           BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           H264_SDK_NAME: openh264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          SSL_SDK_NAME: openssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           BCG_ROOT: ${{ github.workspace }}/libs/bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           H264_ROOT: ${{ github.workspace }}/libs/openh264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           OPUS_ROOT: ${{ github.workspace }}/libs/opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk

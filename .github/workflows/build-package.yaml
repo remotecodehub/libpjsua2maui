@@ -2534,12 +2534,11 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: src
         shell: pwsh
-        run: |
-          $TargetArch = "${{ matrix.arch }}"
-          New-Item -ItemType Directory -Force -Path "./libpjsua2.win/lib/$TargetArch" | Out-Null
+        run: | 
+          New-Item -ItemType Directory -Force -Path "./libpjsua2.win/lib/${{ matrix.arch }}" | Out-Null
 
           if (Test-Path "pjproject/pjsip-apps/src/swig/csharp/output") {
-            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.dll "./libpjsua2maui.win/lib/$TargetArch" -Recurse -Force
+            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.dll "./libpjsua2maui.win/lib/${{ matrix.arch }}" -Recurse -Force
           }
           
           Get-ChildItem .\libpjsua2.win\ -Recurse

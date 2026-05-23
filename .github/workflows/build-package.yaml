@@ -175,7 +175,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v7
       with:
-        name: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+        name: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.os_platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
         path: ${{ github.workspace }}/${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk
         overwrite: true
       
@@ -1795,9 +1795,15 @@ jobs:
       - uses: actions/download-artifact@v8
         if: steps.cache-libs.outputs.cache-hit != 'true'
         with:
-          name: bcg729-${{ matrix.arch }}
+          name: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/bcg729/
-     
+
+      - name: Validate Deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: libs
+        shell: pwsh
+        run: ls -R .
+          
       - name: Install dependencies
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |

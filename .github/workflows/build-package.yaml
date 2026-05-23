@@ -334,7 +334,7 @@ jobs:
                 -DBUILD_SHARED_LIBS=OFF ^
                 -DCMAKE_SYSTEM_VERSION="10.0.26100.0" ^
                 -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
-                -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729\${{ matrix.arch }}
+                -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729\
 
           cmake --build build --config Release --target INSTALL          
 
@@ -2400,8 +2400,8 @@ jobs:
         shell: pwsh
         run: |
             $headers = @(
-                "deps/bcg729/include/bcg729/encoder.h",
-                "deps/bcg729/include/bcg729/decoder.h"
+                "deps/bcg729/${{ matrix.arch }}/include/bcg729/encoder.h",
+                "deps/bcg729/${{ matrix.arch }}/include/bcg729/decoder.h"
             )
 
             foreach ($header in $headers)

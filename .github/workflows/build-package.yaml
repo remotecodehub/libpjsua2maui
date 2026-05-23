@@ -249,7 +249,7 @@ jobs:
           make install \
             > ../logs/${{ matrix.lib_name }}-install-${{ matrix.arch }}.log
         env: 
-          BUILT_SDK_PATH:  ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH:  ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
       - uses: actions/upload-artifact@v7
         name: Upload error logs

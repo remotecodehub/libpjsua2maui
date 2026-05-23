@@ -1940,6 +1940,7 @@ jobs:
           cp "${{ github.workspace }}/res/pj/pjsua2maui/config_site.h" "$TARGET_CONFIG_DIR/config_site.h"
     
       - name: Inspect Dependencies Structure
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           echo "=== Library folders structure check ==="
           ls  ${{ github.workspace }}/libs/${{ env.BCG_SDK_NAME }} && echo "bcg729 found"

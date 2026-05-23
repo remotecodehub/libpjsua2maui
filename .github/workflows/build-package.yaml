@@ -330,12 +330,13 @@ jobs:
                 -A ${{ matrix.arch }} ^
                 -DBUILD_SHARED_LIBS=OFF ^
                 -DENABLE_UNIT_TESTS=OFF ^
+                -DENABLE_NEON=OFF ^
+                -DCMAKE_C_FLAGS="/DBCG729_INTERNAL_DISABLE_NEON /D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE" ^
                 -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ^
                 -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL ^
                 -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729
 
           cmake --build build --config Release --target INSTALL
-
           echo ===== VERIFY CRT =====
           dumpbin /directives ..\deps\bcg729\lib\bcg729.lib | findstr DEFAULTLIB
             

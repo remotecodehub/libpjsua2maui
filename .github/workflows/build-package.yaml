@@ -1905,7 +1905,7 @@ jobs:
           name: ${{ env.BCG_SDK_NAME }}
           path: ${{ github.workspace }}/libs/bcg729
         env:
-          BCG_SDK_NAME: bcg729-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
      
       - uses: actions/download-artifact@v8
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -1914,7 +1914,7 @@ jobs:
           name: ${{ env.H264_SDK_NAME }}
           path: ${{ github.workspace }}/libs/h264
         env:
-          H264_SDK_NAME: openh264-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
        
       - uses: actions/download-artifact@v8
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -1923,7 +1923,7 @@ jobs:
           name: ${{ env.SSL_SDK_NAME }}
           path: ${{ github.workspace }}/libs/ssl
         env:
-          SSL_SDK_NAME: openssl-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          SSL_SDK_NAME: ssl-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
       
       - uses: actions/download-artifact@v8
         if: steps.cache-libs.outputs.cache-hit != 'true'

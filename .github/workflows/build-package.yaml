@@ -306,18 +306,21 @@ jobs:
             where cl
             where msbuild
 
-      - name: Create directories
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-            New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
-            New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
-
       - name: Clone BCG729
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
             git clone --branch "${env:BCG729_VERSION}" --depth 1 https://github.com/BelledonneCommunications/bcg729.git bcg729
+            
+      - name: Remove Legacy MSVC Headers (ARM64 Only)
+        if: matrix.arch == 'ARM64'
+        shell: pwsh
+        working-directory: bcg729
+        run: |
+          if (Test-Path "include/MSVC") {
+            Remove-Item -Path "include/MSVC" -Recurse -Force
+            Write-Host "Removed old MSVC implementation in order to use the new available from Win SDK 10.0.26100.0" -ForegroundColor Green
+          }
 
       - name: Build bcg729
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -329,17 +332,11 @@ jobs:
                 -G "Visual Studio 17 2022" ^
                 -A ${{ matrix.arch }} ^
                 -DBUILD_SHARED_LIBS=OFF ^
-                -DENABLE_UNIT_TESTS=OFF ^
-                -DENABLE_NEON=OFF ^
-                -DCMAKE_C_FLAGS="/DBCG729_INTERNAL_DISABLE_NEON /D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE" ^
-                -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ^
-                -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL ^
-                -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729
+                -DCMAKE_SYSTEM_VERSION="10.0.26100.0" ^
+                -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
+                -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729\${{ matrix.arch }}
 
-          cmake --build build --config Release --target INSTALL
-          echo ===== VERIFY CRT =====
-          dumpbin /directives ..\deps\bcg729\lib\bcg729.lib | findstr DEFAULTLIB
-            
+          cmake --build build --config Release --target INSTALL          
 
       - name: Normalize artifacts
         if: steps.cache-libs.outputs.cache-hit != 'true'

@@ -2060,7 +2060,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         name: Upload pjsip artifact
         with:
-          name: ${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          name: ${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: |
             ${{ env.BUILT_SDK_PATH }}
         env:
@@ -2070,10 +2070,7 @@ jobs:
     name: pjsip - win (x64)
     runs-on: windows-2022
     needs: [bcg729-win, openh264-win, openssl-win, opus-win]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+    steps: 
       - name: Cache pjsip Built SDK
         id: cache-libs
         uses: actions/cache@v5
@@ -2517,61 +2514,94 @@ jobs:
     steps: 
       - name: Checkout
         uses: actions/checkout@v6
-    
+
+      - name: Set VERSION variable
+        run: |
+          NUSPEC_PATH="${{ github.workspace }}/src/libpjsua2maui.nuspec"
+          
+          VERSION=$(xmllint --xpath "//*[local-name()='version']/text()" "$NUSPEC_PATH" 2>/dev/null | xargs)
+          
+          if [ -n "$VERSION" ]; then
+            echo "Found version: $VERSION"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          else
+            echo "Error: Tag <version> not found at .nuspec file"
+            exit 1
+          fi
+
+      - name: Cache pjsip Built SDK
+        uses: actions/cache@v5
+        id: cache-libs
+        with:
+          path: ${{ github.workspace }}
+          key: libpjsua2maui${{ env.VERSION }}.nupkg-${{ env.PJSIP_VERSION }}
+        env: 
+          VERSION: ${{ env.VERSION }}
+
       - name: Setup .NET 10
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
           
       - name: Setup nuget 
         run: brew install nuget
+        if: steps.cache-libs.outputs.cache-hit != 'true'
  
       - uses: actions/setup-java@v5
         with:
           distribution: 'microsoft'
           java-version: '17'
+        if: steps.cache-libs.outputs.cache-hit != 'true'
           
       - name: Download Android x86 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-android-x86
           path: ./artifacts/android-x86
+        if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Download Android x86_64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-android-x86_64
           path: ./artifacts/android-x86_64
+        if: steps.cache-libs.outputs.cache-hit != 'true'
           
       - name: Download Android arm Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-android-armeabi-v7a
           path: ./artifacts/android-armeabi-v7a
+        if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Download Android arm64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-android-arm64-v8a
           path: ./artifacts/android-arm64-v8a
+        if: steps.cache-libs.outputs.cache-hit != 'true'
   
       - name: Download ios Artifacts
         uses: actions/download-artifact@v8
         with:
           name: pjsip-x86_64
           path: ./artifacts/ios/pjsip-x86_64
+        if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Download ios arm64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-arm64
           path: ./artifacts/ios/pjsip-arm64
+        if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download ios arm64s Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-arm64s
           path: ./artifacts/ios/pjsip-arm64s
+        if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - uses: actions/download-artifact@v8
         name: Download pjsip macos (arm64)
@@ -2580,6 +2610,7 @@ jobs:
           path: ${{ env.PJ_PATH }}
         env:
           PJ_PATH: ${{ github.workspace }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}.sdk/arm64
+        if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - uses: actions/download-artifact@v8
         name: Download pjsip macos (x64)
@@ -2588,14 +2619,17 @@ jobs:
           path: ${{ env.PJ_PATH }}
         env:
           PJ_PATH: ${{ github.workspace }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}.sdk/x86_64
+        if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download win x64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-win-x64
           path: ./artifacts/win/pjsip-x64
+        if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Prepare Dirs
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
@@ -2651,11 +2685,10 @@ jobs:
           mv *.a tmp
           libtool -static -o libpjsua2.a ./tmp/*.a 
           rm -rf tmp
-        env:
-          BUILT_OUTPUT_PATH: ${{ github.workspace }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}.sdk         
-      
+        
       - name: Restore Dependencies
         working-directory: src
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: | 
           echo "⏳ Cleaning old workloads..."
           dotnet workload uninstall maui --ignore-failed-sources || true
@@ -2677,27 +2710,16 @@ jobs:
           dotnet restore libpjsua2maui.mac/libpjsua2maui.mac.csproj
 
       - name: Build MAUI Android
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android --no-restore
         
       - name: Build MAUI iOS
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios --no-restore
       
       - name: Build MAUI MacOSX
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -f net10.0-maccatalyst --no-restore
-      
-      - name: Set VERSION variable
-        run: |
-          NUSPEC_PATH="${{ github.workspace }}/src/libpjsua2maui.nuspec"
-          
-          VERSION=$(xmllint --xpath "//*[local-name()='version']/text()" "$NUSPEC_PATH" 2>/dev/null | xargs)
-          
-          if [ -n "$VERSION" ]; then
-            echo "Found version: $VERSION"
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
-          else
-            echo "Error: Tag <version> not found at .nuspec file"
-            exit 1
-          fi
 
       - name: Validate and Pack NuGet 
         working-directory: ${{ github.workspace }}/src

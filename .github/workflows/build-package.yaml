@@ -1446,10 +1446,14 @@ jobs:
             logs/*.log
         env:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-      
+   
   opus-win:
-    name: opus-win (x64)
+    name: opus-win (${{ matrix.arch }})
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
 
     steps:
       - name: Checkout
@@ -1459,109 +1463,104 @@ jobs:
         id: cache-libs
         uses: actions/cache@v5
         with:
-          path: ${{ github.workspace }}/install/opus/x64
-          key: opus-${{ env.OPUS_VERSION }}-win-x64
+          path: ${{ github.workspace }}/install/opus/${{ matrix.arch }}
+          key: opus-${{ env.OPUS_VERSION }}-win-${{ matrix.arch }}
 
       - name: Setup MSVC
         if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: ilammy/msvc-dev-cmd@v1
         with:
-            arch: x64
+          # Se for ARM64, usa o cross-compiler (roda em x64, gera ARM64)
+          # Se for x64, usa o compilador nativo x64
+          arch: ${{ matrix.arch == 'ARM64' && 'x64_arm64' || 'x64' }}
 
       - name: Setup CMake
         if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: lukka/get-cmake@latest
 
       - name: Create directories
-        shell: pwsh
         if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
         run: |
-            New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
-            New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
-            New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
       - name: Clone Opus
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            git clone `
+          git clone `
             --branch "${env:OPUS_VERSION}" `
             --depth 1 `
             https://github.com/xiph/opus.git `
             opus
 
-      - name: Configure MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: cmd
-        run: |
-            call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
-            echo Visual Studio environment loaded
-            where cl
-            where msbuild
-
       - name: Configure Opus
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-            cmake -S opus -B opus\build ^
+          :: O gerador do CMake utiliza o nome exato da arquitetura da matrix (x64 ou ARM64)
+          cmake -S opus -B opus\build ^
             -G "Visual Studio 17 2022" ^
-            -A x64 ^
+            -A ${{ matrix.arch }} ^
             -DCMAKE_BUILD_TYPE=Release ^
-            -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR%\opus\x64 ^
+            -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR%\opus\${{ matrix.arch }} ^
             -DBUILD_SHARED_LIBS=OFF ^
             -DOPUS_BUILD_SHARED_LIBRARY=OFF ^
             -DOPUS_BUILD_PROGRAMS=OFF ^
             -DOPUS_BUILD_TESTING=OFF ^
             -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
-            > %LOGS_DIR%\opus-x64-configure.log 2>&1
+            > %LOGS_DIR%\opus-${{ matrix.arch }}-configure.log 2>&1
 
-            IF %ERRORLEVEL% NEQ 0 (
-            type %LOGS_DIR%\opus-x64-configure.log
-            exit /b %ERRORLEVEL%
-            )
+          if %ERRORLEVEL% neq 0 (
+              type %LOGS_DIR%\opus-${{ matrix.arch }}-configure.log
+              exit /b %ERRORLEVEL%
+          )
 
       - name: Build Opus
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-            cmake --build opus\build ^
+          cmake --build opus\build ^
             --config Release ^
             --parallel  
-            IF %ERRORLEVEL% NEQ 0 ( 
-            exit /b %ERRORLEVEL%
-            )
+          
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
 
       - name: Install Opus
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-            cmake --install opus\build ^
+          cmake --install opus\build ^
             --config Release  
 
-            IF %ERRORLEVEL% NEQ 0 ( 
-            exit /b %ERRORLEVEL%
-            )
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
  
       - name: Patch .lib files
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            cp -v "${env:INSTALL_DIR}\opus\x64\lib\opus.lib" "${env:INSTALL_DIR}\opus\x64\lib\libopus.a"
+          $libPath = "${env:INSTALL_DIR}\opus\${{ matrix.arch }}\lib"
+          cp -v "$libPath\opus.lib" "$libPath\libopus.a"
       
       - name: List generated files
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            Get-ChildItem "${env:INSTALL_DIR}\opus" -Recurse
+          Get-ChildItem "${env:INSTALL_DIR}\opus" -Recurse
 
       - name: Upload Opus artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-            name: opus-win-x64
-            path: |
-              install/opus/x64/**/*
-
+          name: opus-win-${{ matrix.arch }}
+          path: |
+            install/opus/${{ matrix.arch }}/**/*
 
   pjsip-android:
     runs-on: ubuntu-latest

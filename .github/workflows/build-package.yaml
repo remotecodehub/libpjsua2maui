@@ -1887,7 +1887,7 @@ jobs:
         uses: actions/cache@v5
         id: cache-libs
         with:
-          path: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - uses: actions/checkout@v6
@@ -2022,23 +2022,20 @@ jobs:
           
           echo 'Done make mac' >> ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log
           
-          OUTPUT_DIR="${{ env.BUILT_SDK_PATH }}"
-          mkdir -p "$OUTPUT_DIR/lib"
-          mkdir -p "$OUTPUT_DIR/cs"
-          mkdir -p "$OUTPUT_DIR/tmp"
+          OUTPUT_DIR=""
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/lib"
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/cs" 
 
-          cp -v -f ${{ env.BCG_ROOT }}/**/*.a "$OUTPUT_DIR/tmp/" || true
-          cp -v -f ${{ env.H264_ROOT }}/**/*.a "$OUTPUT_DIR/tmp/" || true
-          cp -v -f ${{ env.OPUS_ROOT }}/**/*.a "$OUTPUT_DIR/tmp/" || true
-          cp -v -f ${{ env.SSL_ROOT }}/**/*.a "$OUTPUT_DIR/tmp/" || true
+          cp -v -f ${{ env.BCG_ROOT }}/lib/*.a . 
+          cp -v -f ${{ env.H264_ROOT }}/lib/*.a .
+          cp -v -f ${{ env.OPUS_ROOT }}/lib/*.a .
+          cp -v -f ${{ env.SSL_ROOT }}/lib/*.a .
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/${{ matrix.arch }}/libpjsua2.a .
           
-          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/${{ matrix.arch }}/libpjsua2.a "$OUTPUT_DIR/tmp/" || true
+          libtool -static -o "$OUTPUT_DIR/lib/libpjsua2.a" ./*.a
           
-          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cs "$OUTPUT_DIR/cs/"
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cs "${{ env.BUILT_SDK_PATH }}/cs/"
 
-          libtool -static -o "$OUTPUT_DIR/lib/libpjsua2.a" "$OUTPUT_DIR"/tmp/*.a
-
-          rm -rf "$OUTPUT_DIR/tmp"
         shell: bash
         env:
           BCG_SDK_NAME: bcg729-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
@@ -2067,7 +2064,7 @@ jobs:
           path: |
             ${{ env.BUILT_SDK_PATH }}
         env:
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
    
   pjsip-win:
     name: Build PJSIP (x64)

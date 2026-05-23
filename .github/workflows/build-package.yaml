@@ -2542,7 +2542,7 @@ jobs:
             Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.dll "./libpjsua2maui.win/lib/$TargetArch" -Recurse -Force
           }
           
-          Get-ChildItem .\src\libpjsua2.win\ -Recurse
+          Get-ChildItem .\libpjsua2.win\ -Recurse
           
 
       - name: Upload PJSIP artifacts

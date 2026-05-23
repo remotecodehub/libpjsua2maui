@@ -535,7 +535,7 @@ jobs:
         arch: [arm64, x86_64]
         include:
           - platform: MacOSX
-          - lib_name: openh264
+          - lib_name: h264
           - sdk: macosx
     steps:
       - name: Cache H264 Built SDK

@@ -931,7 +931,7 @@ jobs:
         arch: [arm64, x86_64]
         include:
           - platform: MacOSX
-          - lib_name: openssl
+          - lib_name: ssl
           - sdk: macosx
     steps:
       
@@ -1022,7 +1022,7 @@ jobs:
         env:
           DEVELOPER: $(xcode-select -print-path)
           BUILD_THREADS: $(sysctl -n hw.logicalcpu) 
-          BUILT_SDK_PATH: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
       - uses: actions/upload-artifact@v7
         name: Upload error logs
@@ -1037,12 +1037,12 @@ jobs:
       - name: Upload OpenSSL Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}
+          name: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: |
             ${{ env.BUILT_SDK_PATH }}
             logs/*.log
         env:
-          BUILT_SDK_PATH: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
   openssl-win:
     name: openssl-win (x64)
@@ -2034,14 +2034,14 @@ jobs:
 
         shell: bash
         env:
-          BCG_SDK_NAME: bcg729-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          H264_SDK_NAME: openh264-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          OPUS_SDK_NAME: opus-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          SSL_SDK_NAME: openssl-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BCG_ROOT: ${{ github.workspace }}/libs/bcg729
-          H264_ROOT: ${{ github.workspace }}/libs/h264
-          OPUS_ROOT: ${{ github.workspace }}/libs/opus
-          SSL_ROOT: ${{ github.workspace }}/libs/ssl
+          BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          H264_SDK_NAME: openh264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          SSL_SDK_NAME: openssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BCG_ROOT: ${{ github.workspace }}/libs/bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          H264_ROOT: ${{ github.workspace }}/libs/openh264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          OPUS_ROOT: ${{ github.workspace }}/libs/opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          SSL_ROOT: ${{ github.workspace }}/libs/ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           BUILT_SDK_PATH:  ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
       - uses: actions/upload-artifact@v7

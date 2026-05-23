@@ -2086,11 +2086,15 @@ jobs:
             ${{ env.BUILT_SDK_PATH }}
         env:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-   
+          
   pjsip-win:
-    name: pjsip - win (x64)
+    name: pjsip - win (${{ matrix.arch }})
     runs-on: windows-2022
     needs: [bcg729-win, openh264-win, openssl-win, opus-win]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
     steps: 
       - uses: actions/checkout@v6
 
@@ -2100,12 +2104,12 @@ jobs:
         with:
           path: |
             src/**/*
-          key: pjsip-${{ env.PJSIP_VERSION }}-win-x64
+          key: pjsip-${{ env.PJSIP_VERSION }}-win-${{ matrix.arch }}
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x64
+          arch: ${{ matrix.arch }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Setup NASM
@@ -2139,28 +2143,28 @@ jobs:
       - name: Download OpenSSL
         uses: actions/download-artifact@v4
         with:
-          name: openssl-win-x64
+          name: openssl-win-${{ matrix.arch }}
           path: deps/openssl
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download Opus
         uses: actions/download-artifact@v4
         with:
-          name: opus-win-x64
+          name: opus-win-${{ matrix.arch }}
           path: deps/opus
         if: steps.cache-libs.outputs.cache-hit != 'true'
    
       - name: Download BCG729
         uses: actions/download-artifact@v4
         with:
-          name: bcg729-win-x64
+          name: bcg729-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
           path: deps/bcg729
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download OpenH264
         uses: actions/download-artifact@v4
         with:
-          name: openh264-win-x64
+          name: openh264-win-${{ matrix.arch }}
           path: deps/openh264
         if: steps.cache-libs.outputs.cache-hit != 'true'
   
@@ -2458,22 +2462,25 @@ jobs:
           if ($env:INCLUDE) { $IncludePaths += $env:INCLUDE }
           $env:INCLUDE = $IncludePaths -join ";"
           
-          # Link Libraries Folder Mapping (.lib)
+          # Link Libraries Folder Mapping (.lib) adaptado dinamicamente para a arquitetura alvo
+          $TargetArch = "${{ matrix.arch }}"
           $SdkLib     = $env:WindowsSdkDir + "Lib\" + $env:WindowsSDKVersion
-          $UcrtLib    = "${SdkLib}\ucrt\x64"
-          $UmLib      = "${SdkLib}\um\x64"
-          $MsvcLib    = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\lib\x64"
+          $UcrtLib    = "${SdkLib}\ucrt\${TargetArch}"
+          $UmLib      = "${SdkLib}\um\${TargetArch}"
+          $MsvcLib    = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\lib\${TargetArch}"
 
           $LibPaths = @($OpusLib, $Bcg729Lib, $H264Lib, $SslLib, $MsvcLib, $UcrtLib, $UmLib)
           if ($env:LIB) { $LibPaths += $env:LIB }
           $env:LIB = $LibPaths -join ";"
 
           Write-Host "=== Building with environment variables ==="
-          # O parâmetro /p:UseEnv=true obriga o Linker a usar o nosso $env:LIB corrigido
+          # Mapeia dinamicamente a platform do msbuild de acordo com a arquitetura do job
+          $MsBuildPlatform = if ($TargetArch -eq "arm64") { "ARM64" } else { "x64" }
+
           msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj `
               /p:PlatformToolset=v143 `
               /p:Configuration=Release `
-              /p:Platform=x64 `
+              /p:Platform=$MsBuildPlatform `
               /p:WindowsTargetPlatformVersion="$($env:WindowsSDKVersion.TrimEnd('\'))" `
               /p:AdditionalOptions="/bigobj" `
               /p:UseEnv=true
@@ -2498,28 +2505,33 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: src/libpjsua2maui.win
         run: | 
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2" | Out-Null
+          if (Test-Path "${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output") {
+            Copy-Item ${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2 -ErrorAction SilentlyContinue
+          }
           dotnet publish libpjsua2maui.win.csproj -c Release --no-restore 
 
       - name: Collect PJSIP artifacts
         if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: src
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path "src/libpjsua2.win.dll/lib/x64" | Out-Null
-          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2" | Out-Null
+          $TargetArch = "${{ matrix.arch }}"
+          New-Item -ItemType Directory -Force -Path "./libpjsua2.win/lib/$TargetArch" | Out-Null
+
           if (Test-Path "pjproject/pjsip-apps/src/swig/csharp/output") {
-            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2 -ErrorAction SilentlyContinue
-            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.dll src/libpjsua2.win.dll/lib/x64 -Recurse -Force
+            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.dll "./libpjsua2maui.win/lib/$TargetArch" -Recurse -Force
           }
           
-          Get-ChildItem .\src\libpjsua2maui.win\bin\ -Recurse
-          Get-ChildItem .\src\libpjsua2.win.dll\ -Recurse
+          Get-ChildItem .\src\libpjsua2.win\ -Recurse
+          
 
       - name: Upload PJSIP artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: pjsip-win-x64
+          name: pjsip-win-${{ matrix.arch }}
           path: |
-            src/win
+            src/**/*
           if-no-files-found: warn
 
   nupkg:
@@ -2632,11 +2644,18 @@ jobs:
           path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
+      - name: Download win ARN64 Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: pjsip-win-arm64
+          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+      
       - name: Download win x64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-win-x64
-          path: ${{ env.NUGET_ARTIFACTS }}
+          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64
         if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Validate artifacts

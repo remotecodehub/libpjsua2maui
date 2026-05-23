@@ -2011,8 +2011,7 @@ jobs:
           make mac -j$(sysctl -n hw.logicalcpu) > ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log || exit 1
           
           echo 'Done make mac' >> ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log
-          
-          OUTPUT_DIR=""
+           
           mkdir -p "${{ env.BUILT_SDK_PATH }}/lib"
           mkdir -p "${{ env.BUILT_SDK_PATH }}/cs" 
 
@@ -2022,7 +2021,7 @@ jobs:
           cp -v -f ${{ env.SSL_ROOT }}/lib/*.a .
           cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/${{ matrix.arch }}/libpjsua2.a .
           
-          libtool -static -o "$OUTPUT_DIR/lib/libpjsua2.a" ./*.a
+          libtool -static -o "${{ env.BUILT_SDK_PATH }}/lib/libpjsua2.a" ./*.a
           
           cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cs "${{ env.BUILT_SDK_PATH }}/cs/"
 
@@ -2043,7 +2042,9 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true' && failure()  
         with:
           name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
-          path: logs/*.log
+          path: | 
+            logs/*.log
+            pjproject/*.log
         env:
           SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 

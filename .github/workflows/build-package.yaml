@@ -1909,7 +1909,7 @@ jobs:
         name: Download H264 macos
         with:
           name: ${{ env.H264_SDK_NAME }}
-          path: ${{ github.workspace }}/libs/ ${{ env.H264_SDK_NAME }}
+          path: ${{ github.workspace }}/libs/${{ env.H264_SDK_NAME }}
         env:
           H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
        

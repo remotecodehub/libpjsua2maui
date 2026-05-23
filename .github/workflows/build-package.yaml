@@ -627,7 +627,7 @@ jobs:
         with:
           name: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: |
-            ${{ env.BUILT_SDK_PATH }}
+            ${{ env.BUILT_SDK_PATH }}/**/*
         env: 
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 

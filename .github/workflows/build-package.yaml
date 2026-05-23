@@ -255,22 +255,19 @@ jobs:
         name: Upload error logs
         if: failure()
         with:
-          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          name: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk-logs
           path: |
             logs/*.log        
-        env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-        
+
       - uses: actions/upload-artifact@v7
         name: Upload BCG ${{ matrix.arch }} artifact 
         with:
-          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX}}
+          name: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: |
             ${{ env.BUILT_SDK_PATH }}
             logs/*.log
         env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}--${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
   bcg729-win:
     name: bcg729-win
@@ -493,7 +490,7 @@ jobs:
         sdk_path=$(xcrun --sdk $sdk --show-sdk-path)
         developer_path=$(xcode-select -p)
 
-        h264_prefix="${{ env.OPENH264_PATH }}/builds/${platform}-${{ matrix.resolved_arch }}"
+        h264_prefix="${{ env.BUILT_SDK_PATH }}"
         h264_log="${h264_prefix}/build.log"
         mkdir -p "${h264_prefix}/logs"
 
@@ -517,15 +514,16 @@ jobs:
             SDK_MIN=${{ env.MIN_IOS_VERSION }} v=No clean >> "${h264_log}" || exit 1
 
         mv "${h264_makefile_bak}" "${h264_makefile}"
-
-        echo "artifact=${h264_prefix}" >> "$GITHUB_OUTPUT"
-      shell: bash
  
+      shell: bash
+      env: 
+        BUILT_SDK_PATH: ${{ github.workspace }}/h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+        
     - name: Upload artifacts
       uses: actions/upload-artifact@v7
       with:
-        name: openh264-${{ matrix.arch }}
-        path: ${{ env.OPENH264_PATH }}/builds/${{ matrix.platform }}-${{ matrix.resolved_arch }}
+        name: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+        path: ${{ github.workspace }}/h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
         overwrite: true
 
   openh264-mac:

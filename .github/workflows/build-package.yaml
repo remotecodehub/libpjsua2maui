@@ -2478,9 +2478,7 @@ jobs:
           $LibPaths = @($OpusLib, $Bcg729Lib, $H264Lib, $SslLib, $MsvcLib, $UcrtLib, $UmLib)
           if ($env:LIB) { $LibPaths += $env:LIB }
           $env:LIB = $LibPaths -join ";"
-
-          # === CORREÇÃO PARA O TRK0005 (CL.EXE) ===
-          # Mapeia onde estão as ferramentas executáveis do compilador (Hostx64 para Target)
+ 
           $MsvcBinDir = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\bin\HostX64\${TargetArch}"
           $SdkBinDir  = $env:WindowsSdkDir + "bin\" + $env:WindowsSDKVersion + "${TargetArch}"
           
@@ -2490,14 +2488,20 @@ jobs:
           Write-Host "=== Building with environment variables ==="
           # Mapeia dinamicamente a platform do msbuild de acordo com a arquitetura do job
           $MsBuildPlatform = if ($TargetArch -eq "arm64") { "ARM64" } else { "x64" }
-
+          
+          # Escapa os delimitadores usando o padrão do MSBuild (%3b) e aspas duplas internas para os caminhos com espaço
+          $CustomExecPath = "`"${MsvcBinDir}`"%3b`"${SdkBinDir}`"%3b$env:PATH"
+          $TargetSdkVersion = $env:WindowsSDKVersion.TrimEnd('\')
+          
+          Write-Host "=== Building for win-${{ matrix.arch }} ==="
+          
           msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj `
               /p:PlatformToolset=v143 `
               /p:Configuration=Release `
               /p:Platform=$MsBuildPlatform `
-              /p:WindowsTargetPlatformVersion="$($env:WindowsSDKVersion.TrimEnd('\'))" `
+              /p:WindowsTargetPlatformVersion="$TargetSdkVersion" `
               /p:AdditionalOptions="/bigobj" `
-              /p:ExecutablePath="${MsvcBinDir};${SdkBinDir};%PATH%" `
+              /p:ExecutablePath=$CustomExecPath `
               /p:UseEnv=true
       
       - name: Setup .NET 10.0.x

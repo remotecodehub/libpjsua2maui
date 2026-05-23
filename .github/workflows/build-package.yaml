@@ -1900,7 +1900,7 @@ jobs:
         name: Download bcg729 macos
         with:
           name: ${{ env.BCG_SDK_NAME }}
-          path: ${{ github.workspace }}/libs/${{ env.BCG_SDK_NAME }}
+          path: ${{ github.workspace }}/libs
         env:
           BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
      
@@ -1909,7 +1909,7 @@ jobs:
         name: Download H264 macos
         with:
           name: ${{ env.H264_SDK_NAME }}
-          path: ${{ github.workspace }}/libs/${{ env.H264_SDK_NAME }}
+          path: ${{ github.workspace }}/libs
         env:
           H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
        
@@ -1918,7 +1918,7 @@ jobs:
         name: Download SSL macos
         with:
           name: ${{ env.SSL_SDK_NAME }}
-          path: ${{ github.workspace }}/libs/${{ env.SSL_SDK_NAME }}
+          path: ${{ github.workspace }}/libs
         env:
           SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
       
@@ -1927,7 +1927,7 @@ jobs:
         name: Download opus macos (${{ matrix.arch }})
         with:
           name: ${{ env.OPUS_SDK_NAME }}
-          path: ${{ github.workspace }}/libs/${{ env.OPUS_SDK_NAME }}
+          path: ${{ github.workspace }}/libs
         env:
           OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 

@@ -2479,7 +2479,7 @@ jobs:
             (Get-Content $projectFile) `
             -replace [regex]::Escape($oldNs), $newNs |
             Set-Content $projectFile
-    
+            
       - name: Build 
         shell: pwsh
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -2518,23 +2518,30 @@ jobs:
           $LibPaths = @($OpusLib, $Bcg729Lib, $H264Lib, $SslLib, $MsvcLib, $UcrtLib, $UmLib)
           if ($env:LIB) { $LibPaths += $env:LIB }
           $env:LIB = $LibPaths -join ";"
- 
+
+          # === CORREÇÃO PARA O TRK0005 (CL.EXE) & LNK1158 (RC.EXE) ===
           $MsvcBinDir = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\bin\HostX64\${TargetArch}"
           $SdkBinDir  = $env:WindowsSdkDir + "bin\" + $env:WindowsSDKVersion + "${TargetArch}"
           
-          # Garante que estejam no início do PATH do processo atual
-          $env:PATH = "${MsvcBinDir};${SdkBinDir};${env:PATH}"
+          # SOLUÇÃO PARA O RC.EXE EM ARM64:
+          # O rc.exe não existe na pasta 'arm64' do SDK, ele roda a partir da pasta 'x64' (Host).
+          # Adicionamos a pasta x64 do SDK como fallback de ferramentas.
+          $SdkHostBinDir = $env:WindowsSdkDir + "bin\" + $env:WindowsSDKVersion + "x64"
+
+          if ($TargetArch -eq "arm64") {
+              $env:PATH = "${MsvcBinDir};${SdkBinDir};${SdkHostBinDir};${env:PATH}"
+              $CustomExecPath = "`"${MsvcBinDir}`"%3b`"${SdkBinDir}`"%3b`"${SdkHostBinDir}`"%3b$env:PATH"
+          } else {
+              $env:PATH = "${MsvcBinDir};${SdkBinDir};${env:PATH}"
+              $CustomExecPath = "`"${MsvcBinDir}`"%3b`"${SdkBinDir}`"%3b$env:PATH"
+          }
 
           Write-Host "=== Building with environment variables ==="
-          # Mapeia dinamicamente a platform do msbuild de acordo com a arquitetura do job
           $MsBuildPlatform = if ($TargetArch -eq "arm64") { "ARM64" } else { "x64" }
-          
-          # Escapa os delimitadores usando o padrão do MSBuild (%3b) e aspas duplas internas para os caminhos com espaço
-          $CustomExecPath = "`"${MsvcBinDir}`"%3b`"${SdkBinDir}`"%3b$env:PATH"
+          Write-Host "=== Building pjsip for win-${{ matrix.arch }} ==="
+
           $TargetSdkVersion = $env:WindowsSDKVersion.TrimEnd('\')
-          
-          Write-Host "=== Building for win-${{ matrix.arch }} ==="
-          
+
           msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj `
               /p:PlatformToolset=v143 `
               /p:Configuration=Release `

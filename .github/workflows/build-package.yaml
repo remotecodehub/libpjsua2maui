@@ -2157,7 +2157,7 @@ jobs:
       - name: Download BCG729
         uses: actions/download-artifact@v4
         with:
-          name: bcg729-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
+          name: bcg729-win-${{ matrix.arch }}
           path: deps/bcg729
         if: steps.cache-libs.outputs.cache-hit != 'true'
 

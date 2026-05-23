@@ -2143,14 +2143,14 @@ jobs:
       - name: Download OpenSSL
         uses: actions/download-artifact@v4
         with:
-          name: openssl-win-${{ matrix.arch }}
+          name: openssl-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
           path: deps/openssl
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download Opus
         uses: actions/download-artifact@v4
         with:
-          name: opus-win-${{ matrix.arch }}
+          name: opus-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
           path: deps/opus
         if: steps.cache-libs.outputs.cache-hit != 'true'
    
@@ -2164,7 +2164,7 @@ jobs:
       - name: Download OpenH264
         uses: actions/download-artifact@v4
         with:
-          name: openh264-win-${{ matrix.arch }}
+          name: openh264-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
           path: deps/openh264
         if: steps.cache-libs.outputs.cache-hit != 'true'
   
@@ -2620,28 +2620,28 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk
-          path: ${{ env.NUGET_ARTIFACTS }}
+          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download ios arm64s Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-arm64s.sdk
-          path: ${{ env.NUGET_ARTIFACTS }}
+          path: ${{ env.NUGET_ARTIFACTS }}/ios-arm64s
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - uses: actions/download-artifact@v8
         name: Download pjsip macos (arm64)
         with:
           name: pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}-arm64.sdk
-          path: ${{ env.NUGET_ARTIFACTS }}
+          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}-arm64.sdk
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - uses: actions/download-artifact@v8
         name: Download pjsip macos (x64)
         with:
           name: pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk
-          path: ${{ env.NUGET_ARTIFACTS }}
+          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download win ARN64 Artifact

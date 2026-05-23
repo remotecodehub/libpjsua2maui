@@ -2331,6 +2331,46 @@ jobs:
                 $xml.Save($proj.FullName)
             }
 
+      - name: Force Static Runtime (MT) Alignment across Architectures
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'arm64'
+        shell: pwsh
+        run: |
+            $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
+
+            foreach ($proj in $projects)
+            {
+                Write-Host "Forcing /MT Runtime on $($proj.FullName)"
+
+                [xml]$xml = Get-Content $proj.FullName
+
+                $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+                $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+                # Localiza todas as tags ClCompile dentro de configurações de Release
+                $clCompiles = $xml.SelectNodes("//ns:ItemDefinitionGroup[contains(@Condition, 'Release')]/ns:ClCompile", $ns)
+
+                foreach ($cc in $clCompiles)
+                {
+                    $rtNode = $cc.SelectSingleNode("ns:RuntimeLibrary", $ns)
+
+                    if ($null -eq $rtNode)
+                    {
+                        # Se não existir a tag, cria e injeta MultiThreaded (/MT)
+                        $rtNode = $xml.CreateElement("RuntimeLibrary", $xml.Project.NamespaceURI)
+                        $cc.AppendChild($rtNode) | Out-Null
+                    }
+                    
+                    # Força o valor para MultiThreaded (Equivalente a /MT para Release)
+                    if ($rtNode.InnerText -ne "MultiThreaded")
+                    {
+                        Write-Host "  -> Changing RuntimeLibrary from '$($rtNode.InnerText)' to 'MultiThreaded'"
+                        $rtNode.InnerText = "MultiThreaded"
+                    }
+                }
+
+                $xml.Save($proj.FullName)
+            }
+
       - name: Enable bigobj for SWIG wrapper
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh

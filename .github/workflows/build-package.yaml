@@ -2174,7 +2174,7 @@ jobs:
         shell: pwsh
         run: |
             Get-ChildItem . -Recurse
-            
+
       - name: Clone PJSIP
         shell: pwsh
         run: |
@@ -2400,8 +2400,8 @@ jobs:
         shell: pwsh
         run: |
             $headers = @(
-                "deps/bcg729/include/bcg729/encoder.h",
-                "deps/bcg729/include/bcg729/decoder.h"
+                "deps/bcg729/${{ matrix.arch }}/include/bcg729/encoder.h",
+                "deps/bcg729/${{ matrix.arch }}/include/bcg729/decoder.h"
             )
 
             foreach ($header in $headers)
@@ -2442,11 +2442,11 @@ jobs:
           # Include Path Mapping from third party libraries
           $DepsDir    = "${env:GITHUB_WORKSPACE}/deps"
           $OpusLib    = "${DepsDir}/opus/lib"
-          $Bcg729Lib  = "${DepsDir}/bcg729/lib"
+          $Bcg729Lib  = "${DepsDir}/bcg729/${{ matrix.arch }}/lib"
           $H264Lib    = "${DepsDir}/openh264/lib"
           $SslLib     = "${DepsDir}/openssl/lib"
           $OpusInc    = "${DepsDir}/opus/include"
-          $Bcg729Inc  = "${DepsDir}/bcg729/include"
+          $Bcg729Inc  = "${DepsDir}/bcg729/${{ matrix.arch }}/include"
           $H264Inc    = "${DepsDir}/openh264/include"
           $SslInc     = "${DepsDir}/openssl/include"
 

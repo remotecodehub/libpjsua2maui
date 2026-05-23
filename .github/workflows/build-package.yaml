@@ -1345,7 +1345,7 @@ jobs:
         id: cache-libs
         uses: actions/cache@v5
         with:
-          path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - name: Clone Opus
@@ -1418,29 +1418,25 @@ jobs:
           make install \
             >> ../logs/opus-build-${{ matrix.arch }}.log 
         env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
       - uses: actions/upload-artifact@v7
         name: Upload error logs
         if: failure()
         with:
-          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          name: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}-logs
           path: |
-            logs/*.log
-        env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+            logs/*.log 
           
       - uses: actions/upload-artifact@v7
         name: Upload opus artifact
         with:
-          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}
+          name: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: |
             ${{ env.BUILT_SDK_PATH }}
             logs/*.log
         env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
       
   opus-win:
     name: opus-win (x64)

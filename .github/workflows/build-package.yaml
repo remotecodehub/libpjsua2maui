@@ -2400,8 +2400,8 @@ jobs:
         shell: pwsh
         run: |
             $headers = @(
-                "deps/bcg729/${{ matrix.arch }}/include/bcg729/encoder.h",
-                "deps/bcg729/${{ matrix.arch }}/include/bcg729/decoder.h"
+                "deps/bcg729/include/bcg729/encoder.h",
+                "deps/bcg729/include/bcg729/decoder.h"
             )
 
             foreach ($header in $headers)

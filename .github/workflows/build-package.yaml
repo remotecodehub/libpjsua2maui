@@ -267,7 +267,7 @@ jobs:
             ${{ env.BUILT_SDK_PATH }}/**/*
             logs/*.log
         env:
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}--${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
   bcg729-win:
     name: bcg729-win

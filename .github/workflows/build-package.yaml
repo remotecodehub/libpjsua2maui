@@ -2573,6 +2573,7 @@ jobs:
         run: | 
           New-Item -ItemType Directory -Force -Path "${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2" | Out-Null
           if (Test-Path "${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output") {
+            Write-Host "Copying pjsip managed c# classes"
             Copy-Item ${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2 -ErrorAction SilentlyContinue
           }
           dotnet publish libpjsua2maui.win.csproj -c Release --no-restore 
@@ -2584,8 +2585,9 @@ jobs:
         run: | 
           New-Item -ItemType Directory -Force -Path "./libpjsua2.win/lib/${{ matrix.arch }}" | Out-Null
 
-          if (Test-Path "pjproject/pjsip-apps/src/swig/csharp/output") {
-            Copy-Item pjproject/pjsip-apps/src/swig/csharp/output/*.dll "./libpjsua2maui.win/lib/${{ matrix.arch }}" -Recurse -Force
+          if (Test-Path "${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output") {
+            Write-Host "Copying pjsip dll"
+            Copy-Item ${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output/*.dll "./libpjsua2maui.win/lib/${{ matrix.arch }}" -Recurse -Force
           }
           
           Get-ChildItem .\libpjsua2.win\ -Recurse

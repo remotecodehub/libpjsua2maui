@@ -99,19 +99,24 @@ jobs:
     permissions:
       contents: write
     steps:       
-    - uses: actions/checkout@v6
-      with:
-        submodules: true
-       
+  
     - name: Cache BCG729 Built SDK
       id: cache-libs
       uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk
         key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
-    
+  
+    - name: Clone BCG729
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p ${{ github.workspace }}/lib/
+        cd ${{ github.workspace }}/lib/
+        git clone --branch $BCG729_VERSION https://github.com/BelledonneCommunications/bcg729.git bcg729 
+        
     - name: Setup Xcode 26.4
       uses: maxim-lobanov/setup-xcode@v1
+      if: steps.cache-libs.outputs.cache-hit != 'true'
       with:
         xcode-version: '26.3'
  
@@ -1940,7 +1945,15 @@ jobs:
           TARGET_CONFIG_DIR="pjproject/pjlib/include/pj"
           mkdir -p "$TARGET_CONFIG_DIR"
           cp "${{ github.workspace }}/res/pj/pjsua2maui/config_site.h" "$TARGET_CONFIG_DIR/config_site.h"
-          
+    
+      - name: Inspect Dependencies Structure
+        run: |
+          echo "=== Library folders structure check ==="
+          ls -R ${{ github.workspace }}/libs/opus || echo "opus not found nao encontrada"
+          ls -R ${{ github.workspace }}/libs/ssl || echo "ssl not found"
+          ls -R ${{ github.workspace }}/libs/h264 || echo "h264 not found"
+          ls -R ${{ github.workspace }}/libs/bcg729 || echo "bcg729 not found"
+
       - name: Build 
         id: build-pjsip-mac
         if: steps.cache-libs.outputs.cache-hit != 'true'

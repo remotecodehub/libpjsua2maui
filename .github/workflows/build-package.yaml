@@ -49,25 +49,25 @@ jobs:
           key: bcg729-${{ env.BCG729_VERSION }}-android
     
       - name: Create Output Directory
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: mkdir -p ${{ github.workspace }}/bcg729-output
 
       - name: Set Permissions for Output Directory
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: chmod -R 777 ${{ github.workspace }}/bcg729-output
 
       - name: Build Docker Image
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           docker build -t bcg729-builder ${{ github.workspace }}/res/docker/bcg729
         
       - name: Run Docker Container 
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           docker run --name bcg729-build bcg729-builder
           
       - name: Extract Artifacts from Container
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           docker cp bcg729-build:/root/outputs/libs ${{ github.workspace }}/bcg729-output
  
@@ -108,7 +108,7 @@ jobs:
         key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
   
     - name: Clone BCG729
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         mkdir -p ${{ github.workspace }}/lib/
         cd ${{ github.workspace }}/lib/
@@ -116,19 +116,19 @@ jobs:
         
     - name: Setup Xcode 26.4
       uses: maxim-lobanov/setup-xcode@v1
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       with:
         xcode-version: '26.3'
  
     - name: Install deps
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         brew install nasm autoconf automake libtool
       shell: sh
 
     - name: Build bcg729 for iOS
       id: build
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         echo "Building BCG729 for iOS"
         xcode_dev_path=$(xcode-select -print-path)
@@ -199,7 +199,7 @@ jobs:
           key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - name: Clone BCG729
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           git clone --branch $BCG729_VERSION https://github.com/BelledonneCommunications/bcg729.git 
 
@@ -209,13 +209,13 @@ jobs:
           xcode-version: '26.3'
   
       - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           brew install autoconf automake cmake libtool llvm nasm 
         shell: sh
 
       - name: Build BCG729 for MacCatalyst
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         working-directory: bcg729
         shell: sh
         run: |
@@ -284,17 +284,17 @@ jobs:
           key: bcg729-${{ env.BCG729_VERSION }}-win-x64
     
       - name: Setup MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: ilammy/msvc-dev-cmd@v1
         with:
             arch: x64
 
       - name: Setup CMake
         uses: lukka/get-cmake@latest
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Configure MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         run: |
             call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
@@ -303,14 +303,14 @@ jobs:
             where msbuild
 
       - name: Create directories
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
       - name: Clone BCG729
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             git clone `
@@ -320,7 +320,7 @@ jobs:
             bcg729
 
       - name: Build bcg729
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         working-directory: bcg729
         run: |
@@ -343,7 +343,7 @@ jobs:
             
 
       - name: Normalize artifacts
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $target = "${env:INSTALL_DIR}\bcg729\x64"
@@ -358,7 +358,7 @@ jobs:
             Copy-Item -Destination "$target\include\bcg729" -Force
 
       - name: List generated files
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             Get-ChildItem "${env:INSTALL_DIR}\bcg729" -Recurse
@@ -385,24 +385,24 @@ jobs:
     
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/libopenh264-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Set Permissions for Output Directory
         run: chmod -R 777 ${{ github.workspace }}/libopenh264-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Build Docker Image
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           docker build -t openh264-builder ${{ github.workspace }}/res/docker/openh264
 
       - name: Run Docker Container 
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: | 
           docker run --name openh264-build openh264-builder
           
       - name: Extract Artifacts from Container
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: | 
           docker cp openh264-build:/root/outputs/libs ${{ github.workspace }}/libopenh264-output
            
@@ -433,12 +433,9 @@ jobs:
     permissions:
       contents: write
     steps:
-        
-    - name: Checkout
-      uses: actions/checkout@v6
-      with:
-        submodules: true
-
+         
+    - uses: actions/checkout@v6
+      
     - name: Cache H264 Built SDK
       id: cache-libs
       uses: actions/cache@v5
@@ -446,21 +443,28 @@ jobs:
         path: ${{ env.OPENH264_PATH }}/builds/${{ matrix.platform }}-${{ matrix.resolved_arch }}
         key: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}
   
+    - name: Clone OpenH264
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
+      run: |
+        mkdir -p ${{ github.workspace }}/lib
+        cd ${{ github.workspace }}/lib
+        git clone --branch v2.3.0 https://github.com/cisco/openh264.git
+ 
     - name: Setup Xcode 26.3
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '26.3'
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         
     - name: Install deps
       run: |
         brew install nasm autoconf automake libtool 
       shell: sh
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
           
     - name: Build OpenH264 for ${{ matrix.arch }}
       id: build
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         cd ${{ env.OPENH264_PATH }}
         h264_makefile="Makefile"
@@ -546,24 +550,24 @@ jobs:
           key: ${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
       
       - name: Clone OpenH264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           git clone --branch v2.3.0 https://github.com/cisco/openh264.git
 
       - name: Setup Xcode 26.3
         uses: maxim-lobanov/setup-xcode@v1
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         with:
           xcode-version: '26.3'
   
       - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           brew install autoconf automake cmake libtool llvm nasm 
         shell: sh
 
       - name: Build OpenH264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         id: build
         working-directory: openh264
         run: |
@@ -649,16 +653,16 @@ jobs:
     
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         with:
             arch: x64
 
       - name: Setup NASM
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: ilammy/setup-nasm@v1
 
       - name: Create directories
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
@@ -666,7 +670,7 @@ jobs:
             New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
       - name: Clone OpenH264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             git clone `
@@ -677,7 +681,7 @@ jobs:
 
 
       - name: Configure MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         run: |
             call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
@@ -686,7 +690,7 @@ jobs:
             where msbuild
 
       - name: Build OpenH264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         working-directory: openh264
         run: |
@@ -701,7 +705,7 @@ jobs:
             )
 
       - name: Prepare artifact structure
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $target = "install/openh264/x64"
@@ -711,7 +715,7 @@ jobs:
             New-Item -ItemType Directory -Force -Path "$target\include\wels" | Out-Null
 
       - name: Collect static libraries
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $target = "install/openh264/x64/lib"
@@ -720,7 +724,7 @@ jobs:
             Copy-Item -Destination $target -Force
 
       - name: Collect headers
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $target = "install/openh264/x64/include/wels"
@@ -729,7 +733,7 @@ jobs:
             Copy-Item -Destination $target -Force
 
       - name: List generated files
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             Get-ChildItem "install/openh264" -Recurse
@@ -760,26 +764,26 @@ jobs:
     
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/openssl-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Set Permissions for Output Directory
         run: chmod -R 777 ${{ github.workspace }}/openssl-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Build Docker Image
         run: |
           docker build -t openssl-builder ${{ github.workspace }}/res/docker/openssl
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         
       - name: Run Docker Container and Extract Artifacts
         run: |  
           docker run --name openssl-build openssl-builder
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       
       - name: Extract Artifacts from Container
         run: |  
           docker cp openssl-build:/root/outputs/libs ${{ github.workspace }}/openssl-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
           
 
       - name: Upload openssl Artifacts
@@ -815,32 +819,36 @@ jobs:
     permissions:
       contents: write
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v6
-      with:
-        submodules: true
-     
+    - uses: actions/checkout@v6 
+    
     - name: Cache SSL Built SDK
       id: cache-libs
       uses: actions/cache@v5
       with:
         path: ${{ env.OPENSSL_PATH }}/bin/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
         key: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}
-      
+
+    - name: Clone OpenSSL
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
+      run: |
+        mkdir -p ${{ github.workspace }}/lib/
+        cd ${{ github.workspace }}/lib/
+        git clone --branch $OPENSSL_VERSION https://github.com/openssl/openssl.git --recursive      
+
     - name: Setup Xcode 26.3
       uses: maxim-lobanov/setup-xcode@v1
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       with:
         xcode-version: '26.3'
  
     - name: Install deps
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         brew install nasm autoconf automake libtool 
       shell: sh
         
     - name: Build OpenSSL
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       id: build
       run: |
         INCLUDE_DIR=""
@@ -940,7 +948,7 @@ jobs:
           key: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - name: Clone OpenSSL
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           git clone --branch $OPENSSL_VERSION https://github.com/openssl/openssl.git --recursive
 
@@ -950,13 +958,13 @@ jobs:
           xcode-version: '26.3'
   
       - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           brew install nasm autoconf automake libtool 
         shell: sh
           
       - name: Build OpenSSL
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         working-directory: openssl
         shell: bash 
         run: |
@@ -1056,17 +1064,17 @@ jobs:
           key: ssl-${{ env.OPENSSL_VERSION }}-win-x64
 
       - name: Setup MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: ilammy/msvc-dev-cmd@v1
         with:
             arch: x64
 
       - name: Setup NASM
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: ilammy/setup-nasm@v1
 
       - name: Create directories
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
@@ -1074,7 +1082,7 @@ jobs:
             New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
       - name: Clone OpenSSL
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             git clone `
@@ -1084,7 +1092,7 @@ jobs:
             openssl
 
       - name: Configure OpenSSL
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         working-directory: openssl
         run: |
@@ -1097,7 +1105,7 @@ jobs:
             )
 
       - name: Configure MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         run: |
             call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
@@ -1106,7 +1114,7 @@ jobs:
             where msbuild
 
       - name: Build OpenSSL
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         working-directory: openssl
         run: |
@@ -1117,7 +1125,7 @@ jobs:
             )
 
       - name: Install OpenSSL
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         working-directory: openssl
         run: |
@@ -1128,14 +1136,14 @@ jobs:
             )
  
       - name: Patch .lib files
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             cp -v "${env:INSTALL_DIR}\openssl\x64\lib\libcrypto.lib" "${env:INSTALL_DIR}\openssl\x64\lib\crypto.lib"
             cp -v "${env:INSTALL_DIR}\openssl\x64\lib\libssl.lib" "${env:INSTALL_DIR}\openssl\x64\lib\ssl.lib"
       
       - name: List generated files
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: | 
             Get-ChildItem "${env:INSTALL_DIR}\openssl" -Recurse
@@ -1154,7 +1162,8 @@ jobs:
     steps:  
       - name: Checkout repository
         uses: actions/checkout@v6
-      
+
+        
       - name: Cache opus Built SDK
         id: cache-libs
         uses: actions/cache@v5
@@ -1164,23 +1173,23 @@ jobs:
 
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/opus-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
-      - name: Set Permissions for Output Directory
-        run: chmod -R 777 ${{ github.workspace }}/opus-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+      - name Set OpenSSL for Output 
+        git clone --branch $OPENSSL_VERSION https://github.com/openssl/openssl.git --recursive        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Build Docker Image
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: steps.cache
+        -libs.outputs.cache-hit != 'true'
         run: |
           docker build -t opus-builder ${{ github.workspace }}/res/docker/opus
           
       - name: Run Docker Container
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: docker run --name opus-build opus-builder
         
       - name: Extract Artifacts from Container
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: | 
           docker cp opus-build:/root/outputs/ ${{ github.workspace }}/opus-output
 
@@ -1211,12 +1220,7 @@ jobs:
     permissions:
       contents: write
     steps:
-        
-    - name: Checkout
-      uses: actions/checkout@v6
-      with:
-        submodules: true
-      
+     
     - name: Cache opus Built SDK
       id: cache-libs
       uses: actions/cache@v5
@@ -1224,21 +1228,28 @@ jobs:
         path: ${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
         key: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
+    - name: Clone Opus
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
+      run: |
+        mkdir -p ${{ github.workspace }}/lib/opus
+        cd ${{ github.workspace }}/lib/opus
+        git clone --branch v1.4 https://github.com/xiph/opus.git
+
     - name: Setup Xcode 26.3
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '26.3'
  
     - name: Install deps
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         brew install nasm autoconf automake libtool 
       shell: sh
          
     - name: Build opus
       id: build
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         opus_version="1.4"
         opus_opt_cflags="-O3 -ffast-math -flto -g"
@@ -1339,9 +1350,9 @@ jobs:
           key: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - name: Clone Opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
-          # Clonando explicitamente a versão 1.4 conforme solicitado
+          
           git clone --branch v1.4 https://github.com/xiph/opus.git
 
       - name: Setup Xcode 26.3
@@ -1350,7 +1361,7 @@ jobs:
           xcode-version: '26.3'
   
       - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           brew install nasm autoconf automake libtool 
         shell: sh
@@ -1358,7 +1369,7 @@ jobs:
       - name: Build Opus
         id: build  # Adicionado o ID 'build' para que o '${{ steps.build.outputs.artifact }}' funcione no upload
         working-directory: opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           mkdir -p ../logs
 
@@ -1444,25 +1455,25 @@ jobs:
           key: opus-${{ env.OPUS_VERSION }}-win-x64
 
       - name: Setup MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: ilammy/msvc-dev-cmd@v1
         with:
             arch: x64
 
       - name: Setup CMake
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: lukka/get-cmake@latest
 
       - name: Create directories
         shell: pwsh
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
             New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
       - name: Clone Opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             git clone `
@@ -1472,7 +1483,7 @@ jobs:
             opus
 
       - name: Configure MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         run: |
             call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
@@ -1481,7 +1492,7 @@ jobs:
             where msbuild
 
       - name: Configure Opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         run: |
             cmake -S opus -B opus\build ^
@@ -1502,7 +1513,7 @@ jobs:
             )
 
       - name: Build Opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         run: |
             cmake --build opus\build ^
@@ -1513,7 +1524,7 @@ jobs:
             )
 
       - name: Install Opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: cmd
         run: |
             cmake --install opus\build ^
@@ -1524,13 +1535,13 @@ jobs:
             )
  
       - name: Patch .lib files
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             cp -v "${env:INSTALL_DIR}\opus\x64\lib\opus.lib" "${env:INSTALL_DIR}\opus\x64\lib\libopus.a"
       
       - name: List generated files
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             Get-ChildItem "${env:INSTALL_DIR}\opus" -Recurse
@@ -1553,13 +1564,10 @@ jobs:
     needs: [bcg729-android, openh264-android, openssl-android, opus-android]
     name: pjsip - android
     permissions:
-        contents: write
+      contents: write
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v6
-      with:
-        submodules: 'true'
+    steps: 
+    - uses: actions/checkout@v6 
   
     - name: Cache opus Built SDK
       id: cache-libs
@@ -1567,23 +1575,30 @@ jobs:
       with:
         path: ${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}
         key: pjsip-${{ env.PJSIP_VERSION }}-android-${{ matrix.arch }}
+
+    - name: Clone PJSIP
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
+      run: |
+        mkdir -p ${{ github.workspace }}/lib
+        cd ${{ github.workspace }}/lib
+        git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git
      
     - uses: actions/setup-java@v4
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       with:
         distribution: 'temurin'
         java-version: '17'
         check-latest: true
       
     - name: Setup Android SDK
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       uses: android-actions/setup-android@v3
       with:
         cmdline-tools-version: 11076708 
         packages: platforms;android-28 tools platform-tools build-tools;34.0.0
     
     - uses: nttld/setup-ndk@v1
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       id: setup-ndk
       with:
         ndk-version: r28
@@ -1591,7 +1606,7 @@ jobs:
         link-to-sdk: true
       
     - name: Debug NDK
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       shell: bash
       run: |
         ls -R $ANDROID_NDK_HOME
@@ -1599,7 +1614,7 @@ jobs:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
     - name: Prepare Environment
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         cd ${{ github.workspace }}
         sudo mkdir -p /home/runner/libpjsua2 
@@ -1611,55 +1626,55 @@ jobs:
         sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
     
     - uses: actions/download-artifact@v8
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       with:
         name: openssl-android
         path: ${{ github.workspace }}/output/openssl
       
     - uses: actions/download-artifact@v8
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       with:
         name: openh264-android
         path: ${{ github.workspace }}/output/openh264/
         
     - uses: actions/download-artifact@v8
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       with:
         name: opus-android
         path: ${{ github.workspace }}/output/opus/
         
     - uses: actions/download-artifact@v8
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       with:
         name: bcg729-android
         path: ${{ github.workspace }}/output/bcg729/
        
     - name: Create config_site.h
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       run: |
         echo "Creating config site file for Android ..."
-        echo "#define PJ_CONFIG_ANDROID                 1" > ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_HAS_G7221_CODEC           1" >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_AUDIO_DEV_HAS_ANDROID_JNI 0" >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_AUDIO_DEV_HAS_OPENSL      1" >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJSIP_AUTH_AUTO_SEND_NEXT         0" >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Changing PJSIP_MAX_PKT_LEN to             6000"
-        echo "#define PJSIP_MAX_PKT_LEN                 6000" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJ_CONFIG_ANDROID                 1"                       > ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_HAS_G7221_CODEC           1"                       >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_AUDIO_DEV_HAS_ANDROID_JNI 0"                       >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_AUDIO_DEV_HAS_OPENSL      1"                       >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJSIP_AUTH_AUTO_SEND_NEXT         0"                       >> ${{ env.CONFIG_SITE_PATH }}
+        echo "Changing PJSIP_MAX_PKT_LEN to 6000"
+        echo "#define PJSIP_MAX_PKT_LEN                 6000"                    >> ${{ env.CONFIG_SITE_PATH }}
         echo "Enabling BCG729 in config_site"
-        echo "#define PJMEDIA_HAS_BCG729                1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_HAS_BCG729                1"                       >> ${{ env.CONFIG_SITE_PATH }}
         echo "Enabling h264 and Video support in config_site"
-        echo "#define PJMEDIA_HAS_VIDEO                 1" >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_HAS_OPENH264_CODEC        1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_HAS_VIDEO                 1"                       >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJMEDIA_HAS_OPENH264_CODEC        1"                       >> ${{ env.CONFIG_SITE_PATH }}
         echo "Enabling Opus in config_site"
-        echo "#define PJMEDIA_HAS_OPUS_CODEC            1" >> ${{ env.CONFIG_SITE_PATH }} 
+        echo "#define PJMEDIA_HAS_OPUS_CODEC            1"                       >> ${{ env.CONFIG_SITE_PATH }} 
         echo "Enabling SSL in config_site"
-        echo "#define PJ_HAS_SSL_SOCK                   1" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#define PJ_HAS_SSL_SOCK                   1"                       >> ${{ env.CONFIG_SITE_PATH }}
         echo "#define PJ_SSL_SOCK_IMP                   PJ_SSL_SOCK_IMP_OPENSSL" >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#include <pj/config_site_sample.h>" >> ${{ env.CONFIG_SITE_PATH }}
+        echo "#include <pj/config_site_sample.h>"                                >> ${{ env.CONFIG_SITE_PATH }}
         sed -i'' -e 's/xamarin/maui/g' ${{ env.PJSIP_PATH }}/pjsip-apps/src/swig/csharp/Makefile
 
     - name: Build
-      if: steps.cache-libs.outputs.cache-hit != 'true'
+      if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       id: build-pj
       run: |
         cd ${{ env.PJSIP_PATH }}
@@ -1741,11 +1756,8 @@ jobs:
       contents: write
     steps:
       
-      - name: Checkout 
-        uses: actions/checkout@v6
-        with:
-          submodules: true
- 
+      - uses: actions/checkout@v6
+      
       - name: Cache pjsip Built SDK
         uses: actions/cache@v5
         id: cache-libs
@@ -1753,45 +1765,51 @@ jobs:
           path: ${{ github.workspace }}/pjsip-${{matrix.arch}}
           key: pjsip-${{ env.PJSIP_VERSION }}${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
 
+      - name: Clone PJSIP
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
+        run: |
+          mkdir -p ${{ github.workspace }}/lib
+          cd ${{ github.workspace }}/lib
+          git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git
+      
       - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         with:
           name: openssl-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/ssl/
-          
       
       - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         with:
           name: openh264-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/h264/
       
       - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         with:
           name: opus-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/opus/
       
       - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         with:
           name: bcg729-${{ matrix.arch }}
           path: ${{ github.workspace }}/libs/bcg729/
      
       - name: Install dependencies
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           brew install automake autoconf libtool pkg-config swig llvm
 
       - name: Setup Xcode 26.3
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '26.3'
  
       - name: Build pjsip
         id: build-pj-ios
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           cp -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
           mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
@@ -1878,26 +1896,24 @@ jobs:
           key: ${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - name: Clone PJSIP
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git
-        env:  
-          PJSIP_VERSION: 2.16
 
       - name: Setup Xcode 26.3
         uses: maxim-lobanov/setup-xcode@v1
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         with:
           xcode-version: '26.3'
   
       - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           brew install nasm autoconf automake libtool swig pkg-config llvm
         shell: sh
 
       - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         name: Download bcg729 macos
         with:
           name: ${{ env.BCG_SDK_NAME }}
@@ -1906,7 +1922,7 @@ jobs:
           BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
      
       - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         name: Download H264 macos
         with:
           name: ${{ env.H264_SDK_NAME }}
@@ -1915,7 +1931,7 @@ jobs:
           H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
        
       - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         name: Download SSL macos
         with:
           name: ${{ env.SSL_SDK_NAME }}
@@ -1924,7 +1940,7 @@ jobs:
           SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
       
       - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         name: Download opus macos (${{ matrix.arch }})
         with:
           name: ${{ env.OPUS_SDK_NAME }}
@@ -1933,14 +1949,14 @@ jobs:
           OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           
       - name: Copy config_site.h to PJSIP
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           TARGET_CONFIG_DIR="pjproject/pjlib/include/pj"
           mkdir -p "$TARGET_CONFIG_DIR"
           cp "${{ github.workspace }}/res/pj/pjsua2maui/config_site.h" "$TARGET_CONFIG_DIR/config_site.h"
     
       - name: Inspect Dependencies Structure
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           echo "=== Library folders structure check ==="
           ls  ${{ github.workspace }}/libs/${{ env.BCG_SDK_NAME }} && echo "bcg729 found"
@@ -1955,7 +1971,7 @@ jobs:
           SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
       - name: Build 
         id: build-pjsip-mac
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         working-directory: pjproject
         run: |
           mkdir -p ../logs
@@ -2049,7 +2065,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         name: Upload error logs
-        if: steps.cache-libs.outputs.cache-hit != 'true' && failure()  
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }} && failure()  
         with:
           name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
           path: | 
@@ -2085,27 +2101,27 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Setup NASM
         uses: ilammy/setup-nasm@v1
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
              
       - name: Validate SWIG
         shell: pwsh
         run: |
           swig -version
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Setup CMake
         uses: lukka/get-cmake@latest
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Create directories
         shell: pwsh
@@ -2113,41 +2129,41 @@ jobs:
           New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
           New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
           New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Download OpenSSL
         uses: actions/download-artifact@v4
         with:
           name: openssl-win-x64
           path: deps/openssl
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Download Opus
         uses: actions/download-artifact@v4
         with:
           name: opus-win-x64
           path: deps/opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
    
       - name: Download BCG729
         uses: actions/download-artifact@v4
         with:
           name: bcg729-win-x64
           path: deps/bcg729
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Download OpenH264
         uses: actions/download-artifact@v4
         with:
           name: openh264-win-x64
           path: deps/openh264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
   
       - name: Clone PJSIP
         shell: pwsh
         run: |
           git clone --branch "${env:PJSIP_VERSION}" --depth 1 https://github.com/pjsip/pjproject.git pjproject
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Create config_site.h
         shell: pwsh
@@ -2172,12 +2188,12 @@ jobs:
 
           New-Item -ItemType Directory -Force -Path "pjproject/pjlib/include/pj" | Out-Null
           Set-Content -Path "pjproject/pjlib/include/pj/config_site.h" -Value $config
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Patch SWIG C# vcxproj linker settings
         working-directory: pjproject
         shell: pwsh
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           $projects = Get-ChildItem -Recurse -Filter *.vcxproj
 
@@ -2269,7 +2285,7 @@ jobs:
           }
  
       - name: Retarget Windows SDK
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
@@ -2294,7 +2310,7 @@ jobs:
             }
 
       - name: Enable bigobj for SWIG wrapper
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $proj = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
@@ -2325,7 +2341,7 @@ jobs:
             $xml.Save($proj)            
   
       - name: Patch SWIG linker settings
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $proj = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
@@ -2364,7 +2380,7 @@ jobs:
             $xml.Save($proj)
 
       - name: Force bcg729 static headers
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $headers = @(
@@ -2390,7 +2406,7 @@ jobs:
             }            
 
       - name: Patch c# namespace
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
             $projectFile = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
@@ -2403,7 +2419,7 @@ jobs:
             Set-Content $projectFile
 
       - name: Validate Deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         working-directory: deps
         shell: pwsh
         run: |
@@ -2411,7 +2427,7 @@ jobs:
     
       - name: Build 
         shell: pwsh
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         working-directory: pjproject
         run: |
           # Include Path Mapping from third party libraries
@@ -2458,13 +2474,13 @@ jobs:
               /p:UseEnv=true
       
       - name: Setup .NET 10.0.x
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
           
       - name: Restore Dependencies
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         working-directory: src/libpjsua2maui.win
         run: | 
           dotnet workload install maui --source https://api.nuget.org/v3/index.json --skip-manifest-update
@@ -2475,12 +2491,12 @@ jobs:
 
       - name: Build win managed dll     
         working-directory: src/libpjsua2maui.win
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           dotnet publish libpjsua2maui.win.csproj -c Release --no-restore
    
       - name: Collect PJSIP artifacts
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path "src/libpjsua2.win.dll/lib/x64" | Out-Null
@@ -2494,7 +2510,7 @@ jobs:
           Get-ChildItem .\src\libpjsua2.win.dll\ -Recurse
 
       - name: Build Managed Library
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         working-directory: src/libpjsua2maui.win
         run: | 
           dotnet publish libpjsua2maui.win.csproj -c Release --no-restore 
@@ -2540,69 +2556,69 @@ jobs:
           VERSION: ${{ env.VERSION }}
 
       - name: Setup .NET 10
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
           
       - name: Setup nuget 
         run: brew install nuget
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
  
       - uses: actions/setup-java@v5
         with:
           distribution: 'microsoft'
           java-version: '17'
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
           
       - name: Download Android x86 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-android-x86
           path: ./artifacts/android-x86
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       
       - name: Download Android x86_64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-android-x86_64
           path: ./artifacts/android-x86_64
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
           
       - name: Download Android arm Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-android-armeabi-v7a
           path: ./artifacts/android-armeabi-v7a
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       
       - name: Download Android arm64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-android-arm64-v8a
           path: ./artifacts/android-arm64-v8a
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
   
       - name: Download ios Artifacts
         uses: actions/download-artifact@v8
         with:
           name: pjsip-x86_64
           path: ./artifacts/ios/pjsip-x86_64
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       
       - name: Download ios arm64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-arm64
           path: ./artifacts/ios/pjsip-arm64
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Download ios arm64s Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-arm64s
           path: ./artifacts/ios/pjsip-arm64s
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - uses: actions/download-artifact@v8
         name: Download pjsip macos (arm64)
@@ -2611,7 +2627,7 @@ jobs:
           path: ${{ env.PJ_PATH }}
         env:
           PJ_PATH: ${{ github.workspace }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}.sdk/arm64
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - uses: actions/download-artifact@v8
         name: Download pjsip macos (x64)
@@ -2620,17 +2636,17 @@ jobs:
           path: ${{ env.PJ_PATH }}
         env:
           PJ_PATH: ${{ github.workspace }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}.sdk/x86_64
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
 
       - name: Download win x64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-win-x64
           path: ./artifacts/win/pjsip-x64
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
       
       - name: Prepare Dirs
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: |
           mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
@@ -2678,7 +2694,7 @@ jobs:
           
       - name: Restore Dependencies
         working-directory: src
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: | 
           echo "⏳ Cleaning old workloads..."
           dotnet workload uninstall maui --ignore-failed-sources || true
@@ -2700,15 +2716,15 @@ jobs:
           dotnet restore libpjsua2maui.mac/libpjsua2maui.mac.csproj
 
       - name: Build MAUI Android
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android --no-restore
         
       - name: Build MAUI iOS
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios --no-restore
       
       - name: Build MAUI MacOSX
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-libs.outputs.cache-hit != 'true' || startsWith(github.event.commits[0].message, '[ig-cache]:') }}
         run: dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -f net10.0-maccatalyst --no-restore
 
       - name: Validate and Pack NuGet 

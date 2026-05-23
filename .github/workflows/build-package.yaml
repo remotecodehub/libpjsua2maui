@@ -2439,7 +2439,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: pjproject
         run: |
-           
+          # Include Path Mapping from third party libraries
           $DepsDir    = "${env:GITHUB_WORKSPACE}/deps"
           $OpusLib    = "${DepsDir}/opus/lib"
           $Bcg729Lib  = "${DepsDir}/bcg729/lib"
@@ -2457,7 +2457,7 @@ jobs:
           $UmInc      = "${SdkInc}\um"
           $MsvcInc    = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\include"
 
-          
+          # INCLUDE setup
           $IncludePaths = @($MsvcInc, $UcrtInc, $SharedInc, $UmInc, $OpusInc, $Bcg729Inc, $H264Inc, $SslInc)
           if ($env:INCLUDE) { $IncludePaths += $env:INCLUDE }
           $env:INCLUDE = $IncludePaths -join ";"

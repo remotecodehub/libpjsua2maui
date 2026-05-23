@@ -31,9 +31,9 @@ env:
   SDKVERSION: 26.2
   BUILD_TYPE: Release
   ROOT_DIR: ${{ github.workspace }}
-  ARTIFACTS_DIR: ${{ github.workspace }}\artifacts
   LOGS_DIR: ${{ github.workspace }}\logs
   INSTALL_DIR: ${{ github.workspace }}\install
+  NUGET_ARTIFACTS: ${{ github.workspace }}/artifacts
 
 jobs:
   bcg729-android:
@@ -440,9 +440,11 @@ jobs:
       id: cache-libs
       uses: actions/cache@v5
       with:
-        path: ${{ env.OPENH264_PATH }}/builds/${{ matrix.platform }}-${{ matrix.resolved_arch }}
-        key: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}
-  
+        path: ${{ env. BUILT_SDK_PATH }}
+        key: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+      env: 
+        BUILT_SDK_PATH: ${{ github.workspace }}/h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+        
     - name: Clone OpenH264
       if: steps.cache-libs.outputs.cache-hit != 'true'
       run: |
@@ -665,7 +667,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
+            New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
@@ -1077,7 +1079,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
+            New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
@@ -1471,7 +1473,7 @@ jobs:
         shell: pwsh
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
-            New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
+            New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
             New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
@@ -1705,14 +1707,14 @@ jobs:
         cp -r -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*  ${{ env.PJSIP_BUILD_OUT_PATH }}/${{ matrix.arch }}
         cp -r -v ${{ env.PJSUA_GENERATED_JAVA_SRC_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}/java
         cp -r -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}/csharp
-        echo "artifact=${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}" >> "$GITHUB_OUTPUT" 
+         
       env:
         ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
     - name: Upload pjsip artifacts
       uses: actions/upload-artifact@v7
       with:
-        name: pjsip-android-${{ matrix.arch }}
+        name: pjsip-${{ env.PJSIP_VERSION }}-android-${{ matrix.arch }}
         path: ${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}
         overwrite: true
  
@@ -1857,22 +1859,24 @@ jobs:
           cd ./pjsip-apps/src/swig
           sed -i'' -e 's/xamarin/maui/g' ./csharp/Makefile
           make
+          mkdir -p ${{ github.workspace }}/merge
           mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
           mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
-          cp -v -f ${{ github.workspace }}/libs/ssl/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.resolved_arch }}/*.a ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          cp -v -f ${{ github.workspace }}/libs/ssl/lib/*.a ${{ github.workspace }}/merge
+          cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/merge
+          cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/merge
+          cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/merge
+          cp -v -f ./csharp/pjsua2maui/pjsua2maui.iOS/lib/${{ matrix.resolved_arch }}/*.a ${{ github.workspace }}/merge
+          libtool -static -o ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib/libpjsua2.a ${{ github.workspace }}/merge/*.a
           cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
-          echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
+          
         env:
           BUILD_THREADS: $(sysctl -n hw.ncpu)
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: pjsip-${{ matrix.arch }}
+          name: pjsip-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: ${{ github.workspace }}/pjsip-${{matrix.arch}}
           overwrite: true
        
@@ -2096,8 +2100,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            src/libpjsua2.win.dll/**/*
-            src/libpjsua2maui.win/bin/**/*
+            src/libpjsua2*/**/*
           key: pjsip-${{ env.PJSIP_VERSION }}-win-x64
 
       - name: Setup MSVC
@@ -2129,7 +2132,7 @@ jobs:
       - name: Create directories
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path "${env:ARTIFACTS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
           New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
           New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -2523,8 +2526,7 @@ jobs:
         with:
           name: pjsip-win-x64
           path: |
-            src/libpjsua2.win.dll/**/*
-            src/libpjsua2maui.win/**/*
+            src/libpjsua2*/**/*
           if-no-files-found: warn
 
   nupkg:
@@ -2577,77 +2579,78 @@ jobs:
       - name: Download Android x86 Artifact
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-android-x86
-          path: ./artifacts/android-x86
+          name: pjsip-${{ env.PJSIP_VERSION }}-android-x86
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Download Android x86_64 Artifact
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-android-x86_64
-          path: ./artifacts/android-x86_64
+          name: pjsip-${{ env.PJSIP_VERSION }}-android-x86_64
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
           
       - name: Download Android arm Artifact
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-android-armeabi-v7a
-          path: ./artifacts/android-armeabi-v7a
+          name: pjsip-${{ env.PJSIP_VERSION }}-android-armeabi-v7a
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Download Android arm64 Artifact
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-android-arm64-v8a
-          path: ./artifacts/android-arm64-v8a
+          name: pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
   
       - name: Download ios Artifacts
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-x86_64
-          path: ./artifacts/ios/pjsip-x86_64
+          name: pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-x86_64.sdk
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Download ios arm64 Artifact
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-arm64
-          path: ./artifacts/ios/pjsip-arm64
+          name: pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download ios arm64s Artifact
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-arm64s
-          path: ./artifacts/ios/pjsip-arm64s
+          name: pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-arm64s.sdk
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - uses: actions/download-artifact@v8
         name: Download pjsip macos (arm64)
         with:
           name: pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}-arm64.sdk
-          path: ${{ env.PJ_PATH }}
-        env:
-          PJ_PATH: ${{ github.workspace }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}.sdk/arm64
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - uses: actions/download-artifact@v8
         name: Download pjsip macos (x64)
         with:
           name: pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk
-          path: ${{ env.PJ_PATH }}
-        env:
-          PJ_PATH: ${{ github.workspace }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}.sdk/x86_64
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download win x64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-win-x64
-          path: ./artifacts/win/pjsip-x64
+          path: ${{ env.NUGET_ARTIFACTS }}
         if: steps.cache-libs.outputs.cache-hit != 'true'
       
+      - name: Validate artifacts
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          ls -R ${{ env.NUGET_ARTIFACTS }}
+
       - name: Prepare Dirs
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
@@ -2669,31 +2672,31 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64
  
           # Move managed classes to projects directory
-          cp -v -r ${{ github.workspace }}/artifacts/android-arm64-v8a/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
-          cp -v -r ${{ github.workspace }}/artifacts/android-arm64-v8a/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
-          cp -v -r ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
-          cp -v -r ${{ github.workspace }}/artifacts/mac/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
+          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android--arm64-v8a/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
+          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android--arm64-v8a/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
+          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
+          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-arm64.sdk/cs/* ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
           
           # Move managed assemblies to projects directory
-          cp -v -r ${{ github.workspace }}/artifacts/win/pjsip-x64/bin ${{ github.workspace }}/src/libpjsua2maui.win/bin
+          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2maui.win/bin ${{ github.workspace }}/src/libpjsua2maui.win/bin
 
           # Move android libs to packaging directory
-          cp -v -r ${{ github.workspace }}/artifacts/android-x86/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
-          cp -v -r ${{ github.workspace }}/artifacts/android-x86_64/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
-          cp -v -r ${{ github.workspace }}/artifacts/android-armeabi-v7a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
-          cp -v -r ${{ github.workspace }}/artifacts/android-arm64-v8a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
+          mv -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
+          mv -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86_64/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
+          mv -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--armeabi-v7a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
+          mv -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--arm64-v8a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
           
           # Move ios libs to packaging directory
-          cp -v -r ${{ github.workspace }}/artifacts/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
-          cp -v -r ${{ github.workspace }}/artifacts/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
-          cp -v -r ${{ github.workspace }}/artifacts/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
+          mv -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
+          mv -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
+          mv -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
           
           # Move mac libs to packaging directory
-          cp -v -r ${{ github.workspace }}/artifacts/mac/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
-          cp -v -r ${{ github.workspace }}/artifacts/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
+          mv -v ${{ env.NUGET_ARTIFACTS }}/mac/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
+          mv -v ${{ env.NUGET_ARTIFACTS }}/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
           
           # Move win libs to packaging directory
-          cp -v -r -v ${{ github.workspace }}/artifacts/win/pjsip-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
+          mv -v -v ${{ env.NUGET_ARTIFACTS }}/win/pjsip-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
           
       - name: Restore Dependencies
         working-directory: src

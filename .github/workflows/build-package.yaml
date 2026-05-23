@@ -1047,10 +1047,15 @@ jobs:
             logs/*.log
         env:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-
+ 
   openssl-win:
-    name: openssl-win (x64)
+    name: openssl-win (${{ matrix.arch }})
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -1059,32 +1064,34 @@ jobs:
         id: cache-libs
         uses: actions/cache@v5
         with:
-          path: ${{ github.workspace }}/install/openssl/x64
-          key: ssl-${{ env.OPENSSL_VERSION }}-win-x64
+          path: ${{ github.workspace }}/install/openssl/${{ matrix.arch }}
+          key: ssl-${{ env.OPENSSL_VERSION }}-win-${{ matrix.arch }}
 
       - name: Setup MSVC
         if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: ilammy/msvc-dev-cmd@v1
         with:
-            arch: x64
+          # Se for ARM64, usa o cross-compiler (roda em x64, gera ARM64)
+          # Se for x64, usa o compilador nativo x64
+          arch: ${{ matrix.arch == 'ARM64' && 'x64_arm64' || 'x64' }}
 
       - name: Setup NASM
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'x64'
         uses: ilammy/setup-nasm@v1
 
       - name: Create directories
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
-            New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
-            New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
       - name: Clone OpenSSL
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            git clone `
+          git clone `
             --branch "${env:OPENSSL_VERSION}" `
             --depth 1 `
             https://github.com/openssl/openssl.git `
@@ -1095,66 +1102,65 @@ jobs:
         shell: cmd
         working-directory: openssl
         run: |
-            perl Configure VC-WIN64A no-shared no-tests ^
-            --prefix=%INSTALL_DIR%\openssl\x64 ^
-            --openssldir=%INSTALL_DIR%\openssl\x64  
+          :: Define o target correto do Perl com base na arquitetura da matrix
+          if "${{ matrix.arch }}"=="ARM64" (
+              set "SSL_TARGET=VC-WIN64-ARM"
+          ) else (
+              set "SSL_TARGET=VC-WIN64A"
+          )
 
-            IF %ERRORLEVEL% NEQ 0 ( 
-            exit /b %ERRORLEVEL%
-            )
+          :: Executa a configuração apontando para o prefixo da arquitetura atual
+          perl Configure %SSL_TARGET% no-shared no-tests ^
+            --prefix=%INSTALL_DIR%\openssl\${{ matrix.arch }} ^
+            --openssldir=%INSTALL_DIR%\openssl\${{ matrix.arch }}
 
-      - name: Configure MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: cmd
-        run: |
-            call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
-            echo Visual Studio environment loaded
-            where cl
-            where msbuild
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
 
       - name: Build OpenSSL
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: cmd
         working-directory: openssl
         run: |
-            call nmake  
+          call nmake  
 
-            IF %ERRORLEVEL% NEQ 0 ( 
-            exit /b %ERRORLEVEL%
-            )
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
 
       - name: Install OpenSSL
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: cmd
         working-directory: openssl
         run: |
-            call nmake install 
+          call nmake install 
 
-            IF %ERRORLEVEL% NEQ 0 ( 
-            exit /b %ERRORLEVEL%
-            )
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
  
       - name: Patch .lib files
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            cp -v "${env:INSTALL_DIR}\openssl\x64\lib\libcrypto.lib" "${env:INSTALL_DIR}\openssl\x64\lib\crypto.lib"
-            cp -v "${env:INSTALL_DIR}\openssl\x64\lib\libssl.lib" "${env:INSTALL_DIR}\openssl\x64\lib\ssl.lib"
+          $libPath = "${env:INSTALL_DIR}\openssl\${{ matrix.arch }}\lib"
+          cp -v "$libPath\libcrypto.lib" "$libPath\crypto.lib"
+          cp -v "$libPath\libssl.lib" "$libPath\ssl.lib"
       
       - name: List generated files
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: | 
-            Get-ChildItem "${env:INSTALL_DIR}\openssl" -Recurse
+          Get-ChildItem "${env:INSTALL_DIR}\openssl" -Recurse
 
       - name: Upload OpenSSL artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-            name: openssl-win-x64
-            path: |
-              install/openssl/x64/**/*
-
+          name: openssl-win-${{ matrix.arch }}
+          path: |
+            install/openssl/${{ matrix.arch }}/**/*
       
   opus-android:
     runs-on: ubuntu-latest   

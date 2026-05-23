@@ -552,6 +552,7 @@ jobs:
 
       - name: Setup Xcode 26.3
         uses: maxim-lobanov/setup-xcode@v1
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         with:
           xcode-version: '26.3'
   

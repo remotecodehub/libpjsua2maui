@@ -2650,43 +2650,32 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64
  
           # Move managed classes to projects directory
-          mv ${{ github.workspace }}/artifacts/android-arm64-v8a/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip/
-          mv ${{ github.workspace }}/artifacts/android-arm64-v8a/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
-          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
-          mv ${{ github.workspace }}/artifacts/mac/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
+          cp -v -r ${{ github.workspace }}/artifacts/android-arm64-v8a/java/org/pjsip/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
+          cp -v -r ${{ github.workspace }}/artifacts/android-arm64-v8a/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
+          cp -v -r ${{ github.workspace }}/artifacts/ios/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
+          cp -v -r ${{ github.workspace }}/artifacts/mac/pjsip-arm64/cs/* ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
           
           # Move managed assemblies to projects directory
-          mv -v ${{ github.workspace }}/artifacts/win/pjsip-x64/bin ${{ github.workspace }}/src/libpjsua2maui.win/bin
+          cp -v -r ${{ github.workspace }}/artifacts/win/pjsip-x64/bin ${{ github.workspace }}/src/libpjsua2maui.win/bin
 
           # Move android libs to packaging directory
-          mv ${{ github.workspace }}/artifacts/android-x86/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
-          mv ${{ github.workspace }}/artifacts/android-x86_64/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
-          mv ${{ github.workspace }}/artifacts/android-armeabi-v7a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
-          mv ${{ github.workspace }}/artifacts/android-arm64-v8a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
+          cp -v -r ${{ github.workspace }}/artifacts/android-x86/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
+          cp -v -r ${{ github.workspace }}/artifacts/android-x86_64/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
+          cp -v -r ${{ github.workspace }}/artifacts/android-armeabi-v7a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
+          cp -v -r ${{ github.workspace }}/artifacts/android-arm64-v8a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
           
           # Move ios libs to packaging directory
-          mv ${{ github.workspace }}/artifacts/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
-          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
-          mv ${{ github.workspace }}/artifacts/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
+          cp -v -r ${{ github.workspace }}/artifacts/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
+          cp -v -r ${{ github.workspace }}/artifacts/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
+          cp -v -r ${{ github.workspace }}/artifacts/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
           
           # Move mac libs to packaging directory
-          mv ${{ github.workspace }}/artifacts/mac/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
-          mv ${{ github.workspace }}/artifacts/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
+          cp -v -r ${{ github.workspace }}/artifacts/mac/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
+          cp -v -r ${{ github.workspace }}/artifacts/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
           
           # Move win libs to packaging directory
-          mv -v ${{ github.workspace }}/artifacts/win/pjsip-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
-
-          cd  ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
-          mkdir tmp
-          mv *.a tmp
-          libtool -static -o libpjsua2.a ./tmp/*.a 
-          rm -rf tmp
-          cd ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
-          mkdir tmp
-          mv *.a tmp
-          libtool -static -o libpjsua2.a ./tmp/*.a 
-          rm -rf tmp
-        
+          cp -v -r -v ${{ github.workspace }}/artifacts/win/pjsip-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
+          
       - name: Restore Dependencies
         working-directory: src
         if: steps.cache-libs.outputs.cache-hit != 'true'

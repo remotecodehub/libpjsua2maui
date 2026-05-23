@@ -1795,7 +1795,7 @@ jobs:
       - uses: actions/download-artifact@v8
         if: steps.cache-libs.outputs.cache-hit != 'true'
         with:
-          name: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
+          name: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: ${{ github.workspace }}/libs/bcg729/
 
       - name: Validate Deps

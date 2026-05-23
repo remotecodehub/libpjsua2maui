@@ -2480,6 +2480,57 @@ jobs:
             -replace [regex]::Escape($oldNs), $newNs |
             Set-Content $projectFile
             
+      - name: Patch Windows SDK Tool Path for ARM64 Cross-Compile
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'arm64'
+        shell: pwsh
+        working-directory: pjproject
+        run: |
+          Write-Host "=== Fixing Windows SDK Tool Paths for ARM64 Cross-Compilation ==="
+          
+          # 1. Copiar fisicamente o rc.exe e rcdll.dll para a pasta de ferramentas do MSVC para garantir o fallback
+          $MsvcBinDir = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\bin\HostX64\arm64"
+          $SdkX64BinDir = $env:WindowsSdkDir + "bin\" + $env:WindowsSDKVersion + "x64"
+          
+          Write-Host "Copying rc.exe and rcdll.dll from SDK x64 to MSVC HostX64/arm64..."
+          if (Test-Path "$SdkX64BinDir\rc.exe") {
+              Copy-Item "$SdkX64BinDir\rc.exe" -Destination "$MsvcBinDir\" -Force
+              Copy-Item "$SdkX64BinDir\rcdll.dll" -Destination "$MsvcBinDir\" -Force
+              Write-Host "  -> Files successfully copied to MSVC Toolset directory."
+          } else {
+              Write-Warning "  -> Could not locate rc.exe in $SdkX64BinDir"
+          }
+
+          # 2. Injetar propriedades de infraestrutura do SDK no arquivo .vcxproj
+          $ProjPath = "pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+          Write-Host "Injecting SDK path descriptors directly into $ProjPath"
+
+          [xml]$xml = Get-Content $ProjPath
+          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+          $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+          # Encontra o primeiro PropertyGroup global (geralmente o primeiro filho do nó raiz Project)
+          $propGroup = $xml.SelectSingleNode("//ns:PropertyGroup[not(@Condition)]", $ns)
+          if ($null -eq $propGroup) {
+              $propGroup = $xml.SelectSingleNode("//ns:PropertyGroup", $ns)
+          }
+
+          if ($null -ne $propGroup) {
+              # Injeta explicitamente o caminho das ferramentas de build para apontar para a pasta HostX64
+              $rcToolPathNode = $xml.CreateElement("RcToolPath", $xml.Project.NamespaceURI)
+              $rcToolPathNode.InnerText = "$SdkX64BinDir"
+              $propGroup.AppendChild($rcToolPathNode) | Out-Null
+
+              # Injeta o subdiretório correto do compilador de recursos
+              $rcPathNode = $xml.CreateElement("ResourceCompilerToolPath", $xml.Project.NamespaceURI)
+              $rcPathNode.InnerText = "$SdkX64BinDir"
+              $propGroup.AppendChild($rcPathNode) | Out-Null
+
+              $xml.Save($ProjPath)
+              Write-Host "  -> XML successfully patched with RcToolPath."
+          } else {
+              Write-Error "  -> Target PropertyGroup could not be found in vcxproj XML structure."
+          }
+
       - name: Build 
         shell: pwsh
         if: steps.cache-libs.outputs.cache-hit != 'true'

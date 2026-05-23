@@ -2439,14 +2439,14 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: pjproject
         run: |
-          # Include Path Mapping from third party libraries
+           
           $DepsDir    = "${env:GITHUB_WORKSPACE}/deps"
           $OpusLib    = "${DepsDir}/opus/lib"
-          $Bcg729Lib  = "${DepsDir}/bcg729/${{ matrix.arch }}/lib"
+          $Bcg729Lib  = "${DepsDir}/bcg729/lib"
           $H264Lib    = "${DepsDir}/openh264/lib"
           $SslLib     = "${DepsDir}/openssl/lib"
           $OpusInc    = "${DepsDir}/opus/include"
-          $Bcg729Inc  = "${DepsDir}/bcg729/${{ matrix.arch }}/include"
+          $Bcg729Inc  = "${DepsDir}/bcg729/include"
           $H264Inc    = "${DepsDir}/openh264/include"
           $SslInc     = "${DepsDir}/openssl/include"
 
@@ -2457,7 +2457,7 @@ jobs:
           $UmInc      = "${SdkInc}\um"
           $MsvcInc    = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\include"
 
-          # INCLUDE setup
+          
           $IncludePaths = @($MsvcInc, $UcrtInc, $SharedInc, $UmInc, $OpusInc, $Bcg729Inc, $H264Inc, $SslInc)
           if ($env:INCLUDE) { $IncludePaths += $env:INCLUDE }
           $env:INCLUDE = $IncludePaths -join ";"
@@ -2473,6 +2473,14 @@ jobs:
           if ($env:LIB) { $LibPaths += $env:LIB }
           $env:LIB = $LibPaths -join ";"
 
+          # === CORREÇÃO PARA O TRK0005 (CL.EXE) ===
+          # Mapeia onde estão as ferramentas executáveis do compilador (Hostx64 para Target)
+          $MsvcBinDir = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\bin\HostX64\${TargetArch}"
+          $SdkBinDir  = $env:WindowsSdkDir + "bin\" + $env:WindowsSDKVersion + "${TargetArch}"
+          
+          # Garante que estejam no início do PATH do processo atual
+          $env:PATH = "${MsvcBinDir};${SdkBinDir};${env:PATH}"
+
           Write-Host "=== Building with environment variables ==="
           # Mapeia dinamicamente a platform do msbuild de acordo com a arquitetura do job
           $MsBuildPlatform = if ($TargetArch -eq "arm64") { "ARM64" } else { "x64" }
@@ -2483,6 +2491,7 @@ jobs:
               /p:Platform=$MsBuildPlatform `
               /p:WindowsTargetPlatformVersion="$($env:WindowsSDKVersion.TrimEnd('\'))" `
               /p:AdditionalOptions="/bigobj" `
+              /p:ExecutablePath="${MsvcBinDir};${SdkBinDir};%PATH%" `
               /p:UseEnv=true
       
       - name: Setup .NET 10.0.x

@@ -613,8 +613,7 @@ jobs:
 
         shell: bash
         env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
       - uses: actions/upload-artifact@v7
         name: Upload error logs
@@ -940,7 +939,7 @@ jobs:
         id: cache-libs
         uses: actions/cache@v5
         with:
-          path: ${{ github.workspace }}/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
 
       - name: Clone OpenSSL
@@ -1022,9 +1021,8 @@ jobs:
   
         env:
           DEVELOPER: $(xcode-select -print-path)
-          BUILD_THREADS: $(sysctl -n hw.logicalcpu)  
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }}
+          BUILD_THREADS: $(sysctl -n hw.logicalcpu) 
+          BUILT_SDK_PATH: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
       - uses: actions/upload-artifact@v7
         name: Upload error logs
@@ -1044,8 +1042,7 @@ jobs:
             ${{ env.BUILT_SDK_PATH }}
             logs/*.log
         env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ env.SDK_SUFFIX }} 
+          BUILT_SDK_PATH: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
   openssl-win:
     name: openssl-win (x64)

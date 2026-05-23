@@ -1941,10 +1941,11 @@ jobs:
       - name: Inspect Dependencies Structure
         run: |
           echo "=== Library folders structure check ==="
-          ls -R ${{ github.workspace }}/libs/${{ env.BCG_SDK_NAME }} || echo "bcg729 not found nao encontrada"
-          ls -R ${{ github.workspace }}/libs/${{ env.H264_SDK_NAME }} || echo "h264 not found"
-          ls -R ${{ github.workspace }}/libs/${{ env.OPUS_SDK_NAME }} || echo "opus not found"
-          ls -R ${{ github.workspace }}/libs/${{ env.SSL_SDK_NAME }} || echo "ssl not found"
+          ls  ${{ github.workspace }}/libs/${{ env.BCG_SDK_NAME }} && echo "bcg729 found"
+          ls  ${{ github.workspace }}/libs/${{ env.H264_SDK_NAME }} && echo "h264 found"
+          ls  ${{ github.workspace }}/libs/${{ env.OPUS_SDK_NAME }} && echo "opus  found"
+          ls  ${{ github.workspace }}/libs/${{ env.SSL_SDK_NAME }} && echo "ssl  found"
+          ls -R ${{ github.workspace }}/libs
         env:
           BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk

@@ -167,16 +167,13 @@ jobs:
         make || exit 1
         make install
 
-
     - name: Upload artifacts
       uses: actions/upload-artifact@v7
       with:
         name: bcg729-${{ matrix.arch }}
         path: ${{ github.workspace }}/${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk
         overwrite: true
-      env:
-        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
- 
+      
   bcg729-mac:
     runs-on: macos-26
     name: bcg729-mac
@@ -188,8 +185,7 @@ jobs:
           - platform: MacOSX
           - lib_name: bcg729
           - sdk: macosx
-    steps:
-      
+    steps:  
       - name: Cache BCG729 Built SDK
         id: cache-libs
         uses: actions/cache@v5
@@ -1323,10 +1319,8 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: opus-${{ matrix.arch }}
-        path: ${{ github.workspace }}/opus/build/${{ matrix.platform}}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
+        path: ${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
         overwrite: true
-      env:
-        SDKVERSION: ${{ matrix.arch == 'arm64' && '$(xcrun -sdk iphoneos --show-sdk-version)' || '$(xcrun -sdk iphonesimulator --show-sdk-version)' }}
          
   opus-mac:
     runs-on: macos-26

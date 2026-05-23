@@ -313,7 +313,7 @@ jobs:
             git clone --branch "${env:BCG729_VERSION}" --depth 1 https://github.com/BelledonneCommunications/bcg729.git bcg729
             
       - name: Remove Legacy MSVC Headers (ARM64 Only)
-        if: matrix.arch == 'ARM64'
+        if: matrix.arch == 'ARM64' && steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         working-directory: bcg729
         run: |
@@ -635,8 +635,12 @@ jobs:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
 
   openh264-win:
-    name: openh264-win (x64)
+    name: openh264-win (${{ matrix.arch }})
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
 
     steps:
       - name: Checkout
@@ -647,103 +651,98 @@ jobs:
         uses: actions/cache@v5
         with:
           path: install/openh264/
-          key: h264-${{ env.OPENH264_VERSION }}-win-x64
+          key: h264-${{ env.OPENH264_VERSION }}-win-${{ matrix.arch }}
     
       - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
         if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-            arch: x64
+          arch: ${{ matrix.arch }}
 
       - name: Setup NASM
-        if: steps.cache-libs.outputs.cache-hit != 'true'
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'x64'
         uses: ilammy/setup-nasm@v1
 
       - name: Create directories
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
-            New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
-            New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
 
       - name: Clone OpenH264
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            git clone `
+          git clone `
             --branch "${env:OPENH264_VERSION}" `
             --depth 1 `
             https://github.com/cisco/openh264.git `
             openh264
-
-
-      - name: Configure MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: cmd
-        run: |
-            call "E:\Program Files\Microsoft Visual Studio Community 2026\Common7\Tools\VsDevCmd.bat" -arch=x64
-            echo Visual Studio environment loaded
-            where cl
-            where msbuild
 
       - name: Build OpenH264
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: cmd
         working-directory: openh264
         run: |
-            set ARCH=x86_64
+          :: Define as variáveis corretas com base na arquitetura da matrix
+          if "${{ matrix.arch }}"=="ARM64" (
+              set "ARCH_FLAG=arm64"
+              set "ASM_FLAG=USE_ASM=No"
+          ) else (
+              set "ARCH_FLAG=x86_64"
+              set "ASM_FLAG="
+          )
 
-            make OS=msvc ARCH=%ARCH% BUILDTYPE=Release ^
-            ENABLE64BIT=Yes ^
-            DEBUGSYMBOLS=False 
+          :: Executa o build usando NMake/Make do ambiente MSVC
+          make OS=msvc ARCH=%ARCH_FLAG% BUILDTYPE=Release ENABLE64BIT=Yes DEBUGSYMBOLS=False %ASM_FLAG%
 
-            IF %ERRORLEVEL% NEQ 0 (
-            exit /b %ERRORLEVEL%
-            )
+          if %ERRORLEVEL% neq 0 (
+              exit /b %ERRORLEVEL%
+          )
 
       - name: Prepare artifact structure
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $target = "install/openh264/x64"
+          $target = "install/openh264/${{ matrix.arch }}"
 
-            New-Item -ItemType Directory -Force -Path "$target\bin" | Out-Null
-            New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
-            New-Item -ItemType Directory -Force -Path "$target\include\wels" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$target\bin" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$target\include\wels" | Out-Null
 
       - name: Collect static libraries
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $target = "install/openh264/x64/lib"
+          $target = "install/openh264/${{ matrix.arch }}/lib"
 
-            Get-ChildItem openh264 -Recurse -Filter *.lib |
+          Get-ChildItem openh264 -Recurse -Filter *.lib |
             Copy-Item -Destination $target -Force
 
       - name: Collect headers
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $target = "install/openh264/x64/include/wels"
+          $target = "install/openh264/${{ matrix.arch }}/include/wels"
 
-            Get-ChildItem openh264/codec/api/wels -Filter *.h |
+          Get-ChildItem openh264/codec/api/wels -Filter *.h |
             Copy-Item -Destination $target -Force
 
       - name: List generated files
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            Get-ChildItem "install/openh264" -Recurse
+          Get-ChildItem "install/openh264" -Recurse
 
       - name: Upload OpenH264 artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-            name: openh264-win-x64
-            path: |
-              install/openh264/x64/**/*
-
+          name: openh264-win-${{ matrix.arch }}
+          path: |
+            install/openh264/${{ matrix.arch }}/**/*
 
   openssl-android:
     runs-on: ubuntu-latest

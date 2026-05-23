@@ -1777,7 +1777,7 @@ jobs:
       - uses: actions/download-artifact@v8
         if: steps.cache-libs.outputs.cache-hit != 'true'
         with:
-          name: openh264-${{ matrix.arch }}
+          name: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           path: ${{ github.workspace }}/libs/h264/
       
       - uses: actions/download-artifact@v8

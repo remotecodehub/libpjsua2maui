@@ -2096,13 +2096,13 @@ jobs:
     needs: [bcg729-win, openh264-win, openssl-win, opus-win]
     steps: 
       - uses: actions/checkout@v6
-      
+
       - name: Cache pjsip Built SDK
         id: cache-libs
         uses: actions/cache@v5
         with:
           path: |
-            src/libpjsua2*/**/*
+            src/**/*
           key: pjsip-${{ env.PJSIP_VERSION }}-win-x64
 
       - name: Setup MSVC
@@ -2528,7 +2528,7 @@ jobs:
         with:
           name: pjsip-win-x64
           path: |
-            src/libpjsua2*/**/*
+            src/**/*
           if-no-files-found: warn
 
   nupkg:

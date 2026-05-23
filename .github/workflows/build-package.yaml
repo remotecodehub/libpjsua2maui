@@ -16,7 +16,7 @@ env:
   OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
   OPUS_PATH: ${{ github.workspace }}/lib/opus
   PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
-  MIN_IOS_VERSION: 14.0
+  MIN_IOS_VERSION: 15.0
   DOTNET_NOLOGO: true                     # Disable the .NET logo
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Disable the .NET first time experience
   DOTNET_CLI_TELEMETRY_OPTOUT: true       # Disable sending .NET CLI telemetry
@@ -27,7 +27,7 @@ env:
   OPENH264_VERSION: v2.3.0
   OPUS_VERSION: v1.4
   BCG729_VERSION: 1.1.1
-  MIN_MACOSX_VERSION: 14.0
+  MIN_MACOSX_VERSION: 15.0
   SDKVERSION: 26.2
   BUILD_TYPE: Release
   ROOT_DIR: ${{ github.workspace }}
@@ -229,7 +229,7 @@ jobs:
             -DCMAKE_C_COMPILER=$(which clang)                                   \
             -DCMAKE_MAKE_PROGRAM:PATH=$(which make)                             \
             -DCMAKE_SKIP_INSTALL_RPATH=ON                                       \
-            -DCMAKE_C_FLAGS="-target ${{ matrix.arch }}-apple-ios14.0-macabi"   \
+            -DCMAKE_C_FLAGS="-target ${{ matrix.arch }}-apple-ios15.0-macabi"   \
             -DBUILD_SHARED_LIBS=OFF                                             \
             -DENABLE_SHARED=OFF                                                 \
             -DENABLE_STATIC=ON                                                  \
@@ -852,7 +852,7 @@ jobs:
         export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
         SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
         export SDKVERSION
-        export IOS_MIN_SDK_VERSION=14.0
+        export IOS_MIN_SDK_VERSION=15.0
         export CONFIG_DISABLE_BITCODE=true 
         export CONFIG_OPTIONS="no-dso no-shared no-engine no-tests no-unit-test no-ssl3 no-comp enable-ec_nistp_64_gcc_128"
         cd ${{ env.OPENSSL_PATH }}
@@ -962,7 +962,7 @@ jobs:
         run: |
           mkdir -p ../logs
           TARGET="darwin64-${{ matrix.arch }}-cc"
-          HOST_TARGET="${{ matrix.arch }}-apple-ios14.0-macabi"
+          HOST_TARGET="${{ matrix.arch }}-apple-ios15.0-macabi"
           
           export CC="clang -target $HOST_TARGET"
           export CFLAGS="-fPIC"
@@ -976,7 +976,7 @@ jobs:
           LIBCRYPTO_IOSSIM=()
           export OPENSSL_LOCAL_CONFIG_DIR=${{ github.workspace }}/res/ssl/config
           export SDKVERSION=${{ env.SDKVERSION }}
-          export MACOSX_MIN_SDK_VERSION=14.0
+          export MACOSX_MIN_SDK_VERSION=15.0
           export CONFIG_DISABLE_BITCODE=true 
           export CONFIG_OPTIONS="no-dso no-shared no-engine no-tests no-unit-test no-ssl3 no-comp enable-ec_nistp_64_gcc_128"
                     
@@ -1286,7 +1286,6 @@ jobs:
         make install 
       shell: sh
       env:
-        MIN_IOS_VERSION: 14.0
         CONFIG_DISABLE_BITCODE: true
         DEVELOPER: $(xcode-select -print-path)
         IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
@@ -1379,11 +1378,11 @@ jobs:
 
           if [ "${{ matrix.arch }}" == "arm64" ]; then
             HOST="arm-apple-darwin"
-            TARGET="arm64-apple-ios14.0-macabi"
+            TARGET="arm64-apple-ios15.0-macabi"
             opus_opt_cflags="-O3 -ffast-math -flto -g -Wno-cast-align"
           else
             HOST="x86_64-apple-darwin"
-            TARGET="x86_64-apple-ios14.0-macabi"
+            TARGET="x86_64-apple-ios15.0-macabi"
             opus_opt_cflags="-O3 -ffast-math -flto -g"
           fi
 
@@ -1849,7 +1848,6 @@ jobs:
           cp -v -f ./csharp/pjsua2maui/pjsua2maui/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
           echo "artifact=${{ github.workspace }}/pjsip-${{matrix.arch}}" >> "$GITHUB_OUTPUT"
         env:
-          MIN_IOS_VERSION: 14.0
           BUILD_THREADS: $(sysctl -n hw.ncpu)
 
       - name: Upload artifacts
@@ -1952,7 +1950,7 @@ jobs:
            
           CATALYST_SYSTEM_INCLUDES="$SDKPATH/System/iOSSupport/usr/include"
           export ARCH=${{ matrix.arch }}
-          export TARGET="${{ matrix.arch }}-apple-ios14.0-macabi"
+          export TARGET="${{ matrix.arch }}-apple-ios15.0-macabi"
           export CC="clang -target $TARGET"
           export CXX="clang++ -target $TARGET"
           export SDKVERSION=${{ env.SDKVERSION }}
@@ -1963,13 +1961,13 @@ jobs:
           export CFLAGS="${CFLAGS} -I${{ env.BCG_ROOT }}/include -I${{ env.H264_ROOT }}/include -I${{ env.SSL_ROOT }}/include -I${{ env.OPUS_ROOT }}/include "
           export LDFLAGS="${LDFLAGS} -L${{ env.BCG_ROOT }}/lib -lbcg729 -L${{ env.H264_ROOT }}/lib -lopenh264 -L${{ env.SSL_ROOT }}/lib -lssl -lcrypto -L${{ env.OPUS_ROOT }}/lib -lopus"
           if [[ '${{ matrix.arch }}' == 'arm64' ]]; then
-            export CFLAGS="-arch arm64 -target arm64-apple-ios14.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS" 
-            export CXXFLAGS="-arch arm64 -target arm64-apple-ios14.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
-            export LDFLAGS="-arch arm64 -target arm64-apple-ios14.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
+            export CFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS" 
+            export CXXFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export LDFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
           else
-            export CFLAGS="-arch x86_64 -target x86_64-apple-ios14.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
-            export CXXFLAGS="-arch x86_64 -target x86_64-apple-ios14.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
-            export LDFLAGS="-arch x86_64 -target x86_64-apple-ios14.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
+            export CFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export CXXFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export LDFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
           fi
 
           ./configure                            \

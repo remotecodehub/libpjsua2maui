@@ -2168,6 +2168,13 @@ jobs:
           path: deps/openh264
         if: steps.cache-libs.outputs.cache-hit != 'true'
   
+      - name: Validate Deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: deps
+        shell: pwsh
+        run: |
+            Get-ChildItem . -Recurse
+            
       - name: Clone PJSIP
         shell: pwsh
         run: |
@@ -2426,13 +2433,6 @@ jobs:
             (Get-Content $projectFile) `
             -replace [regex]::Escape($oldNs), $newNs |
             Set-Content $projectFile
-
-      - name: Validate Deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: deps
-        shell: pwsh
-        run: |
-            Get-ChildItem . -Recurse
     
       - name: Build 
         shell: pwsh

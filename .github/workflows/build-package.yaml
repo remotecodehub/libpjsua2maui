@@ -657,7 +657,9 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: ${{ matrix.arch }}
+          # Se for ARM64, usa o cross-compiler (roda em x64, gera ARM64)
+          # Se for x64, usa o compilador nativo x64
+          arch: ${{ matrix.arch == 'ARM64' && 'x64_arm64' || 'x64' }}
 
       - name: Setup NASM
         if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'x64'

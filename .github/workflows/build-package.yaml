@@ -2826,7 +2826,7 @@ jobs:
           
           # Move win libs to packaging directory
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2.win/lib/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2.win/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/lib/x64 
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2.win/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64 
           
       - name: Restore Dependencies
         working-directory: src

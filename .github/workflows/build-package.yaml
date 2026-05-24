@@ -1701,7 +1701,7 @@ jobs:
         mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
         mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
         shopt -s globstar && cp ${{ github.workspace }}/output/**/libs/${{ matrix.arch }}/**/*.so ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib
-        cp -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*.sp ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib/ 
+        cp -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*.so ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib/ 
         cp -v ${{ env.PJSUA_BASE_DIR }}/csharp/pjsua2maui/pjsua2maui/Platforms/Android/org/pjsip/*.java ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
         cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
          

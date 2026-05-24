@@ -1771,7 +1771,7 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/lib
           cd ${{ github.workspace }}/lib
-          git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git
+          git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git pjsip
       
       - uses: actions/download-artifact@v8
         if: steps.cache-libs.outputs.cache-hit != 'true'

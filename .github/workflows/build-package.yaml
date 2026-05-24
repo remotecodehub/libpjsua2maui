@@ -2758,7 +2758,7 @@ jobs:
           path: ${{ env.NUGET_ARTIFACTS }}/pjsip-${{env.PJSIP_VERSION}}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
-      - name: Download win ARN64 Artifact
+      - name: Download win ARM64 Artifact
         uses: actions/download-artifact@v8
         with:
           name: pjsip-win-arm64
@@ -2799,30 +2799,31 @@ jobs:
  
           # Move managed classes to projects directory
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/java/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
-          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/csharp/pjsua2/* ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
-          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk/cs/* ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
-          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-arm64.sdk/cs/* ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/csharp/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
           
           # Move managed assemblies to projects directory
-          mv -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2maui.win/bin ${{ github.workspace }}/src/libpjsua2maui.win/bin
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2.win/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2.win/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
 
           # Move android libs to packaging directory
-          mv -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
-          mv -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86_64/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
-          mv -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--armeabi-v7a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
-          mv -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--arm64-v8a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
+          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
+          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86_64/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
+          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--armeabi-v7a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
+          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--arm64-v8a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
           
           # Move ios libs to packaging directory
-          mv -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
-          mv -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
-          mv -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-arm64s/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s
+          cp -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64
           
           # Move mac libs to packaging directory
-          mv -v ${{ env.NUGET_ARTIFACTS }}/mac/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
-          mv -v ${{ env.NUGET_ARTIFACTS }}/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/mac/pjsip-arm64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
           
           # Move win libs to packaging directory
-          mv -v -v ${{ env.NUGET_ARTIFACTS }}/win/pjsip-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
+          cp -v -v ${{ env.NUGET_ARTIFACTS }}/win/pjsip-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
           
       - name: Restore Dependencies
         working-directory: src

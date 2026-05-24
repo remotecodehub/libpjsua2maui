@@ -1723,7 +1723,7 @@ jobs:
       CONFIG_SITE_PATH: ${{ github.workspace }}/lib/pjsip/pjlib/include/pj/config_site.h
       PJSUA_GENERATED_CSHARP_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/pjsua2 
       PJSUA_GENERATED_SO_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/Platforms/Android/lib
-      PJSUA_BASE_DIR: /tmp/pjsip/pjsip-arpps/sc/swig
+      PJSUA_BASE_DIR: /tmp/pjsip/pjsip-apps/src/swig
       TARGET_ANDROID_API: 28
       OPENSSL_BUILD_OUT_PATH: ${{ github.workspace }}/output/openssl
       OPENH264_BUILD_OUT_PATH: ${{ github.workspace}}/output/openh264

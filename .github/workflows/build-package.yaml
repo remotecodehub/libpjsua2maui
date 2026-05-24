@@ -1702,7 +1702,7 @@ jobs:
         mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
         shopt -s globstar && cp ${{ github.workspace }}/output/**/libs/${{ matrix.arch }}/**/*.so ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib
         find ${{ env.PJSUA_GENERATED_SO_DIR }} -path "${{ matrix.arch }}/*.so" -exec cp {} ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib/ \;
-        cp -v ${{ env.PJSUA_GENERATED_JAVA_SRC_DIR }}/*.java ${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}/
+        cp -v ${{ env.PJSUA_BASE_DIR }}/org/pjsua2/*.java ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
         cp -r -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }} ${{ env.PJSIP_BUILD_OUT_PATH }}/${{matrix.arch}}/csharp
          
       env:
@@ -1721,11 +1721,9 @@ jobs:
       BCG729_LIB_PATH: ${{ github.workspace }}/output/bcg729/libs/
       PJSIP_TMP_PATH: /tmp/pjsip
       CONFIG_SITE_PATH: ${{ github.workspace }}/lib/pjsip/pjlib/include/pj/config_site.h
-      PJSUA_GENERATED_CSHARP_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/pjsua2
-      PJSUA_GENERATED_JAVA_SRC_DIR: /tmp/pjsip/pjsip-apps/src/swig/java/android/pjsua2/src/main/java
-      PJSUA_GENERATED_SO_PATH: /tmp/pjsip/pjsip-apps/src/swig/java/android/pjsua2/src/main/jniLibs
-      PJSUA_GENERATED_SO_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui.Android/lib
-      PJSUA_BASE_DIR: /tmp/pjsip/pjsip-apps/src/swig
+      PJSUA_GENERATED_CSHARP_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/pjsua2 
+      PJSUA_GENERATED_SO_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/Platforms/Android/lib
+      PJSUA_BASE_DIR: /tmp/pjsip/pjsip-apps/src/swig/
       TARGET_ANDROID_API: 28
       OPENSSL_BUILD_OUT_PATH: ${{ github.workspace }}/output/openssl
       OPENH264_BUILD_OUT_PATH: ${{ github.workspace}}/output/openh264

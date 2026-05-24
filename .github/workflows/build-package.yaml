@@ -2640,7 +2640,7 @@ jobs:
             Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
           }
           
-          Get-ChildItem .\libpjsua2.win\ -Recurse
+          Get-ChildItem .. -Recurse
           
 
       - name: Upload PJSIP artifacts

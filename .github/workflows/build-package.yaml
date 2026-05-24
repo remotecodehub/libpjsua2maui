@@ -364,7 +364,6 @@ jobs:
         with:
           name: bcg729-win-${{ matrix.arch }}
           path: deps/bcg729/**/*
-
           
   openh264-android:
     runs-on: ubuntu-latest
@@ -2109,7 +2108,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            src/**/*
+            srxc\**\*
           key: pjsip-${{ env.PJSIP_VERSION }}-win-${{ matrix.arch }}
 
       - name: Setup MSVC
@@ -2622,23 +2621,23 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: src/libpjsua2maui.win
         run: | 
-          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2" | Out-Null
-          if (Test-Path "${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output") {
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2maui.win\pjsua2maui\pjsua2" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\lib\${{ matrix.arch }}" | Out-Null
+
+          if (Test-Path "${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\") {
             Write-Host "Copying pjsip managed c# classes"
-            Copy-Item ${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2 -ErrorAction SilentlyContinue
+            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2 -Verbose
           }
           dotnet publish libpjsua2maui.win.csproj -c Release --no-restore 
 
       - name: Collect PJSIP artifacts
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: src
+        working-directory: src\libpjsua2.win
         shell: pwsh
         run: | 
-          New-Item -ItemType Directory -Force -Path "./libpjsua2.win/lib/${{ matrix.arch }}" | Out-Null
-
-          if (Test-Path "${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output") {
+          if (Test-Path "${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\") {
             Write-Host "Copying pjsip dll"
-            Copy-Item ${{ github.workspace }}/pjproject/pjsip-apps/src/swig/csharp/output/*.dll "./libpjsua2maui.win/lib/${{ matrix.arch }}" -Recurse -Force
+            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
           }
           
           Get-ChildItem .\libpjsua2.win\ -Recurse
@@ -2649,7 +2648,7 @@ jobs:
         with:
           name: pjsip-win-${{ matrix.arch }}
           path: |
-            src/**/*
+            srxc\**\*
           if-no-files-found: warn
 
   nupkg:

@@ -1166,7 +1166,6 @@ jobs:
     steps:  
       - name: Checkout repository
         uses: actions/checkout@v6
-
         
       - name: Cache opus Built SDK
         id: cache-libs
@@ -1175,16 +1174,16 @@ jobs:
           path:  ${{ github.workspace }}/opus-output
           key: opus-${{ env.OPUS_VERSION }}-android
 
+      - name: Clone Opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ${{ github.workspace }}/lib
+          cd ${{ github.workspace }}/lib          
+          git clone --branch v1.4 https://github.com/xiph/opus.git opus
+
       - name: Create Output Directory
         run: mkdir -p ${{ github.workspace }}/opus-output
         if: steps.cache-libs.outputs.cache-hit != 'true'
-
-      - name: Set OpenSSL for Output 
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ${{ github.workflow }}/lib
-          cd ${{ github.workflow }}/lib
-          git clone --branch $OPENSSL_VERSION https://github.com/openssl/openssl.git --recursive       
 
       - name: Build Docker Image
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -1238,9 +1237,9 @@ jobs:
     - name: Clone Opus
       if: steps.cache-libs.outputs.cache-hit != 'true'
       run: |
-        mkdir -p ${{ github.workspace }}/lib/opus
-        cd ${{ github.workspace }}/lib/opus
-        git clone --branch v1.4 https://github.com/xiph/opus.git
+        mkdir -p ${{ github.workspace }}/lib
+        cd ${{ github.workspace }}/lib
+        git clone --branch v1.4 https://github.com/xiph/opus.git opus
 
     - name: Setup Xcode 26.3
       if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -2443,8 +2442,8 @@ jobs:
         shell: pwsh
         run: |
             $headers = @(
-                "deps/bcg729/${{ matrix.arch }}/include/bcg729/encoder.h",
-                "deps/bcg729/${{ matrix.arch }}/include/bcg729/decoder.h"
+                "deps/bcg729/include/bcg729/encoder.h",
+                "deps/bcg729/include/bcg729/decoder.h"
             )
 
             foreach ($header in $headers)
@@ -2536,11 +2535,11 @@ jobs:
           # Include Path Mapping from third party libraries
           $DepsDir    = "${env:GITHUB_WORKSPACE}/deps"
           $OpusLib    = "${DepsDir}/opus/lib"
-          $Bcg729Lib  = "${DepsDir}/bcg729/${{ matrix.arch }}/lib"
+          $Bcg729Lib  = "${DepsDir}/bcg729/lib"
           $H264Lib    = "${DepsDir}/openh264/lib"
           $SslLib     = "${DepsDir}/openssl/lib"
           $OpusInc    = "${DepsDir}/opus/include"
-          $Bcg729Inc  = "${DepsDir}/bcg729/${{ matrix.arch }}/include"
+          $Bcg729Inc  = "${DepsDir}/bcg729/include"
           $H264Inc    = "${DepsDir}/openh264/include"
           $SslInc     = "${DepsDir}/openssl/include"
 

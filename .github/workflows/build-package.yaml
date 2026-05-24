@@ -2806,7 +2806,7 @@ jobs:
           
           # Move managed assemblies to projects directory
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2.win/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2.win/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2.win/libarm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
 
           # Move android libs to packaging directory
           cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
@@ -2824,7 +2824,7 @@ jobs:
           cp -v ${{ env.NUGET_ARTIFACTS }}/mac/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
           
           # Move win libs to packaging directory
-          cp -v -v ${{ env.NUGET_ARTIFACTS }}/win/pjsip-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win.dll/lib/x64 
           
       - name: Restore Dependencies
         working-directory: src

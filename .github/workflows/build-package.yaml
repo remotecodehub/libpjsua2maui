@@ -2809,10 +2809,10 @@ jobs:
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2.win/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
 
           # Move android libs to packaging directory
-          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
-          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86_64/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
-          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--armeabi-v7a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
-          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--arm64-v8a/*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
+          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
+          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--x86_64/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
+          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--armeabi-v7a/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a
+          cp -v ${{ env.NUGET_ARTIFACTS }}pjsip/pjsip-${{ env.PJSIP_VERSION }}-android--arm64-v8a/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a
           
           # Move ios libs to packaging directory
           cp -v ${{ env.NUGET_ARTIFACTS }}/ios/pjsip-x86_64/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64

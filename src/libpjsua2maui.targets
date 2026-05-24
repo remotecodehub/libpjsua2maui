@@ -141,9 +141,17 @@
 
   <!-- Windows Native Linking -->
   <ItemGroup Condition="'$(IsWin)' == 'true'">
-    <None Condition="'$(Platform)' == 'x64'"
-      Include="$(NuGetPackageRoot)libpjsua2maui\$(LibVersion)\runtimes\win-x64\native\pjsua2.dll">
+    <None Condition="$(RuntimeIdentifier.Contains('x64')) Or '$(Platform)' == 'x64'"
+          Include="$(NuGetPackageRoot)libpjsua2maui\$(LibVersion)\runtimes\win-x64\native\pjsua2.dll">
       <Link>Platforms\Windows\Native\x64\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>True</Visible>
+      <TargetPath>%(Filename)%(Extension)</TargetPath>
+    </None>
+
+    <None Condition="$(RuntimeIdentifier.Contains('arm64')) Or '$(Platform)' == 'ARM64' Or '$(Platform)' == 'arm64'"
+          Include="$(NuGetPackageRoot)libpjsua2maui\$(LibVersion)\runtimes\win-arm64\native\pjsua2.dll">
+      <Link>Platforms\Windows\Native\ARM64\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Visible>True</Visible>
       <TargetPath>%(Filename)%(Extension)</TargetPath>

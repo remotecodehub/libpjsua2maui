@@ -75,8 +75,11 @@ android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
             target="runtimes\maccatalyst-arm64\native\libpjsua2.a" />
 
         <!-- Native Windows -->
-        <file src="libpjsua2.win.dll\lib\x64\pjsua2.dll"
+        <file src="libpjsua2.win\lib\x64\pjsua2.dll"
             target="runtimes\win-x64\native\pjsua2.dll" />
+        <file src="libpjsua2.win\lib\arm64\pjsua2.dll"
+            target="runtimes\win-arm64\native\pjsua2.dll" />
+
 
         <!-- Managed Java bindings -->
         <file src="libpjsua2.android.so\org\pjsip\*" target="contentFiles\any\android\org\pjsip\" />

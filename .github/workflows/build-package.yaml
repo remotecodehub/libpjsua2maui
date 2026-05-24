@@ -1185,13 +1185,6 @@ jobs:
         run: mkdir -p ${{ github.workspace }}/opus-output
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
-      - name: Set OpenSSL for Output 
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ${{ github.workflow }}/lib
-          cd ${{ github.workflow }}/lib
-          git clone --branch $OPENSSL_VERSION https://github.com/openssl/openssl.git --recursive       
-
       - name: Build Docker Image
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |

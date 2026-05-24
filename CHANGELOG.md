@@ -3,6 +3,7 @@
 ## Version 2.16.0.1
 
     - 🧩 Feature: Add MacOSX support (both arm64 and x86_64)
+    - 🧩 Feature: Add Windows support (only x64, arm64 isn't supported by some third_party libraries for now)
     - 🐞 BugFix: Android java classes not found at startup fixed
     - ⬆️ Upgrade: Using ios/macosx sdk version 26.2 as version target
         

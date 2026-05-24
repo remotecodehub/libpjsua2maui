@@ -2,11 +2,15 @@
     <PropertyGroup>
         <TargetFramework>net10.0-ios</TargetFramework>
         <UseMaui>true</UseMaui>
-        <SingleProject>true</SingleProject>
+        <SingleProject>false</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
-        <AssemblyName>pjsua2maui.ios</AssemblyName>
         <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+        <AssemblyName>pjsua2maui.ios</AssemblyName>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.0</SupportedOSPlatformVersion>
+    </PropertyGroup>
+    
+    <PropertyGroup>
         <PackageId>libpjsua2maui.ios</PackageId>
         <Version>2.16.0.1</Version>
         <AssemblyVersion>2.16.0.1</AssemblyVersion>
@@ -32,7 +36,8 @@ https://github.com/remotecodehub/libpjsua2maui/blob/main/CHANGELOG.md
         <PackageProjectUrl>https://github.com/remotecodehub/libpjsua2maui</PackageProjectUrl>
         <RepositoryUrl>https://github.com/remotecodehub/libpjsua2maui/libpjsua2maui.git</RepositoryUrl>
     </PropertyGroup>
-	<ItemGroup>
+	
+    <ItemGroup>
         <None Update="..\LICENSE">
             <PackagePath>\</PackagePath>
             <Pack>True</Pack>

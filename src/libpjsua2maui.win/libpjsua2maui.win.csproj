@@ -1,18 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0-maccatalyst</TargetFramework>
-        <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
+        <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+        <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
-        <AssemblyName>pjsua2maui.mac</AssemblyName>
+        <AssemblyName>pjsua2maui.win</AssemblyName>
         <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+	    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
     </PropertyGroup>
     
     <PropertyGroup>
-        <PackageId>libpjsua2maui.mac</PackageId>
+        <PackageId>libpjsua2maui.win</PackageId>
         <Version>2.16.0.1</Version>
         <AssemblyVersion>2.16.0.1</AssemblyVersion>
         <FileVersion>2.16.0.1</FileVersion>
@@ -25,8 +26,8 @@
 Provides .NET for ios bindings for libpjsua2 by pjsip.
 Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
 #NOTES
-Min MacOSX version : 14.0
-Target MacOSX version : 26.2
+Min Win version : 10.0.17763.0
+Target Win version : 11.0
 
 This library enables working with the pjsip SIP stack implementation for make voip
 calls.
@@ -37,8 +38,8 @@ https://github.com/remotecodehub/libpjsua2maui/blob/main/CHANGELOG.md
         <PackageProjectUrl>https://github.com/remotecodehub/libpjsua2maui</PackageProjectUrl>
         <RepositoryUrl>https://github.com/remotecodehub/libpjsua2maui/libpjsua2maui.git</RepositoryUrl>
     </PropertyGroup>
-	
-    <ItemGroup>
+    
+	<ItemGroup>
         <None Update="..\LICENSE">
             <PackagePath>\</PackagePath>
             <Pack>True</Pack>

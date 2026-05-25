@@ -2609,7 +2609,7 @@ jobs:
             Write-Host "Copying pjsip dll"
             Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
             Write-Host "Copying pjsip managed c# classes"
-            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2maui.win\pjsua2maui\pjsua2" -Verbose
+            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2.win\pjsua2" -Verbose
           }
           
           Get-ChildItem . -Recurse
@@ -2798,8 +2798,8 @@ jobs:
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX26.2-x86_64.sdk/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
           
           # Move win libs to packaging directory
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2.win/lib/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2.win/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64 
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-arm64/libpjsua2.win/lib/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/libpjsua2.win/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64 
           
       - name: Restore Dependencies
         working-directory: src

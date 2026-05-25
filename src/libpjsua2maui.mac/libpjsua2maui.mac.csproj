@@ -13,17 +13,17 @@
     
     <PropertyGroup>
         <PackageId>libpjsua2maui.mac</PackageId>
-        <Version>2.16.0.1</Version>
-        <AssemblyVersion>2.16.0.1</AssemblyVersion>
-        <FileVersion>2.16.0.1</FileVersion>
+        <Version>2.17</Version>
+        <AssemblyVersion>2.17</AssemblyVersion>
+        <FileVersion>2.17</FileVersion>
         <Title>PJSIP bindings for .NET MAUI</Title>
         <Authors>Weslley Murdock</Authors>
         <Company>Remote Code Hub</Company>
         <Copyright>Copyright ©2026 Remote Code Hub</Copyright>
         <PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
         <Description>##PJSIP pjsua2 bindings for pjsua2
-Provides .NET for ios bindings for libpjsua2 by pjsip.
-Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
+Provides .NET bindings of library libpjsua2 by pjsip for MacOSX.
+Pjsip version used is 2.17, using thirdy party libs such as openh264, openssl, opus and bcg729
 #NOTES
 Min MacOSX version : 14.0
 Target MacOSX version : 26.2

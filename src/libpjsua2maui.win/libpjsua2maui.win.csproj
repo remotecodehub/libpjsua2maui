@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
         <AssemblyName>pjsua2maui.win</AssemblyName>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 	    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
     </PropertyGroup>

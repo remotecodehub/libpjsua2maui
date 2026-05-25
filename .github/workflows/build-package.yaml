@@ -2623,7 +2623,7 @@ jobs:
 
           if (Test-Path "${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\") {
             Write-Host "Copying pjsip dll"
-            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2maui.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
+            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
             Write-Host "Copying pjsip managed c# classes"
             Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2maui.win\pjsua2maui\pjsua2" -Verbose
           }

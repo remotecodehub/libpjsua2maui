@@ -1,13 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0-ios</TargetFramework>
-        <UseMaui>true</UseMaui>
-        <SingleProject>false</SingleProject>
+        <TargetFramework>net10.0-ios</TargetFramework>  
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
-        <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+        <RootNamespace>pjsua2maui.pjsua2</RootNamespace> 
         <AssemblyName>pjsua2maui.ios</AssemblyName>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>14</TargetPlatformMinVersion>
     </PropertyGroup>
      
     <PropertyGroup>
@@ -33,9 +32,9 @@
         <PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
         <Description>##PJSIP pjsua2 bindings for pjsua2
 Provides .NET bindings of library libpjsua2 by pjsip for iOS.
-Pjsip version used is 2.15, using thirdy party libs such as openh264, openssl, opus and bcg729
+Pjsip version used is 2.17, using thirdy party libs such as openh264, openssl, opus and bcg729
 #NOTES
-Min iOS version : 12.2
+Min iOS version : 14.0
 Target iOS version : 26.2
 
 This library enables working with the pjsip SIP stack implementation for make voip

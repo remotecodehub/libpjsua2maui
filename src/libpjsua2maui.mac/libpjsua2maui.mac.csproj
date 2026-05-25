@@ -1,13 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0-maccatalyst</TargetFramework>
-        <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
-        <UseMaui>true</UseMaui>
-        <SingleProject>true</SingleProject>
+        <TargetFramework>net10.0-maccatalyst</TargetFramework>  
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
-        <AssemblyName>pjsua2maui.mac</AssemblyName>
-        <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+        <AssemblyName>pjsua2maui.mac</AssemblyName> 
+		<TargetPlatformMinVersion>14</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
     </PropertyGroup>
      

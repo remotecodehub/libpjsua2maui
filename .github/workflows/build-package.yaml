@@ -2852,15 +2852,15 @@ jobs:
 
       - name: Build MAUI Android
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android --no-restore
+        run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -p:IsOfficialBuild=true -f net10.0-android --no-restore
         
       - name: Build MAUI iOS
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios --no-restore
+        run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -p:IsOfficialBuild=true -f net10.0-ios --no-restore
       
       - name: Build MAUI MacOSX
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -f net10.0-maccatalyst --no-restore
+        run: dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -p:IsOfficialBuild=true -f net10.0-maccatalyst --no-restore
 
       - name: Validate and Pack NuGet 
         if: steps.cache-libs.outputs.cache-hit != 'true'

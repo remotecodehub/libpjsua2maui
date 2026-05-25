@@ -2758,6 +2758,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/x64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86

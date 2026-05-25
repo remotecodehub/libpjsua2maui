@@ -1,6 +1,6 @@
-name: 💡 Task
+name: 🧩 Task
 description: An task (of many) from a feature.
-title: "💡 [TASK]: <title>"
+title: "🧩 [TASK]: <title>"
 labels: [Enhancement]
 body:
 
@@ -19,8 +19,7 @@ body:
         - "End User"
     validations:
       required: true
-
-
+ 
   - type: textarea
     id: user_story
     attributes:
@@ -36,7 +35,7 @@ body:
   - type: textarea
     id: tasks
     attributes:
-      label: " "
+      label: "Tasks:"
       description: "Add tasks for complete this requisite (one per-line)."
       value: |
         - [ ] Task 1

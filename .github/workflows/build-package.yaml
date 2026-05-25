@@ -2780,9 +2780,7 @@ jobs:
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2
-          
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2maui.win/bin/arm64/Release/net10.0-windows10.0.19041.0/publish/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64/Release/net10.0-windows10.0.19041.0/publish/
-         
+           
           # Move android libs to packaging directory
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86/lib/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86_64/lib/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64

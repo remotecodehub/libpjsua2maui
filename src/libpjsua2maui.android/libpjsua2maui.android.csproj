@@ -2,30 +2,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net10.0-android</TargetFramework>
-		<RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
-		<UseMaui>true</UseMaui>
-		<SingleProject>false</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion>21</TargetPlatformMinVersion>
 		<RootNamespace>pjsua2maui.pjsua2</RootNamespace>
-		<AssemblyName>pjsua2maui.android</AssemblyName>
-		<SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+		<AssemblyName>pjsua2maui.android</AssemblyName> 
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>23</TargetPlatformMinVersion>
 	</PropertyGroup>
+ 
+    <PropertyGroup>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
 
+    <PropertyGroup Condition="'$(IsOfficialBuild)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+ 
 	<PropertyGroup>
 		<PackageId>libpjsua2maui.android</PackageId>
-	    <Version>2.16.0.1</Version>
-		<AssemblyVersion>2.16.0.1</AssemblyVersion>
-		<FileVersion>2.16.0.1</FileVersion>
+	    <Version>2.17</Version>
+		<AssemblyVersion>2.17</AssemblyVersion>
+		<FileVersion>2.17</FileVersion>
 		<Title>PJSIP bindings for .NET MAUI</Title>
 	    <Authors>Weslley Murdock</Authors>
 	    <Company>Remote Code Hub</Company>
 		<Copyright>Copyright ©2026 Remote Code Hub</Copyright>
 		<PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
 		<Description>##PJSIP libpjsua2 bindings for .NET MAUI
-Provides PJSIP bindings for .NET MAUI.
-Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
+Provides .NET bindings of library libpjsua2 by pjsip for Android.
+Pjsip version used is 2.17, using thirdy party libs such as openh264, openssl, opus and bcg729
 #NOTES
 Min Android version : 9.0 (API 28)
 Target Android version : 16.0 (API 36)

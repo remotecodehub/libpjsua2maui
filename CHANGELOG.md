@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version 2.17.0
+
+    - ⬆️ upgrade pjsip version
+    - 🎯 update README.md 
+    - 🐞 BugFix: windows `pjsua2maui.pjsua` namespace unavailable when targeting windows
+
 ## Version 2.16.0.1
 
     - 🧩 Feature: Add MacOSX support (both arm64 and x86_64)

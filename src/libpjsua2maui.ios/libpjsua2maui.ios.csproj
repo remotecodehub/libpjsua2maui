@@ -1,30 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0-ios</TargetFramework>
-        <UseMaui>true</UseMaui>
-        <SingleProject>false</SingleProject>
+        <TargetFramework>net10.0-ios</TargetFramework>  
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
-        <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+        <RootNamespace>pjsua2maui.pjsua2</RootNamespace> 
         <AssemblyName>pjsua2maui.ios</AssemblyName>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>14</TargetPlatformMinVersion>
     </PropertyGroup>
-    
+     
+    <PropertyGroup>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(IsOfficialBuild)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+ 
     <PropertyGroup>
         <PackageId>libpjsua2maui.ios</PackageId>
-        <Version>2.16.0.1</Version>
-        <AssemblyVersion>2.16.0.1</AssemblyVersion>
-        <FileVersion>2.16.0.1</FileVersion>
+        <Version>2.17</Version>
+        <AssemblyVersion>2.17</AssemblyVersion>
+        <FileVersion>2.17</FileVersion>
         <Title>PJSIP bindings for .NET MAUI</Title>
         <Authors>Weslley Murdock</Authors>
         <Company>Remote Code Hub</Company>
         <Copyright>Copyright ©2026 Remote Code Hub</Copyright>
         <PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
         <Description>##PJSIP pjsua2 bindings for pjsua2
-Provides .NET for ios bindings for libpjsua2 by pjsip.
-Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
+Provides .NET bindings of library libpjsua2 by pjsip for iOS.
+Pjsip version used is 2.17, using thirdy party libs such as openh264, openssl, opus and bcg729
 #NOTES
-Min iOS version : 12.2
+Min iOS version : 14.0
 Target iOS version : 26.2
 
 This library enables working with the pjsip SIP stack implementation for make voip

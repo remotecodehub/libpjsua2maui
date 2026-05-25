@@ -1,30 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-        <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
-        <UseMaui>true</UseMaui>
-        <SingleProject>true</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
         <AssemblyName>pjsua2maui.win</AssemblyName>
-        <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 	    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
     </PropertyGroup>
-    
+
+    <PropertyGroup>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(IsOfficialBuild)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+ 
     <PropertyGroup>
         <PackageId>libpjsua2maui.win</PackageId>
-        <Version>2.16.0.1</Version>
-        <AssemblyVersion>2.16.0.1</AssemblyVersion>
-        <FileVersion>2.16.0.1</FileVersion>
+        <Version>2.17.0</Version>
+        <AssemblyVersion>2.17.0</AssemblyVersion>
+        <FileVersion>2.17.0</FileVersion>
         <Title>PJSIP bindings for .NET MAUI</Title>
         <Authors>Weslley Murdock</Authors>
         <Company>Remote Code Hub</Company>
         <Copyright>Copyright ©2026 Remote Code Hub</Copyright>
         <PackageTags>sip;voip;pjsip;pjlib;pjsua;pjsua2;libpjsua2;pjproject;pjsua2maui;maui;net</PackageTags>
         <Description>##PJSIP pjsua2 bindings for pjsua2
-Provides .NET for ios bindings for libpjsua2 by pjsip.
-Pjsip version used is 2.16, using thirdy party libs such as openh264, openssl, opus and bcg729
+Provides .NET bindings of library libpjsua2 by pjsip for Windows.
+Pjsip version used is 2.17, using thirdy party libs such as openh264, openssl, opus and bcg729
 #NOTES
 Min Win version : 10.0.17763.0
 Target Win version : 11.0

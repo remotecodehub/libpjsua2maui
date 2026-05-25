@@ -22,7 +22,7 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true       # Disable sending .NET CLI telemetry
   PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
   SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output    
-  PJSIP_VERSION: 2.16
+  PJSIP_VERSION: 2.17
   OPENSSL_VERSION: OpenSSL_1_1_1s
   OPENH264_VERSION: v2.3.0
   OPUS_VERSION: v1.4
@@ -2104,8 +2104,7 @@ jobs:
         id: cache-libs
         uses: actions/cache@v5
         with:
-          path: |
-            ${{ github.workspace }}\src\**\*
+          path: ${{ github.workspace }}\src\libpjsua2.win\*
           key: pjsip-${{ env.PJSIP_VERSION }}-win-${{ matrix.arch }}
 
       - name: Setup MSVC
@@ -2598,53 +2597,29 @@ jobs:
               /p:ExecutablePath=$CustomExecPath `
               /p:UseEnv=true
       
-      - name: Setup .NET 10.0.x
+      - name: Collect PJSIP artifacts
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '10.0.x'
-          
-      - name: Restore Dependencies
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: src\libpjsua2maui.win
+        working-directory: src
+        shell: pwsh
         run: | 
-          dotnet workload install maui --source https://api.nuget.org/v3/index.json --skip-manifest-update
-          dotnet workload install windows --source https://api.nuget.org/v3/index.json --skip-manifest-update
-          dotnet workload update
-          dotnet workload restore libpjsua2maui.win.csproj
-          dotnet restore libpjsua2maui.win.csproj
-
-      - name: Build Managed Library
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: src/libpjsua2maui.win
-        run: | 
-          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2maui.win\pjsua2maui\pjsua2" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\pjsua2" | Out-Null
           New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\lib\${{ matrix.arch }}" | Out-Null
 
           if (Test-Path "${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\") {
-            Write-Host "Copying pjsip managed c# classes"
-            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2 -Verbose
-          }
-          dotnet publish libpjsua2maui.win.csproj -c Release --no-restore 
-
-      - name: Collect PJSIP artifacts
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: src\libpjsua2.win
-        shell: pwsh
-        run: | 
-          if (Test-Path "${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\") {
             Write-Host "Copying pjsip dll"
-            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
+            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
+            Write-Host "Copying pjsip managed c# classes"
+            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2.win\pjsua2" -Verbose
           }
           
-          Get-ChildItem .. -Recurse
+          Get-ChildItem . -Recurse
           
 
       - name: Upload PJSIP artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: pjsip-win-${{ matrix.arch }}
-          path: ${{ github.workspace }}\src\**\*
+          name: pjsip-${{ env.PJSIP_VERSION }}-Win-${{ matrix.arch }}
+          path: ${{ github.workspace }}\src\libpjsua2.win\*
           if-no-files-found: warn
 
   nupkg:
@@ -2760,15 +2735,15 @@ jobs:
       - name: Download win ARM64 Artifact
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-win-arm64
-          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64
+          name: pjsip-${{ env.PJSIP_VERSION }}-Win-arm64
+          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-arm64
         if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Download win x64 Artifact
         uses: actions/download-artifact@v8
         with:
-          name: pjsip-win-x64
-          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64
+          name: pjsip-${{ env.PJSIP_VERSION }}-Win-x64
+          path: ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64
         if: steps.cache-libs.outputs.cache-hit != 'true'
       
       - name: Validate artifacts
@@ -2783,6 +2758,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/x64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
@@ -2795,19 +2771,16 @@ jobs:
           mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64
           mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/x64/Release/net10.0-windows10.0.19041.0/publish/
-          mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/arm64/Release/net10.0-windows10.0.19041.0/publish/
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/x64/ 
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/arm64/ 
 
           # Move managed classes to projects directory
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/java/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/csharp/*.cs ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
-          
-          # Move managed assemblies to projects directory
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2maui.win/bin/x64/Release/net10.0-windows10.0.19041.0/publish/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64/Release/net10.0-windows10.0.19041.0/publish/
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2maui.win/bin/arm64/Release/net10.0-windows10.0.19041.0/publish/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64/Release/net10.0-windows10.0.19041.0/publish/
-         
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2
+           
           # Move android libs to packaging directory
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86/lib/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86_64/lib/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64
@@ -2824,43 +2797,48 @@ jobs:
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX26.2-x86_64.sdk/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
           
           # Move win libs to packaging directory
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-arm64/libpjsua2.win/lib/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-win-x64/libpjsua2.win/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64 
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-arm64/lib/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64 
           
       - name: Restore Dependencies
         working-directory: src
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: | 
-          echo "⏳ Cleaning old workloads..."
-          dotnet workload uninstall maui --ignore-failed-sources || true
-          dotnet workload uninstall android --ignore-failed-sources || true
-          dotnet workload uninstall ios --ignore-failed-sources || true
-          dotnet workload uninstall maccatalyst --ignore-failed-sources || true
+          echo "⏳ Installing required workloads for .NET 10..."
+          # Instalamos apenas os workloads específicos das plataformas móveis/Apple
+          # O parâmetro '--skip-manifest-update' evita checagens demoradas se você rodar o update logo em seguida
+          dotnet workload install android ios maccatalyst --source https://api.nuget.org/v3/index.json --skip-manifest-update
 
-          echo "⏳ Installing workloads MAUI 10..."
-          dotnet workload install maui --source https://api.nuget.org/v3/index.json --skip-manifest-update
-          dotnet workload install android --source https://api.nuget.org/v3/index.json --skip-manifest-update
-          dotnet workload install ios --source https://api.nuget.org/v3/index.json --skip-manifest-update
-          dotnet workload install maccatalyst --source https://api.nuget.org/v3/index.json --skip-manifest-update
-
-          echo "⏳ Updating all workloads..."
+          echo "⏳ Updating and synchronizing workloads..."
           dotnet workload update
-          dotnet workload restore $(find . -name "*.slnx" | head -n 1)
+          
+          # Se você usa um arquivo de solução moderna (.slnx) ou clássica (.sln), o restore resolve todos os projetos de uma vez
+          if [ -f "$(find . -name "*.slnx" -o -name "*.sln" | head -n 1)" ]; then
+            echo "📦 Restoring entire solution..."
+            dotnet workload restore $(find . -name "*.slnx" -o -name "*.sln" | head -n 1)
+          fi
+
+          echo "📦 Forcing clean NuGet restore for all target projects..."
           dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
           dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
           dotnet restore libpjsua2maui.mac/libpjsua2maui.mac.csproj
+          dotnet restore libpjsua2maui.win/libpjsua2maui.win.csproj
 
       - name: Build MAUI Android
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android --no-restore
+        run: dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android -p:IsOfficialBuild=true --no-restore
         
       - name: Build MAUI iOS
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios --no-restore
+        run: dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios -p:IsOfficialBuild=true --no-restore
       
       - name: Build MAUI MacOSX
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -f net10.0-maccatalyst --no-restore
+        run: dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -f net10.0-maccatalyst -p:IsOfficialBuild=true --no-restore
+
+      - name: Build MAUI Win
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: dotnet publish src/libpjsua2maui.win/libpjsua2maui.win.csproj -c Release -f net10.0-windows10.0.19041.0 -p:IsOfficialBuild=true --no-restore
 
       - name: Validate and Pack NuGet 
         if: steps.cache-libs.outputs.cache-hit != 'true'

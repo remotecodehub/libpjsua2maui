@@ -2597,22 +2597,6 @@ jobs:
               /p:ExecutablePath=$CustomExecPath `
               /p:UseEnv=true
       
-      - name: Setup .NET 10.0.x
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '10.0.x'
-          
-      - name: Restore Dependencies
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: src\libpjsua2maui.win
-        run: | 
-          dotnet workload install maui --source https://api.nuget.org/v3/index.json --skip-manifest-update
-          dotnet workload install windows --source https://api.nuget.org/v3/index.json --skip-manifest-update
-          dotnet workload update
-          dotnet workload restore libpjsua2maui.win.csproj
-          dotnet restore libpjsua2maui.win.csproj
-
       - name: Collect PJSIP artifacts
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: src

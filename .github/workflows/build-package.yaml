@@ -2797,8 +2797,8 @@ jobs:
           cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX26.2-x86_64.sdk/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64
           
           # Move win libs to packaging directory
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-arm64/libpjsua2.win/lib/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
-          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/libpjsua2.win/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64 
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-arm64/lib/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
+          cp -v ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64 
           
       - name: Restore Dependencies
         working-directory: src

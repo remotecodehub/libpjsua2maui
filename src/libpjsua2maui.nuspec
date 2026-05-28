@@ -3,7 +3,7 @@
     <metadata>
         <id>libpjsua2maui</id>
         <title>libpjsua2maui</title>
-        <version>2.17.0</version>
+        <version>2.17.0.1</version>
         <authors>Weslley Murdock</authors>
         <owners>Remote Code Hub</owners>
         <projectUrl>http://github.com/remotecodehub/libpjsua2maui</projectUrl>
@@ -14,13 +14,14 @@ The builds of native libraries targets iOS devices (arm64), iOS simulators (arm6
 android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64).
         </description>
         <releaseNotes>
-- 🐞 BugFix: pjsua2maui.pjsua namespace missing in windows
-- ⬆️ Upgrade: pjsip version to 2.17
+- 🐞 BugFix: fixed the pjsip version (was using 2.16 instead of 2.17)
+- 🐞 BugFix: Android targets was not found symbols throwing System.EntryPointNotFoundException
+- 🧩 Improvement: Changed the namespace for libpjsua2.maui as in the pjsip maui sample
         </releaseNotes>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <license type="expression">GPL-3.0-only</license>
         <copyright>Copyright ©2026 Remote Code Hub</copyright>
-        <tags>sip voip pjsip maui native</tags>
+        <tags>sip voip pjsip maui native pjsua2 android ios windows maccatalyst pj net</tags>
         <readme>README.md</readme>
         <iconUrl>https://raw.githubusercontent.com/remotecodehub/libpjsua2maui/main/src/icon.png</iconUrl>
         <icon>icon.png</icon>

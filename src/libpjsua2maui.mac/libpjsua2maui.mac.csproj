@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net10.0-maccatalyst</TargetFramework>  
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
+        <RootNamespace>libpjsua2.maui</RootNamespace>
         <AssemblyName>pjsua2maui.mac</AssemblyName> 
 		<TargetPlatformMinVersion>14</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
@@ -22,9 +22,9 @@
  
     <PropertyGroup>
         <PackageId>libpjsua2maui.mac</PackageId>
-        <Version>2.17</Version>
-        <AssemblyVersion>2.17</AssemblyVersion>
-        <FileVersion>2.17</FileVersion>
+        <Version>2.17.0.1</Version>
+        <AssemblyVersion>2.17.0.1</AssemblyVersion>
+        <FileVersion>2.17.0.1</FileVersion>
         <Title>PJSIP bindings for .NET MAUI</Title>
         <Authors>Weslley Murdock</Authors>
         <Company>Remote Code Hub</Company>

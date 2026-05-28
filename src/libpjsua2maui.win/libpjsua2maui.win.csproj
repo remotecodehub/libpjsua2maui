@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>pjsua2maui.pjsua2</RootNamespace>
+        <RootNamespace>libpjsua2.maui</RootNamespace>
         <AssemblyName>pjsua2maui.win</AssemblyName>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
@@ -23,9 +23,9 @@
  
     <PropertyGroup>
         <PackageId>libpjsua2maui.win</PackageId>
-        <Version>2.17.0</Version>
-        <AssemblyVersion>2.17.0</AssemblyVersion>
-        <FileVersion>2.17.0</FileVersion>
+        <Version>2.17.0.1</Version>
+        <AssemblyVersion>2.17.0.1</AssemblyVersion>
+        <FileVersion>2.17.0.1</FileVersion>
         <Title>PJSIP bindings for .NET MAUI</Title>
         <Authors>Weslley Murdock</Authors>
         <Company>Remote Code Hub</Company>

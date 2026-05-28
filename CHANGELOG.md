@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Version 2.17.0.1
+
+    - 🐞 BugFix: Fixed the reference to old pjsip version in targets which causes the use the use of previous pjsip native library version
+    - 🐞 BugFix: Using the correct built C# managed wrappers with right built native library avoiding System.EntryPointNotFound exception in Android
+    - 🧩 Feature: Changed Namespace to use the pjsip namespace convention used in pjsip .NET MAUI sample
+
 ## Version 2.17.0
 
     - ⬆️ upgrade pjsip version

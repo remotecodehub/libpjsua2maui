@@ -1,128 +1,107 @@
-# Include core PJSIP build configurations
 include ../../../../../build.mak
 include ../../../../../build/common.mak
-include ../../../../../version.mak
 
-SWIG_MODULE     = pjsua2
-MAUI_NAMESPACE  = pjsua2maui.$(SWIG_MODULE)
-BASE_OUTPUT_DIR = ./pjsua2maui/Platforms
+ifneq ($(findstring android,$(TARGET_NAME)),)
+    MAUI_OS = android
+    LIB_NAME = libpjsua2.so
+else ifneq ($(findstring ios,$(TARGET_NAME)),)
+    MAUI_OS = ios
+    LIB_NAME = libpjsua2.a
+else ifneq ($(findstring macabi,$(APP_CFLAGS)),)
+    MAUI_OS = maccatalyst
+    LIB_NAME = libpjsua2.a
+else
+    MAUI_OS = desktop
+    LIB_NAME = libpjsua2.a
+endif
 
-APP_SWIG             ?= swig
-SWIG_INTERFACE_FILES  = ../../pjsua2.i
+SWIG_FLAGS = -I../../../../../pjlib/include \
+             -I../../../../../pjlib-util/include \
+             -I../../../../../pjmedia/include \
+             -I../../../../../pjsip/include \
+             -I../../../../../pjnath/include -c++ -w312 -csharp
 
-SWIG_CS_FLAGS   = -csharp -c++ -w312,314,325,362,383,389,401,503 \
-                  -namespace $(MAUI_NAMESPACE) \
-                  -I$(PJ_DIR)/pjlib/include \
-                  -I$(PJ_DIR)/pjlib-util/include \
-                  -I$(PJ_DIR)/pjmedia/include \
-                  -I$(PJ_DIR)/pjnath/include \
-                  -I$(PJ_DIR)/pjsip/include
- 
-INCLUDES        = -I$(PJ_DIR)/pjlib/include \
-                  -I$(PJ_DIR)/pjlib-util/include \
-                  -I$(PJ_DIR)/pjmedia/include \
-                  -I$(PJ_DIR)/pjnath/include \
-                  -I$(PJ_DIR)/pjsip/include 
+SRC_DIR = ../../../../../pjsip/include
+SRCS = $(SRC_DIR)/pjsua2/endpoint.hpp $(SRC_DIR)/pjsua2/types.hpp
 
-PJSIP_LIBS      = -L$(PJ_DIR)/pjlib/lib \
-                  -L$(PJ_DIR)/pjlib-util/lib \
-                  -L$(PJ_DIR)/pjmedia/lib \
-                  -L$(PJ_DIR)/pjsip/lib \
-                  -L$(PJ_DIR)/pjnath/lib \
-                  -lpjsua2-$(TARGET_NAME) \
-                  -lpjsua-$(TARGET_NAME) \
-                  -lpjsip-ua-$(TARGET_NAME) \
-                  -lpjsip-simple-$(TARGET_NAME) \
-                  -lpjsip-$(TARGET_NAME) \
-                  -lpjmedia-codec-$(TARGET_NAME) \
-                  -lpjmedia-videodev-$(TARGET_NAME) \
-                  -lpjmedia-audiodev-$(TARGET_NAME) \
-                  -lpjmedia-$(TARGET_NAME) \
-                  -lpjlib-util-$(TARGET_NAME) \
-                  -lpj-$(TARGET_NAME)
+MAUI_PROJ_NAME = pjsua2maui
+MAUI_NAMESPACE = libpjsua2.maui
 
-.PHONY: all maui android ios maccatalyst clean  
+ifeq ($(MAUI_OS),android)
+    ARCH_DIR = $(TARGET_ARCH)
+    ifeq ($(ARCH_DIR),)
+        ARCH_DIR = x86_64
+    endif
+    PLATFORM_DIR = Android
+    MAUI_SUP_CLASS_DIR = $(MAUI_PROJ_NAME)/Platforms/Android/org/pjsip
+else
+    ifeq ($(MAUI_OS),maccatalyst)
+        PLATFORM_DIR = MacCatalyst
+        SWIG_FLAGS += -dllimport "__Internal"
+    else
+        PLATFORM_DIR = iOS
+        SWIG_FLAGS += -dllimport "__Internal"
+    endif
+    
+    # arch extraction from flags
+    ifneq ($(findstring arm64,$(APP_CFLAGS)),)
+        ARCH_DIR = arm64
+    else
+        ARCH_DIR = x86_64
+    endif
+endif
 
-all: maui
+OUTPUT_PLATFORM_DIR = $(MAUI_PROJ_NAME)/Platforms/$(PLATFORM_DIR)
+MAUI_OUT_DIR        = $(OUTPUT_PLATFORM_DIR)/pjsua2
+MAUI_LIBPJSUA2_DIR  = $(OUTPUT_PLATFORM_DIR)/lib/$(ARCH_DIR)
+MAUI_LIBPJSUA2      = $(MAUI_LIBPJSUA2_DIR)/$(LIB_NAME)
 
-maui: android ios mac
+MY_CFLAGS   := $(PJ_CXXFLAGS) $(CFLAGS)
+MY_LDFLAGS  := $(PJ_LDXXFLAGS) $(PJ_LDXXLIBS) $(LDFLAGS)
 
-android: 
-	@echo "========================================================="
-	@echo " Generating C# stubs and C++ wrapper for Android...      "
-	@echo "========================================================="
-	mkdir -p $(BASE_OUTPUT_DIR)/Android/$(SWIG_MODULE)
-	mkdir -p $(BASE_OUTPUT_DIR)/Android/$(SWIG_MODULE)/lib
-	$(APP_SWIG) $(SWIG_CS_FLAGS) \
-			-DCC_HAS_INT64=1 \
-			-D_ANDROID \
-			-outdir $(BASE_OUTPUT_DIR)/Android/$(SWIG_MODULE) \
-			-o $(BASE_OUTPUT_DIR)/Android/$(SWIG_MODULE)/pjsua2_wrap.cpp \
-			$(SWIG_INTERFACE_FILES)
-	@echo "Compiling Android Shared Library (libpjsua2.so)..."
-	$(CXX) -shared -fPIC $(CXXFLAGS) $(INCLUDES) \
-			$(BASE_OUTPUT_DIR)/Android/$(SWIG_MODULE)/pjsua2_wrap.cpp \
-			-o $(BASE_OUTPUT_DIR)/Android/$(SWIG_MODULE)/lib/libpjsua2.so \
-			$(PJSIP_LIBS) $(LDFLAGS)
+.PHONY: all clean dep depend distclean realclean install uninstall
 
-ios: 
-	@echo "========================================================="
-	@echo " Generating C# stubs and Obj-C++ wrapper for iOS...      "
-	@echo "========================================================="
-	mkdir -p $(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE)
+all: $(MAUI_LIBPJSUA2)
+
+# Generate/Link rule for final library 
+$(MAUI_LIBPJSUA2): $(MAUI_OUT_DIR)/pjsua2_wrap.o
+	mkdir -p $(MAUI_LIBPJSUA2_DIR)
+
+ifeq ($(MAUI_OS),android)
+	mkdir -p $(MAUI_SUP_CLASS_DIR)
+	$(PJ_CXX) -shared -o $(MAUI_LIBPJSUA2) $(MAUI_OUT_DIR)/pjsua2_wrap.o $(MY_CFLAGS) $(MY_LDFLAGS)
+	if [ -f "${STD_CPP_LIB}" ]; then cp -f ${STD_CPP_LIB} $(MAUI_LIBPJSUA2_DIR); fi
 	
-	$(APP_SWIG) $(SWIG_CS_FLAGS) -dllimport "__Internal" \
-			-DCC_HAS_INT64=1 \
-			-DPJ_APPLE=1 \
-			-D_IOS \
-			-outdir $(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE) \
-			-o $(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE)/pjsua2_wrap.mm \
-			$(SWIG_INTERFACE_FILES)
-	@echo "Compiling iOS Static Library (libpjsua2.a)..."
-	$(CXX) -c $(CXXFLAGS) $(INCLUDES) \
-			$(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE)/pjsua2_wrap.mm \
-			-o $(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE)/pjsua2_wrap.o
-	$(AR) rcs $(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE)/libpjsua2.a \
-			$(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE)/pjsua2_wrap.o
-	rm -f $(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE)/pjsua2_wrap.o
+	# Copia apenas se os arquivos existirem na origem, evitando falsos positivos
+	if [ -f $(PJDIR)/pjmedia/src/pjmedia-videodev/android/PjCamera.java ]; then \
+		cp -f $(PJDIR)/pjmedia/src/pjmedia-videodev/android/PjCamera*.java $(MAUI_SUP_CLASS_DIR)/; \
+	fi
+	if [ -f $(PJDIR)/pjmedia/src/pjmedia-audiodev/android/PjAudioDevInfo.java ]; then \
+		cp -f $(PJDIR)/pjmedia/src/pjmedia-audiodev/android/PjAudioDevInfo.java $(MAUI_SUP_CLASS_DIR)/; \
+	fi
+	
+	# Garante um arquivo dummy oculto para que o "org/pjsip/*.java" do CI/CD não quebre se a pasta estiver vazia
+	touch $(MAUI_SUP_CLASS_DIR)/.keep
+else
+	libtool -static -o $(MAUI_LIBPJSUA2) $(MAUI_OUT_DIR)/pjsua2_wrap.o $(PJ_LIBXX_FILES)
+endif
 
-mac: 
-	@echo "========================================================="
-	@echo " Generating C# stubs and Obj-C++ wrapper for Catalyst... "
-	@echo "========================================================="
+# building C++ wrapper using swig
+$(MAUI_OUT_DIR)/pjsua2_wrap.o: $(MAUI_OUT_DIR)/pjsua2_wrap.cpp
+	$(PJ_CXX) -c $(MAUI_OUT_DIR)/pjsua2_wrap.cpp -o $(MAUI_OUT_DIR)/pjsua2_wrap.o $(MY_CFLAGS)
 
-	mkdir -p $(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)/$(ARCH)
-	mkdir -p $(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)
+# Generate managed C# classes using swig
+$(MAUI_OUT_DIR)/pjsua2_wrap.cpp: ../../pjsua2.i ../../symbols.i Makefile $(SRCS)
+	mkdir -p $(MAUI_OUT_DIR)
+	swig $(SWIG_FLAGS) -namespace $(MAUI_NAMESPACE) -outdir $(MAUI_OUT_DIR) -o $(MAUI_OUT_DIR)/pjsua2_wrap.cpp ../../pjsua2.i
 
-	$(APP_SWIG) $(SWIG_CS_FLAGS) -dllimport "__Internal" \
-			-DCC_HAS_INT64=1 \
-			-DPJ_APPLE=1 \
-			-DTARGET_OS_MACCATALYST=1 \
-			-D_MAC_CATALYST \
-			-outdir $(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE) \
-			-o $(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)/pjsua2_wrap.mm \
-			$(SWIG_INTERFACE_FILES)
+clean distclean realclean:
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/Android/pjsua2
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/Android/lib
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/Android/org
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/iOS/pjsua2
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/iOS/lib
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/MacCatalyst/pjsua2
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/MacCatalyst/lib
 
-	@echo "Compiling MacCatalyst Static Library (libpjsua2.a) for $(ARCH)..."
-
-	$(CXX) -c \
-			$(CXXFLAGS) \
-			$(CFLAGS) \
-			-DPJ_IS_LITTLE_ENDIAN=1 \
-			-DPJ_IS_BIG_ENDIAN=0 \
-			$(if $(filter arm64 aarch64,$(ARCH)),-D__aarch64__=1,) \
-			$(INCLUDES) \
-			$(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)/pjsua2_wrap.mm \
-			-o $(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)/$(ARCH)/pjsua2_wrap.o
-
-	$(AR) rcs \
-			$(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)/$(ARCH)/libpjsua2.a \
-			$(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)/$(ARCH)/pjsua2_wrap.o
-
-	rm -f $(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)/$(ARCH)/pjsua2_wrap.o
-
-clean:
-	rm -rf $(BASE_OUTPUT_DIR)/Android/$(SWIG_MODULE)/*
-	rm -rf $(BASE_OUTPUT_DIR)/iOS/$(SWIG_MODULE)/*
-	rm -rf $(BASE_OUTPUT_DIR)/MacCatalyst/$(SWIG_MODULE)/*
-	@echo "Output directories wiped successfully!"
+dep depend install uninstall:

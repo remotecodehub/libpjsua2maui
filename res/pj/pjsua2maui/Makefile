@@ -66,20 +66,23 @@ all: $(MAUI_LIBPJSUA2)
 # Generate/Link rule for final library 
 $(MAUI_LIBPJSUA2): $(MAUI_OUT_DIR)/pjsua2_wrap.o
 	mkdir -p $(MAUI_LIBPJSUA2_DIR)
+
 ifeq ($(MAUI_OS),android)
 	mkdir -p $(MAUI_SUP_CLASS_DIR)
 	$(PJ_CXX) -shared -o $(MAUI_LIBPJSUA2) $(MAUI_OUT_DIR)/pjsua2_wrap.o $(MY_CFLAGS) $(MY_LDFLAGS)
-	# helper C++ library copy 
 	if [ -f "${STD_CPP_LIB}" ]; then cp -f ${STD_CPP_LIB} $(MAUI_LIBPJSUA2_DIR); fi
-	# Android specific audio and video helpers
-	if echo "$(MY_CFLAGS)" | grep -q "PJMEDIA_VIDEO_DEV_HAS_ANDROID=1"; then \
-		cp $(PJDIR)/pjmedia/src/pjmedia-videodev/android/PjCamera*.java $(MAUI_SUP_CLASS_DIR)/; \
+	
+	# Copia apenas se os arquivos existirem na origem, evitando falsos positivos
+	if [ -f $(PJDIR)/pjmedia/src/pjmedia-videodev/android/PjCamera.java ]; then \
+		cp -f $(PJDIR)/pjmedia/src/pjmedia-videodev/android/PjCamera*.java $(MAUI_SUP_CLASS_DIR)/; \
 	fi
-	if echo "$(MY_CFLAGS)" | grep -q "PJMEDIA_AUDIO_DEV_HAS_OBOE=1"; then \
-		cp $(PJDIR)/pjmedia/src/pjmedia-audiodev/android/PjAudioDevInfo.java $(MAUI_SUP_CLASS_DIR)/; \
+	if [ -f $(PJDIR)/pjmedia/src/pjmedia-audiodev/android/PjAudioDevInfo.java ]; then \
+		cp -f $(PJDIR)/pjmedia/src/pjmedia-audiodev/android/PjAudioDevInfo.java $(MAUI_SUP_CLASS_DIR)/; \
 	fi
+	
+	# Garante um arquivo dummy oculto para que o "org/pjsip/*.java" do CI/CD não quebre se a pasta estiver vazia
+	touch $(MAUI_SUP_CLASS_DIR)/.keep
 else
-	# CORREÇÃO DA APPLE (iOS/MacCatalyst): Uso do libtool nativo para unificar de forma limpa o wrapper e as libs do PJSIP
 	libtool -static -o $(MAUI_LIBPJSUA2) $(MAUI_OUT_DIR)/pjsua2_wrap.o $(PJ_LIBXX_FILES)
 endif
 
@@ -90,13 +93,15 @@ $(MAUI_OUT_DIR)/pjsua2_wrap.o: $(MAUI_OUT_DIR)/pjsua2_wrap.cpp
 # Generate managed C# classes using swig
 $(MAUI_OUT_DIR)/pjsua2_wrap.cpp: ../../pjsua2.i ../../symbols.i Makefile $(SRCS)
 	mkdir -p $(MAUI_OUT_DIR)
-	swig $(SWIG_FLAGS) -namespace $(MAUI_NAMESPACE) -o $(MAUI_OUT_DIR)/pjsua2_wrap.cpp ../../pjsua2.i
+	swig $(SWIG_FLAGS) -namespace $(MAUI_NAMESPACE) -outdir $(MAUI_OUT_DIR) -o $(MAUI_OUT_DIR)/pjsua2_wrap.cpp ../../pjsua2.i
 
 clean distclean realclean:
-	rm -rf $(MAUI_OUT_DIR)
-	rm -rf $(MAUI_LIBPJSUA2_DIR)
-ifeq ($(MAUI_OS),android)
-	rm -rf $(MAUI_SUP_CLASS_DIR)/*.java
-endif
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/Android/pjsua2
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/Android/lib
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/Android/org
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/iOS/pjsua2
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/iOS/lib
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/MacCatalyst/pjsua2
+	rm -rf $(MAUI_PROJ_NAME)/Platforms/MacCatalyst/lib
 
 dep depend install uninstall:

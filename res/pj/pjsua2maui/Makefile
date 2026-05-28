@@ -65,8 +65,8 @@ all: $(MAUI_LIBPJSUA2)
 
 # Generate/Link rule for final library
 $(MAUI_LIBPJSUA2): $(MAUI_OUT_DIR)/pjsua2_wrap.o
-        mkdir -p $(MAUI_LIBPJSUA2_DIR)
-ifeq ($(MAUI_OS),android)
+    mkdir -p $(MAUI_LIBPJSUA2_DIR)
+    ifeq ($(MAUI_OS),android)
         mkdir -p $(MAUI_SUP_CLASS_DIR)
         $(PJ_CXX) -shared -o $(MAUI_LIBPJSUA2) $(MAUI_OUT_DIR)/pjsua2_wrap.o $(MY_CFLAGS) $(MY_LDFLAGS)
         # helper C++ library copy
@@ -78,25 +78,25 @@ ifeq ($(MAUI_OS),android)
         if echo "$(MY_CFLAGS)" | grep -q "PJMEDIA_AUDIO_DEV_HAS_OBOE=1"; then \
                 cp $(PJDIR)/pjmedia/src/pjmedia-audiodev/android/PjAudioDevInfo.java $(MAUI_SUP_CLASS_DIR)/; \
         fi
-else
+    else
         # Apple fix (iOS/MacCatalyst): native libtool use for clean merge of wrapper and libraries
         libtool -static -o $(MAUI_LIBPJSUA2) $(MAUI_OUT_DIR)/pjsua2_wrap.o $(PJ_LIBXX_FILES)
-endif
+    endif
 
 # building C++ wrapper using swig
 $(MAUI_OUT_DIR)/pjsua2_wrap.o: $(MAUI_OUT_DIR)/pjsua2_wrap.cpp
-        $(PJ_CXX) -c $(MAUI_OUT_DIR)/pjsua2_wrap.cpp -o $(MAUI_OUT_DIR)/pjsua2_wrap.o $(MY_CFLAGS)
+    $(PJ_CXX) -c $(MAUI_OUT_DIR)/pjsua2_wrap.cpp -o $(MAUI_OUT_DIR)/pjsua2_wrap.o $(MY_CFLAGS)
 
 # Generate managed C# classes using swig
 $(MAUI_OUT_DIR)/pjsua2_wrap.cpp: ../../pjsua2.i ../../symbols.i Makefile $(SRCS)
-        mkdir -p $(MAUI_OUT_DIR)
-        swig $(SWIG_FLAGS) -namespace $(MAUI_NAMESPACE) -o $(MAUI_OUT_DIR)/pjsua2_wrap.cpp ../../pjsua2.i
+    mkdir -p $(MAUI_OUT_DIR)
+    swig $(SWIG_FLAGS) -namespace $(MAUI_NAMESPACE) -o $(MAUI_OUT_DIR)/pjsua2_wrap.cpp ../../pjsua2.i
 
 clean distclean realclean:
-        rm -rf $(MAUI_OUT_DIR)
-        rm -rf $(MAUI_LIBPJSUA2_DIR)
+    rm -rf $(MAUI_OUT_DIR)
+    rm -rf $(MAUI_LIBPJSUA2_DIR)
 ifeq ($(MAUI_OS),android)
-        rm -rf $(MAUI_SUP_CLASS_DIR)/*.java
+    rm -rf $(MAUI_SUP_CLASS_DIR)/*.java
 endif
 
 dep depend install uninstall:

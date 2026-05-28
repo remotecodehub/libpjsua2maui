@@ -473,7 +473,7 @@ $RECYCLE.BIN/
  
  #generated source files
 *.java
-*.cs 
+src/**/**/*.cs 
 
 src/libpjsua2.maui.ios/pjsua2maui/pjsua2
 src/libpjsua2.maui.android/pjsua2maui
@@ -486,3 +486,4 @@ src/workload-install.ps1
 *.lib
 *.dll
 **/*.zip
+/sample/workload-install.ps1

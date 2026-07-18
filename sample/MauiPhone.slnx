@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/MauiPhone.ApplicationLayer/MauiPhone.ApplicationLayer.csproj" />
+  <Project Path="src/MauiPhone.Composition/MauiPhone.Composition.csproj" />
+  <Project Path="src/MauiPhone.DomainLayer/MauiPhone.DomainLayer.csproj" />
+  <Project Path="src/MauiPhone.InfrastructureLayer/MauiPhone.InfrastructureLayer.csproj" />
+  <Project Path="src/MauiPhone/MauiPhone.csproj" />
+</Solution>

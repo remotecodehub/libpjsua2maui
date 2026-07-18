@@ -23,7 +23,7 @@ body:
   - type: textarea
     id: user_story
     attributes:
-      label: ", I"
+      label: "I"
       description: A clear description of requisite for the task in user story form. Ex. As a developer, i wanna use the library X with support to platform Y [...].
     validations:
       required: true

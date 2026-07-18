@@ -2846,44 +2846,22 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: dotnet publish src/libpjsua2maui.win/libpjsua2maui.win.csproj -c Release -f net10.0-windows10.0.19041.0 -p:IsOfficialBuild=true --no-restore
 
-      - name: Validate and Pack NuGet 
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: ${{ github.workspace }}/src
-        run: |
-          
-          nuget pack libpjsua2maui.nuspec \
-            -Version "${{ env.VERSION }}" \
-            -BasePath "${{ github.workspace }}/src" \
-            -NoPackageAnalysis \
-            -NoDefaultExcludes \
-            -Verbosity detailed 
-        env: 
-          VERSION: ${{ env.VERSION }}
-
-      - name: Authenticate and Push to nuget.org via OIDC
+      - name: NuGet login (OIDC) and package push
         if: startsWith(github.ref, 'refs/tags/')
+        uses: NuGet/login@v1
+        with:
+          user: ${{ env.USERNAME }}  
+        env:
+          USERNAME: ${{ secrets.USER_NAME }}
+
+      - name: Pack and Push
         run: |
-          echo "🔐 Solicitando chave temporária ao NuGet via OIDC..."
-          
-          RESPONSE=$(curl -s -X POST "https://www.nuget.org/api/v2/token" \
-            -H "Content-Type: application/json" \
-            -d "{\"owner\": \"${{ github.repository_owner }}\", \"repository\": \"${{ github.event.repository.name }}\", \"workflow\": \"${{ github.workflow }}\"}")
-          
-          API_KEY=$(echo "$RESPONSE" | grep -o '"token":"[^"]*' | grep -o '[^"]*$')
-          
-          if [ -z "$API_KEY" ]; then
-            echo "❌ Error when getting temporary nuget key. Answer:"
-            echo "$RESPONSE"
-            exit 1
-          fi
-          
-          echo "🚀 Key successfully retrieved. Starting push..."
           cd ${{ github.workspace }}/src
-          
+          dotnet pack -c Release -p:NuspecFile=libpjsua2maui.nuspec  
           dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
-            --source https://api.nuget.org/v3/index.json \
-            --api-key "$API_KEY" \
-            --skip-duplicate
+          --source https://api.nuget.org/v2/index.json \
+          --skip-duplicate \
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" 
         env:
           VERSION: ${{ env.VERSION }}
 

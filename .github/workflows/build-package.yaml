@@ -2863,21 +2863,20 @@ jobs:
 
       - name: NuGet login (OIDC)
         if: startsWith(github.ref, 'refs/tags/')
+        id: nuget-auth
         uses: NuGet/login@v1
         with:
-          user: ${{ env.USERNAME }} # Coloque aqui o seu username público do NuGet.org (não o e-mail)
+          user: ${{ env.USERNAME }}  
         env:
           USERNAME: ${{ secrets.USER_NAME }}
-
-      # 3. ATUALIZE O SEU PASSO DE PUSH
+ 
       - name: Push to nuget.org
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           cd ${{ github.workspace }}/src
-          # O passo NuGet/login injeta automaticamente a chave temporária no ambiente. 
-          # O CLI do dotnet lê ela nativamente de forma segura.
           dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
             --source https://api.nuget.org/v3/index.json \
+            --api-key "${{ steps.nuget-auth.outputs.api-key }}" \
             --skip-duplicate
         env:
           VERSION: ${{ env.VERSION }}

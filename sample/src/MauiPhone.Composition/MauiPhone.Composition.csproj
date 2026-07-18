@@ -30,8 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\MauiPhone.ApplicationLayer\MauiPhone.ApplicationLayer.csproj" />
-	  <ProjectReference Include="..\MauiPhone.InfrastructureLayer\MauiPhone.InfrastructureLayer.csproj" />
+<ProjectReference Include="..\MauiPhone.InfrastructureLayer\MauiPhone.InfrastructureLayer.csproj" />
 	</ItemGroup>
 
 </Project>

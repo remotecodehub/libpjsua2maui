@@ -2847,6 +2847,7 @@ jobs:
         run: dotnet publish src/libpjsua2maui.win/libpjsua2maui.win.csproj -c Release -f net10.0-windows10.0.19041.0 -p:IsOfficialBuild=true --no-restore
 
       - name: NuGet login (OIDC) and package push
+        id: login 
         if: startsWith(github.ref, 'refs/tags/')
         uses: NuGet/login@v1
         with:

@@ -2874,7 +2874,8 @@ jobs:
           cd ${{ github.workspace }}/src
           dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
             --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
+            --skip-duplicate \
+            --interactive
         env:
           VERSION: ${{ env.VERSION }}
 

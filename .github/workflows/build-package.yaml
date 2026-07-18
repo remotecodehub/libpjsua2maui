@@ -2631,6 +2631,10 @@ jobs:
     runs-on: macos-26
     name: libpjsua2.nupkg 
     needs: [pjsip-android, pjsip-ios, pjsip-mac, pjsip-win]
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
     steps: 
       - name: Checkout
         uses: actions/checkout@v6
@@ -2810,14 +2814,11 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: | 
           echo "⏳ Installing required workloads for .NET 10..."
-          # Instalamos apenas os workloads específicos das plataformas móveis/Apple
-          # O parâmetro '--skip-manifest-update' evita checagens demoradas se você rodar o update logo em seguida
           dotnet workload install android ios maccatalyst --source https://api.nuget.org/v3/index.json --skip-manifest-update
 
           echo "⏳ Updating and synchronizing workloads..."
           dotnet workload update
           
-          # Se você usa um arquivo de solução moderna (.slnx) ou clássica (.sln), o restore resolve todos os projetos de uma vez
           if [ -f "$(find . -name "*.slnx" -o -name "*.sln" | head -n 1)" ]; then
             echo "📦 Restoring entire solution..."
             dotnet workload restore $(find . -name "*.slnx" -o -name "*.sln" | head -n 1)
@@ -2860,13 +2861,25 @@ jobs:
         env: 
           VERSION: ${{ env.VERSION }}
 
-      - name: Upload nuget artifacts
-        uses: actions/upload-artifact@v7
+      - name: NuGet login (OIDC)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: NuGet/login@v1
         with:
-          name: libpjsua2maui.${{ env.VERSION }}.nupkg
-          path: ${{ github.workspace }}/src/*.nupkg
-          overwrite: true
-        env: 
+          user: ${{ env.USERNAME }} # Coloque aqui o seu username público do NuGet.org (não o e-mail)
+        env:
+          USERNAME: ${{ secrets.USER_NAME }}
+
+      # 3. ATUALIZE O SEU PASSO DE PUSH
+      - name: Push to nuget.org
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cd ${{ github.workspace }}/src
+          # O passo NuGet/login injeta automaticamente a chave temporária no ambiente. 
+          # O CLI do dotnet lê ela nativamente de forma segura.
+          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+        env:
           VERSION: ${{ env.VERSION }}
 
       - name: Push to nuget.org

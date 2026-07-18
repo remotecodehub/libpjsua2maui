@@ -30,7 +30,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\MauiPhone.DomainLayer\MauiPhone.DomainLayer.csproj" />
-	</ItemGroup>
+</ItemGroup>
 
 </Project>

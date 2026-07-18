@@ -2857,13 +2857,11 @@ jobs:
             -NoPackageAnalysis \
             -NoDefaultExcludes \
             -Verbosity detailed 
-
         env: 
           VERSION: ${{ env.VERSION }}
 
       - name: NuGet login (OIDC)
         if: startsWith(github.ref, 'refs/tags/')
-        id: nuget-auth
         uses: NuGet/login@v1
         with:
           user: ${{ env.USERNAME }}  
@@ -2876,9 +2874,10 @@ jobs:
           cd ${{ github.workspace }}/src
           dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
             --source https://api.nuget.org/v3/index.json \
-            --api-key "${{ steps.nuget-auth.outputs.api-key }}" \
+            --api-key "${{ env.APIKEY }}" \
             --skip-duplicate
         env:
+          APIKEY: ${{ steps.login.outputs.NUGET_API_KEY }}
           VERSION: ${{ env.VERSION }}
 
       - name: Push to nuget.org

@@ -2851,18 +2851,24 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: NuGet/login@v1
         with:
-          user: ${{ env.USERNAME }}  
+          user: weslleyluiz  
         env:
           USERNAME: ${{ secrets.USER_NAME }}
 
       - name: Pack and Push
         run: |
           cd ${{ github.workspace }}/src
-          dotnet pack -c Release -p:NuspecFile=libpjsua2maui.nuspec -p:PackageVersion="${{ env.VERSION }}"
+          # dotnet pack libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -p:NuspecFile=libpjsua2maui.nuspec -p:PackageVersion="${{ env.VERSION }}"
+          nuget pack libpjsua2maui.nuspec \
+            -Version "${{ env.VERSION }}" \
+            -BasePath "${{ github.workspace }}/src" \
+            -NoPackageAnalysis \
+            -NoDefaultExcludes \
+            -Verbosity detailed
           dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
-          --source https://api.nuget.org/v2/index.json \
-          --skip-duplicate \
-          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" 
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate 
         env:
           VERSION: ${{ env.VERSION }}
 

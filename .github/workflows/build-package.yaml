@@ -2858,7 +2858,7 @@ jobs:
       - name: Pack and Push
         run: |
           cd ${{ github.workspace }}/src
-          dotnet pack -c Release -p:NuspecFile=libpjsua2maui.nuspec  
+          dotnet pack -c Release -p:NuspecFile=libpjsua2maui.nuspec -p:PackageVersion="${{ env.VERSION }}"
           dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
           --source https://api.nuget.org/v2/index.json \
           --skip-duplicate \

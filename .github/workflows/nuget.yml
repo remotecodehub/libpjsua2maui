@@ -1,0 +1,285 @@
+name: Build pjsip for .NET MAUI 
+on:
+  workflow_run:
+    workflows:
+      - "Native Android"
+      - "Native iOS"
+      - "Native Mac"
+      - "Native Windows"
+    types:
+      - completed
+  workflow_dispatch:
+   
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  actions: read
+
+env:
+  BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
+  OPENH264_PATH: ${{ github.workspace }}/lib/openh264
+  OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
+  OPUS_PATH: ${{ github.workspace }}/lib/opus
+  PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
+  MIN_IOS_VERSION: 15.0
+  DOTNET_NOLOGO: true                     # Disable the .NET logo
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Disable the .NET first time experience
+  DOTNET_CLI_TELEMETRY_OPTOUT: true       # Disable sending .NET CLI telemetry
+  PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
+  SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output    
+  PJSIP_VERSION: 2.17
+  OPENSSL_VERSION: OpenSSL_1_1_1s
+  OPENH264_VERSION: v2.3.0
+  OPUS_VERSION: v1.4
+  BCG729_VERSION: 1.1.1
+  MIN_MACOSX_VERSION: 15.0
+  SDKVERSION: 26.2
+  BUILD_TYPE: Release
+  ROOT_DIR: ${{ github.workspace }}
+  LOGS_DIR: ${{ github.workspace }}\logs
+  INSTALL_DIR: ${{ github.workspace }}\install
+  NUGET_ARTIFACTS: ${{ github.workspace }}/artifacts
+
+jobs:
+  nupkg:
+    runs-on: macos-26
+    name: libpjsua2.nupkg 
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+      actions: read
+
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Wait for All Native Workflows & Download Artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_SHA: ${{ github.sha }}
+          TARGET_DIR: ${{ env.NUGET_ARTIFACTS }}
+        run: |
+          mkdir -p "$TARGET_DIR"
+          
+          WORKFLOWS=("Native Android" "Native iOS" "Native Mac" "Native Windows")
+          echo "🔍 Verificando estado dos workflows nativos para o commit $COMMIT_SHA..."
+
+          for wf in "${WORKFLOWS[@]}"; do
+            echo "----------------------------------------------------"
+            echo "⏳ Verificando workflow: '$wf'..."
+            
+            # Busca a execução mais recente desse workflow para o mesmo commit/SHA
+            RUN_INFO=$(gh run list --workflow="$wf" --commit="$COMMIT_SHA" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+            
+            if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
+              echo "❌ ERRO: Nenhuma execução do workflow '$wf' foi encontrada para o commit $COMMIT_SHA."
+              exit 1
+            fi
+
+            RUN_ID=$(echo "$RUN_INFO" | jq -r '.databaseId')
+            STATUS=$(echo "$RUN_INFO" | jq -r '.status')
+            CONCLUSION=$(echo "$RUN_INFO" | jq -r '.conclusion')
+
+            echo "   Run ID: $RUN_ID | Status: $STATUS | Conclusão: $CONCLUSION"
+
+            if [ "$STATUS" != "completed" ]; then
+              echo "⌛ O workflow '$wf' ainda está em andamento (Status: $STATUS). Abortando este job para aguardar o próximo gatilho..."
+              exit 1
+            fi
+
+            if [ "$CONCLUSION" != "success" ]; then
+              echo "❌ O workflow '$wf' falhou com a conclusão '$CONCLUSION'. Impossível prosseguir."
+              exit 1
+            fi
+
+            echo "📦 Baixando todos os artefatos do workflow '$wf' (Run ID: $RUN_ID)..."
+            gh run download "$RUN_ID" --dir "$TARGET_DIR"
+          done
+
+          echo "✅ Todos os workflows nativos foram concluídos com sucesso!"
+
+      - name: Unzip Downloaded Artifacts (If zipped)
+        shell: bash
+        run: |
+          cd ${{ env.NUGET_ARTIFACTS }}
+          find . -name "*.zip" -exec unzip -o {} \;
+          ls -R ${{ env.NUGET_ARTIFACTS }}      
+
+      - name: Set VERSION variable
+        run: |
+          NUSPEC_PATH="${{ github.workspace }}/src/libpjsua2maui.nuspec"
+          
+          VERSION=$(xmllint --xpath "//*[local-name()='version']/text()" "$NUSPEC_PATH" 2>/dev/null | xargs)
+          
+          if [ -n "$VERSION" ]; then
+            echo "Found version: $VERSION"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          else
+            echo "Error: Tag <version> not found at .nuspec file"
+            exit 1
+          fi
+
+      - name: Cache pjsip Built SDK
+        uses: actions/cache@v5
+        id: cache-libs
+        with:
+          path: ${{ github.workspace }}/src/*.nupkg
+          key: libpjsua2maui${{ env.VERSION }}.nupkg-${{ env.PJSIP_VERSION }}
+        env: 
+          VERSION: ${{ env.VERSION }}
+
+      - name: Setup .NET 10
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+          
+      - name: Setup nuget 
+        run: brew install nuget
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+ 
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+       
+      - name: Download Android x86 Artifact
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NAME: pjsip-${{ env.PJSIP_VERSION }}-android-x86
+          PATH: ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86
+        run: |
+          echo "Finding latest successful native-android run..."
+          RUN_ID=$(gh run list --workflow=native-android.yml --status=success --limit=1 --json databaseId --jq '.[0].databaseId')
+          if [ -z "$RUN_ID" ]; then
+            echo "ERROR: No successful native-android run found"
+            exit 1
+          fi
+          echo "Downloading artifacts from run $RUN_ID"
+          gh run download "$RUN_ID" --name all-native-binaries --dir 
+ 
+
+      - name: Prepare Dirs & Organize Binaries
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2
+
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/arm64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.win/bin/x64
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.android.so/lib/{x86,x86_64,armeabi-v7a,arm64-v8a}
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.ios.a/lib/{arm64,arm64s,x86_64}
+          mkdir -p ${{ github.workspace }}/src/libpjsua2.mac.a/lib/{arm64,x86_64}
+
+          ART="${{ env.NUGET_ARTIFACTS }}"
+
+          # Managed C# / Java Classes
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/java/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/csharp/*.cs ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2/ || true
+
+          # Android Libs
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-android-x86/lib/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-android-x86_64/lib/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/x86_64/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-android-armeabi-v7a/lib/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/armeabi-v7a/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/lib/lib*.so ${{ github.workspace }}/src/libpjsua2.android.so/lib/arm64-v8a/ || true
+
+          # iOS Libs
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-arm64s.sdk/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/arm64s/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-x86_64.sdk/lib/* ${{ github.workspace }}/src/libpjsua2.ios.a/lib/x86_64/ || true
+
+          # macOS Libs
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-arm64.sdk/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/arm64/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk/lib/* ${{ github.workspace }}/src/libpjsua2.mac.a/lib/x86_64/ || true
+
+          # Windows Libs
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-Win-arm64/lib/arm64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/arm64/ || true
+          cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/lib/x64/*.dll ${{ github.workspace }}/src/libpjsua2.win/bin/x64/ || true
+
+      - name: Restore Workloads and Solution
+        working-directory: src
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          echo "⏳ Instalando Workloads .NET MAUI..."
+          dotnet workload install android ios maccatalyst --skip-manifest-update
+          dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
+          dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
+          dotnet restore libpjsua2maui.mac/libpjsua2maui.mac.csproj
+          dotnet restore libpjsua2maui.win/libpjsua2maui.win.csproj
+
+      - name: Build MAUI Projects
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android -p:IsOfficialBuild=true --no-restore
+          dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios -p:IsOfficialBuild=true --no-restore
+          dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -f net10.0-maccatalyst -p:IsOfficialBuild=true --no-restore
+          dotnet publish src/libpjsua2maui.win/libpjsua2maui.win.csproj -c Release -f net10.0-windows10.0.19041.0 -p:IsOfficialBuild=true --no-restore
+
+      - name: Restore Workloads and Solution
+        working-directory: src
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          echo "⏳ Instalando Workloads .NET MAUI..."
+          dotnet workload install android ios maccatalyst --skip-manifest-update
+          dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
+          dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
+          dotnet restore libpjsua2maui.mac/libpjsua2maui.mac.csproj
+          dotnet restore libpjsua2maui.win/libpjsua2maui.win.csproj
+
+      - name: Build MAUI Projects
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          dotnet publish src/libpjsua2maui.android/libpjsua2maui.android.csproj -c Release -f net10.0-android -p:IsOfficialBuild=true --no-restore
+          dotnet publish src/libpjsua2maui.ios/libpjsua2maui.ios.csproj -c Release -f net10.0-ios -p:IsOfficialBuild=true --no-restore
+          dotnet publish src/libpjsua2maui.mac/libpjsua2maui.mac.csproj -c Release -f net10.0-maccatalyst -p:IsOfficialBuild=true --no-restore
+          dotnet publish src/libpjsua2maui.win/libpjsua2maui.win.csproj -c Release -f net10.0-windows10.0.19041.0 -p:IsOfficialBuild=true --no-restore
+          
+      - name: Build MAUI Win
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: dotnet publish src/libpjsua2maui.win/libpjsua2maui.win.csproj -c Release -f net10.0-windows10.0.19041.0 -p:IsOfficialBuild=true --no-restore
+
+      - name: NuGet login (OIDC) and package push
+        id: login 
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: NuGet/login@v1
+        with:
+          user: ${{ env.USERNAME }}  
+        env:
+          USERNAME: ${{ secrets.USER_NAME }}
+
+      - name: Pack NuGet Package
+        run: |
+          cd ${{ github.workspace }}/src
+          nuget pack libpjsua2maui.nuspec \
+            -Version "${{ env.VERSION }}" \
+            -BasePath "${{ github.workspace }}/src" \
+            -NoPackageAnalysis \
+            -NoDefaultExcludes
+
+      - name: Push to NuGet.org (OIDC / Key)
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          dotnet nuget push ${{ github.workspace }}/src/libpjsua2maui.${{ env.VERSION }}.nupkg \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Push to GitHub Packages
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          dotnet nuget push ${{ github.workspace }}/src/libpjsua2maui.${{ env.VERSION }}.nupkg \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key "${{ secrets.GH_TOKEN }}" \
+            --skip-duplicate

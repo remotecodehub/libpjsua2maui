@@ -1,0 +1,1008 @@
+name: Native Windows
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    tags:
+      - 'v*' 
+  workflow_dispatch:
+   
+permissions:
+  contents: write
+
+env:
+  BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
+  OPENH264_PATH: ${{ github.workspace }}/lib/openh264
+  OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
+  OPUS_PATH: ${{ github.workspace }}/lib/opus
+  PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
+  MIN_IOS_VERSION: 15.0
+  DOTNET_NOLOGO: true                     # Disable the .NET logo
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Disable the .NET first time experience
+  DOTNET_CLI_TELEMETRY_OPTOUT: true       # Disable sending .NET CLI telemetry
+  PJSIP_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/pjsip-build-output
+  SWIG_BUILD_OUT_PATH: ${{ github.workspace }}/outputs/swig-build-output    
+  PJSIP_VERSION: 2.17
+  OPENSSL_VERSION: OpenSSL_1_1_1s
+  OPENH264_VERSION: v2.3.0
+  OPUS_VERSION: v1.4
+  BCG729_VERSION: 1.1.1
+  MIN_MACOSX_VERSION: 15.0
+  SDKVERSION: 26.2
+  BUILD_TYPE: Release
+  ROOT_DIR: ${{ github.workspace }}
+  LOGS_DIR: ${{ github.workspace }}\logs
+  INSTALL_DIR: ${{ github.workspace }}\install
+  NUGET_ARTIFACTS: ${{ github.workspace }}/artifacts
+
+jobs:
+  bcg729-win:
+    name: bcg729-win (${{ matrix.arch }})
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+  
+      - name: Cache BCG729 Built SDK
+        id: cache-libs
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/deps/bcg729
+          key: bcg729-${{ env.BCG729_VERSION }}-win-${{ matrix.arch }}
+    
+      - name: Setup MSVC
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Verify Compiler
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+            echo Visual Studio environment loaded for ${{ matrix.arch }}
+            where cl
+            where msbuild
+
+      - name: Clone BCG729
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            git clone --branch "${env:BCG729_VERSION}" --depth 1 https://github.com/BelledonneCommunications/bcg729.git bcg729
+            
+      - name: Remove Legacy MSVC Headers (ARM64 Only)
+        if: matrix.arch == 'ARM64' && steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        working-directory: bcg729
+        run: |
+          if (Test-Path "include/MSVC") {
+            Remove-Item -Path "include/MSVC" -Recurse -Force
+            Write-Host "Removed old MSVC implementation in order to use the new available from Win SDK 10.0.26100.0" -ForegroundColor Green
+          }
+
+      - name: Build bcg729
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        working-directory: bcg729
+        run: |
+          cmake -S . ^
+                -B build ^
+                -G "Visual Studio 17 2022" ^
+                -A ${{ matrix.arch }} ^
+                -DBUILD_SHARED_LIBS=OFF ^
+                -DCMAKE_SYSTEM_VERSION="10.0.26100.0" ^
+                -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
+                -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729\
+
+          cmake --build build --config Release --target INSTALL          
+
+      - name: Normalize artifacts
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            $target = "${env:INSTALL_DIR}\bcg729\${{ matrix.arch }}"
+
+            New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
+            New-Item -ItemType Directory -Force -Path "$target\include\bcg729" | Out-Null
+
+            Get-ChildItem bcg729/build -Recurse -Filter *.lib |
+            Copy-Item -Destination "$target\lib" -Force
+
+            Get-ChildItem bcg729/include -Recurse -Filter *.h |
+            Copy-Item -Destination "$target\include\bcg729" -Force
+
+      - name: List generated files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            Get-ChildItem "${env:INSTALL_DIR}\bcg729" -Recurse
+ 
+      - name: Upload BCG729 artifacts 
+        uses: actions/upload-artifact@v4
+        with:
+          name: bcg729-win-${{ matrix.arch }}
+          path: deps/bcg729/**/*
+  
+  openh264-win:
+    name: openh264-win (${{ matrix.arch }})
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache H264 Built SDK
+        id: cache-libs
+        uses: actions/cache@v5
+        with:
+          path: install/openh264/
+          key: h264-${{ env.OPENH264_VERSION }}-win-${{ matrix.arch }}
+    
+      - name: Setup MSVC
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          # Se for ARM64, usa o cross-compiler (roda em x64, gera ARM64)
+          # Se for x64, usa o compilador nativo x64
+          arch: ${{ matrix.arch == 'ARM64' && 'x64_arm64' || 'x64' }}
+
+      - name: Setup NASM
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'x64'
+        uses: ilammy/setup-nasm@v1
+
+      - name: Create directories
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+
+      - name: Clone OpenH264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          git clone `
+            --branch "${env:OPENH264_VERSION}" `
+            --depth 1 `
+            https://github.com/cisco/openh264.git `
+            openh264
+
+      - name: Build OpenH264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        working-directory: openh264
+        run: |
+          :: Define as variáveis corretas com base na arquitetura da matrix
+          if "${{ matrix.arch }}"=="ARM64" (
+              set "ARCH_FLAG=arm64"
+              set "ASM_FLAG=USE_ASM=No"
+          ) else (
+              set "ARCH_FLAG=x86_64"
+              set "ASM_FLAG="
+          )
+
+          :: Executa o build usando NMake/Make do ambiente MSVC
+          make OS=msvc ARCH=%ARCH_FLAG% BUILDTYPE=Release ENABLE64BIT=Yes DEBUGSYMBOLS=False %ASM_FLAG%
+
+          if %ERRORLEVEL% neq 0 (
+              exit /b %ERRORLEVEL%
+          )
+
+      - name: Prepare artifact structure
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $target = "install/openh264/${{ matrix.arch }}"
+
+          New-Item -ItemType Directory -Force -Path "$target\bin" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$target\include\wels" | Out-Null
+
+      - name: Collect static libraries
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $target = "install/openh264/${{ matrix.arch }}/lib"
+
+          Get-ChildItem openh264 -Recurse -Filter *.lib |
+            Copy-Item -Destination $target -Force
+
+      - name: Collect headers
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $target = "install/openh264/${{ matrix.arch }}/include/wels"
+
+          Get-ChildItem openh264/codec/api/wels -Filter *.h |
+            Copy-Item -Destination $target -Force
+
+      - name: List generated files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Get-ChildItem "install/openh264" -Recurse
+
+      - name: Upload OpenH264 artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openh264-win-${{ matrix.arch }}
+          path: |
+            install/openh264/${{ matrix.arch }}/**/*
+
+  openssl-win:
+    name: openssl-win (${{ matrix.arch }})
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache SSL Built SDK
+        id: cache-libs
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/install/openssl/${{ matrix.arch }}
+          key: ssl-${{ env.OPENSSL_VERSION }}-win-${{ matrix.arch }}
+
+      - name: Setup MSVC
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          # Se for ARM64, usa o cross-compiler (roda em x64, gera ARM64)
+          # Se for x64, usa o compilador nativo x64
+          arch: ${{ matrix.arch == 'ARM64' && 'x64_arm64' || 'x64' }}
+
+      - name: Setup NASM
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'x64'
+        uses: ilammy/setup-nasm@v1
+
+      - name: Create directories
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+
+      - name: Clone OpenSSL
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          git clone `
+            --branch "${env:OPENSSL_VERSION}" `
+            --depth 1 `
+            https://github.com/openssl/openssl.git `
+            openssl
+
+      - name: Configure OpenSSL
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        working-directory: openssl
+        run: |
+          :: Define o target correto do Perl com base na arquitetura da matrix
+          if "${{ matrix.arch }}"=="ARM64" (
+              set "SSL_TARGET=VC-WIN64-ARM"
+          ) else (
+              set "SSL_TARGET=VC-WIN64A"
+          )
+
+          :: Executa a configuração apontando para o prefixo da arquitetura atual
+          perl Configure %SSL_TARGET% no-shared no-tests ^
+            --prefix=%INSTALL_DIR%\openssl\${{ matrix.arch }} ^
+            --openssldir=%INSTALL_DIR%\openssl\${{ matrix.arch }}
+
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
+
+      - name: Build OpenSSL
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        working-directory: openssl
+        run: |
+          call nmake  
+
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
+
+      - name: Install OpenSSL
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        working-directory: openssl
+        run: |
+          call nmake install 
+
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
+ 
+      - name: Patch .lib files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $libPath = "${env:INSTALL_DIR}\openssl\${{ matrix.arch }}\lib"
+          cp -v "$libPath\libcrypto.lib" "$libPath\crypto.lib"
+          cp -v "$libPath\libssl.lib" "$libPath\ssl.lib"
+      
+      - name: List generated files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: | 
+          Get-ChildItem "${env:INSTALL_DIR}\openssl" -Recurse
+
+      - name: Upload OpenSSL artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openssl-win-${{ matrix.arch }}
+          path: |
+            install/openssl/${{ matrix.arch }}/**/*
+
+  opus-win:
+    name: opus-win (${{ matrix.arch }})
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache opus Built SDK
+        id: cache-libs
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/install/opus/${{ matrix.arch }}
+          key: opus-${{ env.OPUS_VERSION }}-win-${{ matrix.arch }}
+
+      - name: Setup MSVC
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          # Se for ARM64, usa o cross-compiler (roda em x64, gera ARM64)
+          # Se for x64, usa o compilador nativo x64
+          arch: ${{ matrix.arch == 'ARM64' && 'x64_arm64' || 'x64' }}
+
+      - name: Setup CMake
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: lukka/get-cmake@latest
+
+      - name: Create directories
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+
+      - name: Clone Opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          git clone `
+            --branch "${env:OPUS_VERSION}" `
+            --depth 1 `
+            https://github.com/xiph/opus.git `
+            opus
+
+      - name: Configure Opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          :: O gerador do CMake utiliza o nome exato da arquitetura da matrix (x64 ou ARM64)
+          cmake -S opus -B opus\build ^
+            -G "Visual Studio 17 2022" ^
+            -A ${{ matrix.arch }} ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR%\opus\${{ matrix.arch }} ^
+            -DBUILD_SHARED_LIBS=OFF ^
+            -DOPUS_BUILD_SHARED_LIBRARY=OFF ^
+            -DOPUS_BUILD_PROGRAMS=OFF ^
+            -DOPUS_BUILD_TESTING=OFF ^
+            -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
+            > %LOGS_DIR%\opus-${{ matrix.arch }}-configure.log 2>&1
+
+          if %ERRORLEVEL% neq 0 (
+              type %LOGS_DIR%\opus-${{ matrix.arch }}-configure.log
+              exit /b %ERRORLEVEL%
+          )
+
+      - name: Build Opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          cmake --build opus\build ^
+            --config Release ^
+            --parallel  
+          
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
+
+      - name: Install Opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          cmake --install opus\build ^
+            --config Release  
+
+          if %ERRORLEVEL% neq 0 ( 
+              exit /b %ERRORLEVEL%
+          )
+ 
+      - name: Patch .lib files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $libPath = "${env:INSTALL_DIR}\opus\${{ matrix.arch }}\lib"
+          cp -v "$libPath\opus.lib" "$libPath\libopus.a"
+      
+      - name: List generated files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Get-ChildItem "${env:INSTALL_DIR}\opus" -Recurse
+
+      - name: Upload Opus artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: opus-win-${{ matrix.arch }}
+          path: |
+            install/opus/${{ matrix.arch }}/**/*
+     
+  pjsip-win:
+    name: pjsip - win (${{ matrix.arch }})
+    runs-on: windows-2022
+    needs: [bcg729-win, openh264-win, openssl-win, opus-win]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+    steps: 
+      - uses: actions/checkout@v6
+
+      - name: Cache pjsip Built SDK
+        id: cache-libs
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}\src\libpjsua2.win\*
+          key: pjsip-${{ env.PJSIP_VERSION }}-win-${{ matrix.arch }}
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+             
+      - name: Validate SWIG
+        shell: pwsh
+        run: |
+          swig -version
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Create directories
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Download OpenSSL
+        uses: actions/download-artifact@v4
+        with:
+          name: openssl-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
+          path: deps/openssl
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Download Opus
+        uses: actions/download-artifact@v4
+        with:
+          name: opus-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
+          path: deps/opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+   
+      - name: Download BCG729
+        uses: actions/download-artifact@v4
+        with:
+          name: bcg729-win-${{ matrix.arch }}
+          path: deps/bcg729
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Download OpenH264
+        uses: actions/download-artifact@v4
+        with:
+          name: openh264-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
+          path: deps/openh264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+  
+      - name: Validate Deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: deps
+        shell: pwsh
+        run: |
+            Get-ChildItem . -Recurse
+
+      - name: Clone PJSIP
+        shell: pwsh
+        run: |
+          git clone --branch "${env:PJSIP_VERSION}" --depth 1 https://github.com/pjsip/pjproject.git pjproject
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Create config_site.h
+        shell: pwsh
+        run: |
+          $config = @"
+          #include <pj/config_site_sample.h>
+          #define PJ_HAS_IPV6                       1
+          #define PJ_HAS_SSL_SOCK                   1
+          #define PJ_SSL_SOCK_IMP                   PJ_SSL_SOCK_IMP_OPENSSL
+          #define PJSIP_HAS_TLS_TRANSPORT           1
+          #define PJMEDIA_AUDIO_DEV_HAS_PORTAUDIO   0
+          #define PJMEDIA_HAS_VIDEO                 1
+          #define PJMEDIA_HAS_OPENH264_CODEC        1
+          #define PJMEDIA_HAS_OPUS_CODEC            1
+          #define PJMEDIA_HAS_BCG729                1
+          #define PJ_DLL                            1
+          #define PJ_EXPORTING                      1
+          #define PJ_EXPORT_SPECIFIER               __declspec(dllexport)
+          #define PJ_IMPORT_SPECIFIER               __declspec(dllimport)
+
+          "@
+
+          New-Item -ItemType Directory -Force -Path "pjproject/pjlib/include/pj" | Out-Null
+          Set-Content -Path "pjproject/pjlib/include/pj/config_site.h" -Value $config
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Patch SWIG C# vcxproj linker settings
+        working-directory: pjproject
+        shell: pwsh
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          $projects = Get-ChildItem -Recurse -Filter *.vcxproj
+
+          foreach ($proj in $projects) {
+              Write-Host "Patching $($proj.FullName)"
+
+              [xml]$xml = Get-Content $proj.FullName
+
+              $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+              $ns.AddNamespace("msb", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+              $links = $xml.SelectNodes("//msb:ItemDefinitionGroup/msb:Link", $ns)
+
+              foreach ($link in $links) {
+
+                  #
+                  # Remove legacy duplicate OpenSSL libs
+                  #
+                  $depsNode = $link.SelectSingleNode("msb:AdditionalDependencies", $ns)
+
+                  if ($depsNode -ne $null) {
+
+                      $deps = $depsNode.InnerText.Split(';') |
+                          ForEach-Object { $_.Trim() } |
+                          Where-Object { $_ -ne "" }
+
+                      $filtered = @()
+                      $hasModernOpenSsl = $false
+
+                      foreach ($d in $deps) {
+                          if ($d -ieq "libssl.lib" -or $d -ieq "libcrypto.lib") {
+                              $hasModernOpenSsl = $true
+                          }
+                      }
+
+                      foreach ($d in $deps) {
+
+                          #
+                          # Remove duplicate legacy ssl/crypto
+                          #
+                          if ($hasModernOpenSsl -and (
+                              $d -ieq "ssl.lib" -or
+                              $d -ieq "crypto.lib"
+                          )) {
+                              Write-Host "Removing duplicate dependency: $d"
+                              continue
+                          }
+
+                          #
+                          # Avoid duplicated entries
+                          #
+                          if ($filtered -notcontains $d) {
+                              $filtered += $d
+                          }
+                      }
+
+                      $depsNode.InnerText = ($filtered -join ';')
+                  }
+
+                  #
+                  # Remove IgnoreSpecificDefaultLibraries
+                  #
+                  $ignoreNode = $link.SelectSingleNode("msb:IgnoreSpecificDefaultLibraries", $ns)
+
+                  if ($ignoreNode -ne $null) {
+                      Write-Host "Removing IgnoreSpecificDefaultLibraries"
+                      $link.RemoveChild($ignoreNode) | Out-Null
+                  }
+
+                  #
+                  # Remove NODEFAULTLIB from AdditionalOptions
+                  #
+                  $optsNode = $link.SelectSingleNode("msb:AdditionalOptions", $ns)
+
+                  if ($optsNode -ne $null) {
+
+                      $opts = $optsNode.InnerText
+
+                      $opts = $opts -replace '/NODEFAULTLIB:msvcrt\.lib', ''
+                      $opts = $opts -replace '/NODEFAULTLIB', ''
+
+                      $opts = ($opts -split '\s+' | Where-Object { $_ -ne "" }) -join ' '
+
+                      $optsNode.InnerText = $opts
+                  }
+              }
+
+              $xml.Save($proj.FullName)
+          }
+ 
+      - name: Retarget Windows SDK
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
+
+            foreach ($proj in $projects)
+            {
+                Write-Host "Retargeting $($proj.FullName)"
+
+                [xml]$xml = Get-Content $proj
+
+                $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+                $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+                $nodes = $xml.SelectNodes("//ns:WindowsTargetPlatformVersion", $ns)
+
+                foreach ($node in $nodes)
+                {
+                    $node.InnerText = "10.0"
+                }
+
+                $xml.Save($proj.FullName)
+            }
+
+      - name: Force Static Runtime (MT) Alignment across Architectures
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'arm64'
+        shell: pwsh
+        run: |
+            $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
+
+            foreach ($proj in $projects)
+            {
+                Write-Host "Forcing /MT Runtime on $($proj.FullName)"
+
+                [xml]$xml = Get-Content $proj.FullName
+
+                $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+                $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+                # Localiza todas as tags ClCompile dentro de configurações de Release
+                $clCompiles = $xml.SelectNodes("//ns:ItemDefinitionGroup[contains(@Condition, 'Release')]/ns:ClCompile", $ns)
+
+                foreach ($cc in $clCompiles)
+                {
+                    $rtNode = $cc.SelectSingleNode("ns:RuntimeLibrary", $ns)
+
+                    if ($null -eq $rtNode)
+                    {
+                        # Se não existir a tag, cria e injeta MultiThreaded (/MT)
+                        $rtNode = $xml.CreateElement("RuntimeLibrary", $xml.Project.NamespaceURI)
+                        $cc.AppendChild($rtNode) | Out-Null
+                    }
+                    
+                    # Força o valor para MultiThreaded (Equivalente a /MT para Release)
+                    if ($rtNode.InnerText -ne "MultiThreaded")
+                    {
+                        Write-Host "  -> Changing RuntimeLibrary from '$($rtNode.InnerText)' to 'MultiThreaded'"
+                        $rtNode.InnerText = "MultiThreaded"
+                    }
+                }
+
+                $xml.Save($proj.FullName)
+            }
+
+      - name: Enable bigobj for SWIG wrapper
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            $proj = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+
+            [xml]$xml = Get-Content $proj
+
+            $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+            $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+            $nodes = $xml.SelectNodes("//ns:ClCompile", $ns)
+
+            foreach ($node in $nodes)
+            {
+                $optNode = $node.SelectSingleNode("ns:AdditionalOptions", $ns)
+
+                if ($null -eq $optNode)
+                {
+                    $optNode = $xml.CreateElement("AdditionalOptions", $xml.Project.NamespaceURI)
+                    $node.AppendChild($optNode) | Out-Null
+                }
+
+                if ($optNode.InnerText -notmatch "/bigobj")
+                {
+                    $optNode.InnerText = "/bigobj %(AdditionalOptions)"
+                }
+            }
+
+            $xml.Save($proj)            
+  
+      - name: Patch SWIG linker settings
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            $proj = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+
+            [xml]$xml = Get-Content $proj
+
+            $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+            $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+            $links = $xml.SelectNodes("//ns:Link", $ns)
+
+            foreach ($link in $links)
+            {
+                $deps = $link.SelectSingleNode("ns:AdditionalDependencies", $ns)
+
+                if ($null -eq $deps)
+                {
+                    $deps = $xml.CreateElement("AdditionalDependencies", $xml.Project.NamespaceURI)
+                    $link.AppendChild($deps) | Out-Null
+                }
+
+                $deps.InnerText = @(
+                    "opus.lib",
+                    "bcg729.lib",
+                    "openh264.lib",
+                    "ssl.lib",
+                    "crypto.lib",
+                    "ws2_32.lib",
+                    "crypt32.lib",
+                    "iphlpapi.lib",
+                    "secur32.lib",
+                    "%(AdditionalDependencies)"
+                ) -join ";"
+            }
+
+            $xml.Save($proj)
+
+      - name: Force bcg729 static headers
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            $headers = @(
+                "deps/bcg729/include/bcg729/encoder.h",
+                "deps/bcg729/include/bcg729/decoder.h"
+            )
+
+            foreach ($header in $headers)
+            {
+                Write-Host "Patching $header"
+
+                $content = Get-Content $header -Raw
+
+                $content = $content -replace `
+                    "#define BCG729_VISIBILITY __declspec\(dllimport\)", `
+                    "#define BCG729_VISIBILITY"
+
+                $content = $content -replace `
+                    "#define BCG729_VISIBILITY __declspec\(dllexport\)", `
+                    "#define BCG729_VISIBILITY"
+
+                Set-Content $header $content
+            }            
+
+      - name: Patch c# namespace
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            $projectFile = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+
+            $oldNs = 'pjsua2xamarin.pjsua2'
+            $newNs = 'libpjsua2.maui'
+
+            (Get-Content $projectFile) `
+            -replace [regex]::Escape($oldNs), $newNs |
+            Set-Content $projectFile
+            
+      - name: Patch Windows SDK Tool Path for ARM64 Cross-Compile
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'arm64'
+        shell: pwsh
+        working-directory: pjproject
+        run: |
+          Write-Host "=== Fixing Windows SDK Tool Paths for ARM64 Cross-Compilation ==="
+          
+          # 1. Copiar fisicamente o rc.exe e rcdll.dll para a pasta de ferramentas do MSVC para garantir o fallback
+          $MsvcBinDir = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\bin\HostX64\arm64"
+          $SdkX64BinDir = $env:WindowsSdkDir + "bin\" + $env:WindowsSDKVersion + "x64"
+          
+          Write-Host "Copying rc.exe and rcdll.dll from SDK x64 to MSVC HostX64/arm64..."
+          if (Test-Path "$SdkX64BinDir\rc.exe") {
+              Copy-Item "$SdkX64BinDir\rc.exe" -Destination "$MsvcBinDir\" -Force
+              Copy-Item "$SdkX64BinDir\rcdll.dll" -Destination "$MsvcBinDir\" -Force
+              Write-Host "  -> Files successfully copied to MSVC Toolset directory."
+          } else {
+              Write-Warning "  -> Could not locate rc.exe in $SdkX64BinDir"
+          }
+
+          # 2. Injetar propriedades de infraestrutura do SDK no arquivo .vcxproj
+          $ProjPath = "pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+          Write-Host "Injecting SDK path descriptors directly into $ProjPath"
+
+          [xml]$xml = Get-Content $ProjPath
+          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+          $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+
+          # Encontra o primeiro PropertyGroup global (geralmente o primeiro filho do nó raiz Project)
+          $propGroup = $xml.SelectSingleNode("//ns:PropertyGroup[not(@Condition)]", $ns)
+          if ($null -eq $propGroup) {
+              $propGroup = $xml.SelectSingleNode("//ns:PropertyGroup", $ns)
+          }
+
+          if ($null -ne $propGroup) {
+              # Injeta explicitamente o caminho das ferramentas de build para apontar para a pasta HostX64
+              $rcToolPathNode = $xml.CreateElement("RcToolPath", $xml.Project.NamespaceURI)
+              $rcToolPathNode.InnerText = "$SdkX64BinDir"
+              $propGroup.AppendChild($rcToolPathNode) | Out-Null
+
+              # Injeta o subdiretório correto do compilador de recursos
+              $rcPathNode = $xml.CreateElement("ResourceCompilerToolPath", $xml.Project.NamespaceURI)
+              $rcPathNode.InnerText = "$SdkX64BinDir"
+              $propGroup.AppendChild($rcPathNode) | Out-Null
+
+              $xml.Save($ProjPath)
+              Write-Host "  -> XML successfully patched with RcToolPath."
+          } else {
+              Write-Error "  -> Target PropertyGroup could not be found in vcxproj XML structure."
+          }
+
+      - name: Build 
+        shell: pwsh
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: pjproject
+        run: |
+          # Include Path Mapping from third party libraries
+          $DepsDir    = "${env:GITHUB_WORKSPACE}/deps"
+          $OpusLib    = "${DepsDir}/opus/lib"
+          $Bcg729Lib  = "${DepsDir}/bcg729/lib"
+          $H264Lib    = "${DepsDir}/openh264/lib"
+          $SslLib     = "${DepsDir}/openssl/lib"
+          $OpusInc    = "${DepsDir}/opus/include"
+          $Bcg729Inc  = "${DepsDir}/bcg729/include"
+          $H264Inc    = "${DepsDir}/openh264/include"
+          $SslInc     = "${DepsDir}/openssl/include"
+
+          Write-Host "=== Windows Native SDK Infrastructure Mapping ==="
+          $SdkInc     = $env:WindowsSdkDir + "Include\" + $env:WindowsSDKVersion
+          $UcrtInc    = "${SdkInc}\ucrt"
+          $SharedInc  = "${SdkInc}\shared"
+          $UmInc      = "${SdkInc}\um"
+          $MsvcInc    = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\include"
+
+          # INCLUDE setup
+          $IncludePaths = @($MsvcInc, $UcrtInc, $SharedInc, $UmInc, $OpusInc, $Bcg729Inc, $H264Inc, $SslInc)
+          if ($env:INCLUDE) { $IncludePaths += $env:INCLUDE }
+          $env:INCLUDE = $IncludePaths -join ";"
+          
+          # Link Libraries Folder Mapping (.lib) adaptado dinamicamente para a arquitetura alvo
+          $TargetArch = "${{ matrix.arch }}"
+          $SdkLib     = $env:WindowsSdkDir + "Lib\" + $env:WindowsSDKVersion
+          $UcrtLib    = "${SdkLib}\ucrt\${TargetArch}"
+          $UmLib      = "${SdkLib}\um\${TargetArch}"
+          $MsvcLib    = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\lib\${TargetArch}"
+
+          $LibPaths = @($OpusLib, $Bcg729Lib, $H264Lib, $SslLib, $MsvcLib, $UcrtLib, $UmLib)
+          if ($env:LIB) { $LibPaths += $env:LIB }
+          $env:LIB = $LibPaths -join ";"
+
+          # === CORREÇÃO PARA O TRK0005 (CL.EXE) & LNK1158 (RC.EXE) ===
+          $MsvcBinDir = $env:VCINSTALLDIR + "Tools\MSVC\" + $env:VCToolsVersion + "\bin\HostX64\${TargetArch}"
+          $SdkBinDir  = $env:WindowsSdkDir + "bin\" + $env:WindowsSDKVersion + "${TargetArch}"
+          
+          # SOLUÇÃO PARA O RC.EXE EM ARM64:
+          # O rc.exe não existe na pasta 'arm64' do SDK, ele roda a partir da pasta 'x64' (Host).
+          # Adicionamos a pasta x64 do SDK como fallback de ferramentas.
+          $SdkHostBinDir = $env:WindowsSdkDir + "bin\" + $env:WindowsSDKVersion + "x64"
+
+          if ($TargetArch -eq "arm64") {
+              $env:PATH = "${MsvcBinDir};${SdkBinDir};${SdkHostBinDir};${env:PATH}"
+              $CustomExecPath = "`"${MsvcBinDir}`"%3b`"${SdkBinDir}`"%3b`"${SdkHostBinDir}`"%3b$env:PATH"
+          } else {
+              $env:PATH = "${MsvcBinDir};${SdkBinDir};${env:PATH}"
+              $CustomExecPath = "`"${MsvcBinDir}`"%3b`"${SdkBinDir}`"%3b$env:PATH"
+          }
+
+          Write-Host "=== Building with environment variables ==="
+          $MsBuildPlatform = if ($TargetArch -eq "arm64") { "ARM64" } else { "x64" }
+          Write-Host "=== Building pjsip for win-${{ matrix.arch }} ==="
+
+          $TargetSdkVersion = $env:WindowsSDKVersion.TrimEnd('\')
+
+          msbuild pjsip-apps\build\swig_csharp_pjsua2.vcxproj `
+              /p:PlatformToolset=v143 `
+              /p:Configuration=Release `
+              /p:Platform=$MsBuildPlatform `
+              /p:WindowsTargetPlatformVersion="$TargetSdkVersion" `
+              /p:AdditionalOptions="/bigobj" `
+              /p:ExecutablePath=$CustomExecPath `
+              /p:UseEnv=true
+      
+      - name: Collect PJSIP artifacts
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: src
+        shell: pwsh
+        run: | 
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\pjsua2" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\lib\${{ matrix.arch }}" | Out-Null
+
+          if (Test-Path "${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\") {
+            Write-Host "Copying pjsip dll"
+            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
+            Write-Host "Copying pjsip managed c# classes"
+            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2.win\pjsua2" -Verbose
+          }
+          
+          Get-ChildItem . -Recurse
+          
+
+      - name: Upload PJSIP artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pjsip-${{ env.PJSIP_VERSION }}-Win-${{ matrix.arch }}
+          path: ${{ github.workspace }}\src\libpjsua2.win\*
+          if-no-files-found: warn
+ 

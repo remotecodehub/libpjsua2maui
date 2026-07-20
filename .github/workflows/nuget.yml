@@ -1,4 +1,4 @@
-name: Build pjsip for .NET MAUI 
+name: Nuget Pack 
 on:
   workflow_run:
     workflows:
@@ -60,47 +60,71 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMMIT_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
           TARGET_DIR: ${{ env.NUGET_ARTIFACTS }}
         run: |
           mkdir -p "$TARGET_DIR"
           
           WORKFLOWS=("native-android.yml" "native-ios.yml" "native-mac.yml" "native-win.yml")
-          echo "🔍 Verfiying workflow state for commit $COMMIT_SHA..."
+          MAX_ATTEMPTS=30 # 30 tentativas * 20s = ~10 minutos max de espera por workflow
+          
+          echo "🔍 Verifying workflows to SHA: $COMMIT_SHA (Branch/Tag: $REF_NAME)..."
 
           for wf in "${WORKFLOWS[@]}"; do
             echo "----------------------------------------------------"
-            echo "⏳ Verifying workflow: '$wf'..."
+            echo "⏳ Processing workflow: '$wf'..."
             
-            # Busca a execução mais recente desse workflow para o mesmo commit/SHA
-            RUN_INFO=$(gh run list --workflow="$wf" --commit="$COMMIT_SHA" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+            ATTEMPT=1
+            RUN_ID=""
             
-            if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
-              echo "❌ ERROR: No '$wf' workflow executions found for the commit $COMMIT_SHA."
+            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+              # 1. Tenta buscar pelo SHA exato
+              RUN_INFO=$(gh run list --workflow="$wf" --commit="$COMMIT_SHA" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+              
+              # 2. Fallback: Se não achar pelo SHA (comum em merge commits), busca pelo mais recente da Branch/Tag
+              if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
+                RUN_INFO=$(gh run list --workflow="$wf" --branch="$REF_NAME" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+              fi
+
+              # 3. Fallback 2: Se ainda for nulo, busca o último registro bem sucedido geral
+              if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
+                RUN_INFO=$(gh run list --workflow="$wf" --status=success --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+              fi
+
+              if [ -n "$RUN_INFO" ] && [ "$RUN_INFO" != "null" ]; then
+                RUN_ID=$(echo "$RUN_INFO" | jq -r '.databaseId')
+                STATUS=$(echo "$RUN_INFO" | jq -r '.status')
+                CONCLUSION=$(echo "$RUN_INFO" | jq -r '.conclusion')
+
+                echo "   [ATTEMPT $ATTEMPT/$MAX_ATTEMPTS] Run ID: $RUN_ID | Status: $STATUS | Conclusion: $CONCLUSION"
+
+                if [ "$STATUS" == "completed" ]; then
+                  if [ "$CONCLUSION" == "success" ]; then
+                    echo "✅ '$wf' Workflow  successfully finished!"
+                    break
+                  else
+                    echo "❌ ERRO: The '$wf' workflow finished with failures:  ('$CONCLUSION'). Aborting."
+                    exit 1
+                  fi
+                fi
+              else
+                echo "   [ATTEMPT $ATTEMPT/$MAX_ATTEMPTS] No execution found yet. Waiting..."
+              fi
+
+              echo "⌛ 20s wait to check '$wf' again..."
+              sleep 20
+              ATTEMPT=$((ATTEMPT + 1))
+            done
+
+            if [ -z "$RUN_ID" ] || [ "$STATUS" != "completed" ]; then
+              echo "❌ TIMEOUT: the '$wf' workflow do not finished in time."
               exit 1
             fi
 
-            RUN_ID=$(echo "$RUN_INFO" | jq -r '.databaseId')
-            STATUS=$(echo "$RUN_INFO" | jq -r '.status')
-            CONCLUSION=$(echo "$RUN_INFO" | jq -r '.conclusion')
-
-            echo "   Run ID: $RUN_ID | Status: $STATUS | Conclusion: $CONCLUSION"
-
-            if [ "$STATUS" != "completed" ]; then
-              echo "⌛ The workflow '$wf' still running (Status: $STATUS)..."
-              exit 1
-            fi
-
-            if [ "$CONCLUSION" != "success" ]; then
-              echo "❌ The workflow '$wf' failed with the conclusion '$CONCLUSION'. Impossible to continue."
-              exit 1
-            fi
-
-            echo "📦 Downloading all workflow '$wf' artifacts (Run ID: $RUN_ID)..."
+            echo "📦 Downloading '$wf' workflow artifacts (Run ID: $RUN_ID)..."
             gh run download "$RUN_ID" --dir "$TARGET_DIR"
           done
-
-          echo "✅ All workflows was successfully ended!"
-
+       
       - name: Unzip Downloaded Artifacts (If zipped)
         shell: bash
         run: |

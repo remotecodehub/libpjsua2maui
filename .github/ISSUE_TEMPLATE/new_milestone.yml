@@ -1,0 +1,34 @@
+name: Ⓜ️ New Milestone
+description: Creates an issue to aggregate all features for a current milestone (each feature with its respective task issues).
+title: "Ⓜ️ [MILESTONE]: <title>"
+labels: [enhancement, milestone]
+body:
+  - type: input
+    id: start-date
+    attributes:
+      label: Start Date
+      description: Enter the milestone start date (YYYY-MM-DD). Leave empty to use the creation date.
+      placeholder: "YYYY-MM-DD (e.g., 2026-03-20)"
+    validations:
+      required: false
+
+  - type: input
+    id: end-date
+    attributes:
+      label: Target Completion Date
+      description: Enter the estimated completion date for this milestone (YYYY-MM-DD).
+      placeholder: "YYYY-MM-DD (e.g., 2026-04-20)"
+    validations:
+      required: false
+  
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Main Deliverables
+      description: List the primary features and deliverables included in this milestone.
+      placeholder: |-
+        - [ ] 💡 [FEATURE] Implement functionality A (#419)
+        - [ ] 💡 [FEATURE] Implement functionality B (#420)
+    validations:
+      required: true
+

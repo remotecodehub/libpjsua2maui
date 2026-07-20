@@ -64,18 +64,18 @@ jobs:
         run: |
           mkdir -p "$TARGET_DIR"
           
-          WORKFLOWS=("Native Android" "Native iOS" "Native Mac" "Native Windows")
-          echo "🔍 Verificando estado dos workflows nativos para o commit $COMMIT_SHA..."
+          WORKFLOWS=("native-android.yml" "native-ios.yml" "native-mac.yml" "native-win.yml")
+          echo "🔍 Verfiying workflow state for commit $COMMIT_SHA..."
 
           for wf in "${WORKFLOWS[@]}"; do
             echo "----------------------------------------------------"
-            echo "⏳ Verificando workflow: '$wf'..."
+            echo "⏳ Verifying workflow: '$wf'..."
             
             # Busca a execução mais recente desse workflow para o mesmo commit/SHA
             RUN_INFO=$(gh run list --workflow="$wf" --commit="$COMMIT_SHA" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
             
             if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
-              echo "❌ ERRO: Nenhuma execução do workflow '$wf' foi encontrada para o commit $COMMIT_SHA."
+              echo "❌ ERROR: No '$wf' workflow executions found for the commit $COMMIT_SHA."
               exit 1
             fi
 
@@ -83,23 +83,23 @@ jobs:
             STATUS=$(echo "$RUN_INFO" | jq -r '.status')
             CONCLUSION=$(echo "$RUN_INFO" | jq -r '.conclusion')
 
-            echo "   Run ID: $RUN_ID | Status: $STATUS | Conclusão: $CONCLUSION"
+            echo "   Run ID: $RUN_ID | Status: $STATUS | Conclusion: $CONCLUSION"
 
             if [ "$STATUS" != "completed" ]; then
-              echo "⌛ O workflow '$wf' ainda está em andamento (Status: $STATUS). Abortando este job para aguardar o próximo gatilho..."
+              echo "⌛ The workflow '$wf' still running (Status: $STATUS)..."
               exit 1
             fi
 
             if [ "$CONCLUSION" != "success" ]; then
-              echo "❌ O workflow '$wf' falhou com a conclusão '$CONCLUSION'. Impossível prosseguir."
+              echo "❌ The workflow '$wf' failed with the conclusion '$CONCLUSION'. Impossible to continue."
               exit 1
             fi
 
-            echo "📦 Baixando todos os artefatos do workflow '$wf' (Run ID: $RUN_ID)..."
+            echo "📦 Downloading all workflow '$wf' artifacts (Run ID: $RUN_ID)..."
             gh run download "$RUN_ID" --dir "$TARGET_DIR"
           done
 
-          echo "✅ Todos os workflows nativos foram concluídos com sucesso!"
+          echo "✅ All workflows was successfully ended!"
 
       - name: Unzip Downloaded Artifacts (If zipped)
         shell: bash

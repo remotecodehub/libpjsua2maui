@@ -2,10 +2,10 @@ name: Build pjsip for .NET MAUI
 on:
   workflow_run:
     workflows:
-      - "Native Android"
-      - "Native iOS"
-      - "Native Mac"
-      - "Native Windows"
+      - "native-android.yml"
+      - "native-ios.yml"
+      - "native-mac.yml"
+      - "native-win.yml"
     types:
       - completed
   workflow_dispatch:

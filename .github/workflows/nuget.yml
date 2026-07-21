@@ -85,6 +85,11 @@ jobs:
                 RUN_INFO=$(gh run list --workflow="$wf" --branch="$REF_NAME" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
               fi
 
+              # 3. Fallback: Search latest successful execution overall
+              if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
+                RUN_INFO=$(gh run list --workflow="$wf" --status=success --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+              fi
+
               if [ -n "$RUN_INFO" ] && [ "$RUN_INFO" != "null" ]; then
                 RUN_ID=$(echo "$RUN_INFO" | jq -r '.databaseId')
                 STATUS=$(echo "$RUN_INFO" | jq -r '.status')

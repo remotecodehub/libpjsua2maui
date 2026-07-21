@@ -223,8 +223,8 @@ jobs:
         working-directory: src
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
-          echo "⏳ Instalando Workloads .NET MAUI..."
-          dotnet workload install android ios maccatalyst --skip-manifest-update
+          echo "⏳ .NET MAUI Workloads restore..."
+          dotnet workload restore --skip-manifest-update
           dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
           dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
           dotnet restore libpjsua2maui.mac/libpjsua2maui.mac.csproj

@@ -1,13 +1,10 @@
 name: Build pjsip for .NET MAUI 
 on:
-  workflow_run:
-    workflows:
-      - "native-android.yml"
-      - "native-ios.yml"
-      - "native-mac.yml"
-      - "native-win.yml"
-    types:
-      - completed
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    tags:
+      - 'v*' 
   workflow_dispatch:
    
 permissions:
@@ -17,7 +14,7 @@ permissions:
   actions: read
 
 env:
-  BCG729_PATH:  ${{ github.workspace }}/lib/bcg729
+  BCG729_PATH: ${{ github.workspace }}/lib/bcg729
   OPENH264_PATH: ${{ github.workspace }}/lib/openh264
   OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
   OPUS_PATH: ${{ github.workspace }}/lib/opus
@@ -60,38 +57,68 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMMIT_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
           TARGET_DIR: ${{ env.NUGET_ARTIFACTS }}
         run: |
           mkdir -p "$TARGET_DIR"
           
           WORKFLOWS=("native-android.yml" "native-ios.yml" "native-mac.yml" "native-win.yml")
-          echo "🔍 Verfiying workflow state for commit $COMMIT_SHA..."
+          MAX_ATTEMPTS=45 # 45 attempts * 20s = 15 minutes timeout per workflow
+          
+          echo "🔍 Verifying workflow state for commit $COMMIT_SHA (Ref: $REF_NAME)..."
 
           for wf in "${WORKFLOWS[@]}"; do
             echo "----------------------------------------------------"
             echo "⏳ Verifying workflow: '$wf'..."
             
-            # Busca a execução mais recente desse workflow para o mesmo commit/SHA
-            RUN_INFO=$(gh run list --workflow="$wf" --commit="$COMMIT_SHA" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+            ATTEMPT=1
+            RUN_ID=""
+            STATUS=""
+            CONCLUSION=""
             
-            if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
-              echo "❌ ERROR: No '$wf' workflow executions found for the commit $COMMIT_SHA."
-              exit 1
-            fi
+            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+              # 1. Try to fetch by exact commit SHA
+              RUN_INFO=$(gh run list --workflow="$wf" --commit="$COMMIT_SHA" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+              
+              # 2. Fallback: If not found by SHA (e.g. merge commits or PR refs), search by ref/branch name
+              if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
+                RUN_INFO=$(gh run list --workflow="$wf" --branch="$REF_NAME" --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+              fi
 
-            RUN_ID=$(echo "$RUN_INFO" | jq -r '.databaseId')
-            STATUS=$(echo "$RUN_INFO" | jq -r '.status')
-            CONCLUSION=$(echo "$RUN_INFO" | jq -r '.conclusion')
+              # 3. Fallback: Search latest successful execution overall
+              if [ -z "$RUN_INFO" ] || [ "$RUN_INFO" == "null" ]; then
+                RUN_INFO=$(gh run list --workflow="$wf" --status=success --limit 1 --json databaseId,status,conclusion --jq '.[0]')
+              fi
 
-            echo "   Run ID: $RUN_ID | Status: $STATUS | Conclusion: $CONCLUSION"
+              if [ -n "$RUN_INFO" ] && [ "$RUN_INFO" != "null" ]; then
+                RUN_ID=$(echo "$RUN_INFO" | jq -r '.databaseId')
+                STATUS=$(echo "$RUN_INFO" | jq -r '.status')
+                CONCLUSION=$(echo "$RUN_INFO" | jq -r '.conclusion')
 
-            if [ "$STATUS" != "completed" ]; then
-              echo "⌛ The workflow '$wf' still running (Status: $STATUS)..."
-              exit 1
-            fi
+                echo "   [Attempt $ATTEMPT/$MAX_ATTEMPTS] Run ID: $RUN_ID | Status: $STATUS | Conclusion: $CONCLUSION"
 
-            if [ "$CONCLUSION" != "success" ]; then
-              echo "❌ The workflow '$wf' failed with the conclusion '$CONCLUSION'. Impossible to continue."
+                if [ "$STATUS" == "completed" ]; then
+                  if [ "$CONCLUSION" == "success" ]; then
+                    echo "✅ Workflow '$wf' completed successfully!"
+                    break
+                  else
+                    echo "❌ ERROR: Workflow '$wf' failed with conclusion '$CONCLUSION'. Aborting."
+                    exit 1
+                  fi
+                else
+                  echo "⌛ Workflow '$wf' is still running (Status: $STATUS). Waiting..."
+                fi
+              else
+                echo "   [Attempt $ATTEMPT/$MAX_ATTEMPTS] No workflow execution found yet. Waiting..."
+              fi
+
+              echo "⌛ Waiting 20 seconds before checking '$wf' again..."
+              sleep 20
+              ATTEMPT=$((ATTEMPT + 1))
+            done
+
+            if [ -z "$RUN_ID" ] || [ "$STATUS" != "completed" ]; then
+              echo "❌ TIMEOUT: Workflow '$wf' did not complete within the expected timeframe."
               exit 1
             fi
 
@@ -99,7 +126,7 @@ jobs:
             gh run download "$RUN_ID" --dir "$TARGET_DIR"
           done
 
-          echo "✅ All workflows was successfully ended!"
+          echo "✅ All native workflows completed successfully and artifacts were downloaded!"
 
       - name: Unzip Downloaded Artifacts (If zipped)
         shell: bash
@@ -147,23 +174,6 @@ jobs:
           java-version: '17'
         if: steps.cache-libs.outputs.cache-hit != 'true'
        
-      - name: Download Android x86 Artifact
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          NAME: pjsip-${{ env.PJSIP_VERSION }}-android-x86
-          PATH: ${{ env.NUGET_ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86
-        run: |
-          echo "Finding latest successful native-android run..."
-          RUN_ID=$(gh run list --workflow=native-android.yml --status=success --limit=1 --json databaseId --jq '.[0].databaseId')
-          if [ -z "$RUN_ID" ]; then
-            echo "ERROR: No successful native-android run found"
-            exit 1
-          fi
-          echo "Downloading artifacts from run $RUN_ID"
-          gh run download "$RUN_ID" --name all-native-binaries --dir 
- 
 
       - name: Prepare Dirs & Organize Binaries
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -185,6 +195,7 @@ jobs:
           # Managed C# / Java Classes
           cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/java/*.java ${{ github.workspace }}/src/libpjsua2.android.so/org/pjsip/ || true
           cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-android-arm64-v8a/csharp/*.cs ${{ github.workspace }}/src/libpjsua2maui.android/pjsua2maui/pjsua2/ || true
+          cp -vf ${{ github.workspace }}/res/cs/android/*.cs ${{ github.workspace }}/src/libpjsua2maui.android/ || true
           cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-iPhoneOS${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.ios/pjsua2maui/pjsua2/ || true
           cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-arm64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui.mac/pjsua2maui/pjsua2/ || true
           cp -vf $ART/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2maui.win/pjsua2maui/pjsua2/ || true
@@ -212,8 +223,8 @@ jobs:
         working-directory: src
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
-          echo "⏳ Instalando Workloads .NET MAUI..."
-          dotnet workload install android ios maccatalyst --skip-manifest-update
+          echo "⏳ .NET MAUI Workloads restore..."
+          dotnet workload restore --skip-manifest-update
           dotnet restore libpjsua2maui.android/libpjsua2maui.android.csproj
           dotnet restore libpjsua2maui.ios/libpjsua2maui.ios.csproj
           dotnet restore libpjsua2maui.mac/libpjsua2maui.mac.csproj
@@ -260,6 +271,7 @@ jobs:
           USERNAME: ${{ secrets.USER_NAME }}
 
       - name: Pack NuGet Package
+        if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           cd ${{ github.workspace }}/src
           nuget pack libpjsua2maui.nuspec \
@@ -267,7 +279,17 @@ jobs:
             -BasePath "${{ github.workspace }}/src" \
             -NoPackageAnalysis \
             -NoDefaultExcludes
-
+        env: 
+          VERSION: ${{ env.VERSION }}
+      
+      - uses: actions/upload-artifact@v7
+        name: Upload pjsip artifact
+        with:
+          name: libpjsua2maui.${{ env.VERSION }}.nupkg
+          path: ${{ github.workspace }}/src/libpjsua2maui.${{ env.VERSION }}.nupkg
+        env: 
+          VERSION: ${{ env.VERSION }}
+   
       - name: Push to NuGet.org (OIDC / Key)
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -275,6 +297,8 @@ jobs:
             --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
+        env: 
+          VERSION: ${{ env.VERSION }}
 
       - name: Push to GitHub Packages
         if: startsWith(github.ref, 'refs/tags/')
@@ -283,3 +307,5 @@ jobs:
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
             --api-key "${{ secrets.GH_TOKEN }}" \
             --skip-duplicate
+        env: 
+          VERSION: ${{ env.VERSION }}

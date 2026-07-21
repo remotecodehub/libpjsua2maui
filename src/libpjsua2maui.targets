@@ -1,6 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LibVersion>2.17.0.1</LibVersion> 
+    <LibVersion>2.17.0.2</LibVersion> 
     <NuGetPathUnix Condition="'$(MSBuildRuntimeType)' == 'Core' AND '$(OS)' != 'Windows_NT'">$(NuGetPackageRoot.Replace('\',
       '/'))</NuGetPathUnix>
     <NuGetPathUnix Condition="'$(NuGetPathUnix)' == ''">$(NuGetPackageRoot)</NuGetPathUnix>

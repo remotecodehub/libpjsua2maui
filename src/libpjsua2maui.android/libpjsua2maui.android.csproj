@@ -7,6 +7,8 @@
 		<AssemblyName>pjsua2maui.android</AssemblyName> 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion>23</TargetPlatformMinVersion>
+		<UseMaui>true</UseMaui>
+		<IsOfficialBuild>false</IsOfficialBuild>
 	</PropertyGroup>
  
     <PropertyGroup>
@@ -46,7 +48,7 @@ https://github.com/remotecodehub/libpjsua2maui/blob/main/CHANGELOG.md
 		<PackageProjectUrl>https://github.com/remotecodehub/libpjsua2maui</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/remotecodehub/libpjsua2maui/libpjsua2maui.git</RepositoryUrl>
 	</PropertyGroup>
-	
+		
 	<ItemGroup>
         <None Update="..\LICENSE">
             <PackagePath>\</PackagePath>

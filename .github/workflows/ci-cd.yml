@@ -47,7 +47,7 @@ jobs:
       
       - name: Cache BCG729 Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/bcg729-output
           key: bcg729-${{ env.BCG729_VERSION }}-android
@@ -90,7 +90,7 @@ jobs:
   
       - name: Cache H264 Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/libopenh264-output
           key: h264-${{ env.OPENH264_VERSION }}-android
@@ -135,7 +135,7 @@ jobs:
 
       - name: Cache SSL Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/openssl-output
           key: ssl-${{ env.OPENSSL_VERSION }}-android
@@ -179,7 +179,7 @@ jobs:
         
       - name: Cache opus Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path:  ${{ github.workspace }}/opus-output
           key: opus-${{ env.OPUS_VERSION }}-android
@@ -232,7 +232,7 @@ jobs:
   
     - name: Cache opus Built SDK
       id: cache-libs
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}
         key: pjsip-${{ env.PJSIP_VERSION }}-android-${{ matrix.arch }}
@@ -402,7 +402,7 @@ jobs:
   
     - name: Cache BCG729 Built SDK
       id: cache-libs
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ github.workspace }}/${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk
         key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
@@ -504,7 +504,7 @@ jobs:
       
     - name: Cache H264 Built SDK
       id: cache-libs
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ env. BUILT_SDK_PATH }}
         key: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
@@ -628,7 +628,7 @@ jobs:
     
     - name: Cache SSL Built SDK
       id: cache-libs
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ env.OPENSSL_PATH }}/bin/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
         key: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}
@@ -755,7 +755,7 @@ jobs:
      
     - name: Cache opus Built SDK
       id: cache-libs
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
         key: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
@@ -888,7 +888,7 @@ jobs:
       - uses: actions/checkout@v7
       
       - name: Cache pjsip Built SDK
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-libs
         with:
           path: ${{ github.workspace }}/pjsip-${{matrix.arch}}
@@ -1029,7 +1029,7 @@ jobs:
     steps:  
       - name: Cache BCG729 Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
@@ -1119,7 +1119,7 @@ jobs:
     steps:
       - name: Cache H264 Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
@@ -1226,7 +1226,7 @@ jobs:
       
       - name: Cache SSL Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
@@ -1348,7 +1348,7 @@ jobs:
       
       - name: Cache opus Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
           key: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
@@ -1459,7 +1459,7 @@ jobs:
       - uses: actions/checkout@v7
       
       - name: Cache pjsip Built SDK
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-libs
         with:
           path: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
@@ -1667,7 +1667,7 @@ jobs:
   
       - name: Cache BCG729 Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/deps/bcg729
           key: bcg729-${{ env.BCG729_VERSION }}-win-${{ matrix.arch }}
@@ -1763,7 +1763,7 @@ jobs:
 
       - name: Cache H264 Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: install/openh264/
           key: h264-${{ env.OPENH264_VERSION }}-win-${{ matrix.arch }}
@@ -1875,7 +1875,7 @@ jobs:
 
       - name: Cache SSL Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/install/openssl/${{ matrix.arch }}
           key: ssl-${{ env.OPENSSL_VERSION }}-win-${{ matrix.arch }}
@@ -1989,7 +1989,7 @@ jobs:
 
       - name: Cache opus Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/install/opus/${{ matrix.arch }}
           key: opus-${{ env.OPUS_VERSION }}-win-${{ matrix.arch }}
@@ -2103,7 +2103,7 @@ jobs:
 
       - name: Cache pjsip Built SDK
         id: cache-libs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}\src\libpjsua2.win\*
           key: pjsip-${{ env.PJSIP_VERSION }}-win-${{ matrix.arch }}
@@ -2712,7 +2712,7 @@ jobs:
           git push origin HEAD:${{ github.head_ref }}
           echo "Generated bindings committed successfully."
   nupkg:
-    runs-on: macos-26
+    runs-on: windows-latest
     name: libpjsua2.nupkg
     needs: [pjsip-android, pjsip-ios, pjsip-mac, pjsip-win]
     permissions:
@@ -2740,7 +2740,7 @@ jobs:
           fi
 
       - name: Cache pjsip Built SDK
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-libs
         with:
           path: ${{ github.workspace }}/nupkg/*.upkg
@@ -2910,7 +2910,7 @@ jobs:
           echo "📦 Forcing clean NuGet restore for all target projects..."
           dotnet restore src/libpjsua2maui/libpjsua2maui.csproj
         
-      - name: NuGet login (OIDC) and package push
+      - name: NuGet login (OIDC) 
         id: login 
         if: startsWith(github.ref, 'refs/tags/')
         uses: NuGet/login@v1

@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## Version 2.17.0.3
+
+    - 🐞 BugFix: apple namespaces werent working
+    - 🐞 BugFix: native libs on maccatalyst arm64 now use the correct binaries for the abi
+    - 🧩 Improvement: Updated docs to include Windows and MacCatalyst support
+    - 🧩 Improvement: Unified projects into a new libpjsua2maui.csproj for packaging
+
+## Version 2.17.0.2
+
+    - 🐞 BugFix: fixed the pjsip version (was using 2.16 instead of 2.17)
+    - 🐞 BugFix: Android targets was not found symbols throwing System.EntryPointNotFoundException
+    - 🧩 Improvement: Changed the namespace for libpjsua2.maui as in the pjsip maui sample
+
 ## Version 2.17.0.1
 
     - 🐞 BugFix: Fixed the reference to old pjsip version in targets which causes the use the use of previous pjsip native library version

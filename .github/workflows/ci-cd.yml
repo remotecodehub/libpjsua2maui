@@ -2937,11 +2937,7 @@ jobs:
 
       - name: Push to NuGet.org (OIDC / Key)
         if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          dotnet nuget push ${{ github.workspace }}/nupkg/libpjsua2maui.${{ env.VERSION }}.nupkg \
-            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
+        run: dotnet nuget push ${{ github.workspace }}/nupkg/libpjsua2maui.${{ env.VERSION }}.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
         env: 
           VERSION: ${{ env.VERSION }}
 

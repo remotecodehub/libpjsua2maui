@@ -34,7 +34,7 @@ env:
   SDKVERSION: 26.2
   BUILD_TYPE: Release
   NUGET_ARTIFACTS: ${{ github.workspace }}/artifacts
-  ARTIFACTS: /tmp/artifacts
+  ARTIFACTS: D:/tmp/artifacts
   ROOT_DIR: ${{ github.workspace }}
   LOGS_DIR: ${{ github.workspace }}\logs
   INSTALL_DIR: ${{ github.workspace }}\install

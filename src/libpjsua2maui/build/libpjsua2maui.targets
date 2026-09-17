@@ -1,0 +1,165 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <LibVersion>2.17.0.3</LibVersion> 
+    <NuGetPathUnix Condition="'$(MSBuildRuntimeType)' == 'Core' AND '$(OS)' != 'Windows_NT'">$(NuGetPackageRoot.Replace('\',
+      '/'))</NuGetPathUnix>
+    <NuGetPathUnix Condition="'$(NuGetPathUnix)' == ''">$(NuGetPackageRoot)</NuGetPathUnix>
+    <IsWin Condition="$(RuntimeIdentifier.StartsWith('win'))">true</IsWin>
+    <IsWin Condition="'$(IsWin)' == ''">false</IsWin>
+  </PropertyGroup>
+ 
+  <!-- Android Native Libraries -->
+  <ItemGroup Condition="$(TargetFramework.Contains('android'))">
+    <!-- armeabi-v7a -->
+    <AndroidNativeLibrary Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/android-arm/native/*.so">
+      <Abi>armeabi-v7a</Abi>
+      <Link>Platforms/Android/lib/armeabi-v7a/%(Filename)%(Extension)</Link>
+    </AndroidNativeLibrary>
+
+    <!-- arm64-v8a -->
+    <AndroidNativeLibrary Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/android-arm64/native/*.so">
+      <Abi>arm64-v8a</Abi>
+      <Link>Platforms/Android/lib/arm64-v8a/%(Filename)%(Extension)</Link>
+    </AndroidNativeLibrary>
+
+    <!-- x86 -->
+    <AndroidNativeLibrary Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/android-x86/native/*.so">
+      <Abi>x86</Abi>
+      <Link>Platforms/Android/lib/x86/%(Filename)%(Extension)</Link>
+    </AndroidNativeLibrary>
+
+    <!-- x86_64 -->
+    <AndroidNativeLibrary
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/android-x86_64/native/*.so">
+      <Abi>x86_64</Abi>
+      <Link>Platforms/Android/lib/x86_64/%(Filename)%(Extension)</Link>
+    </AndroidNativeLibrary>
+  </ItemGroup>
+
+  <!-- Android Java Bindings -->
+  <ItemGroup Condition="$(TargetFramework.Contains('android'))">
+    <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjAudioDevInfo.java">
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
+      <Bind />
+    </AndroidJavaSource>
+    <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCamera.java">
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
+      <Bind />
+    </AndroidJavaSource>
+   <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCamera2.java">
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
+      <Bind />
+    </AndroidJavaSource>
+   <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCameraInfo.java">
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
+      <Bind />
+    </AndroidJavaSource>
+   <AndroidJavaSource
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/contentFiles/any/android/org/pjsip/PjCameraInfo2.java">
+      <Link>Platforms/Android/org/pjsip/%(Filename)%(Extension)</Link>
+      <Bind />
+    </AndroidJavaSource>
+  </ItemGroup>
+
+
+  <!-- iOS Static Libraries -->
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('ios'))">
+    <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native/libpjsua2.a">
+      <Link>Platforms/iOS/lib/arm64/libpjsua2.a</Link>
+      <Visible>True</Visible>
+    </None>
+    <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native/libpjsua2.a">
+      <Link>Platforms/iOS/lib/arm64s/libpjsua2.a</Link>
+      <Visible>True</Visible>
+    </None>
+    <None Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native/libpjsua2.a">
+      <Link>Platforms/iOS/lib/x86_64/libpjsua2.a</Link>
+      <Visible>True</Visible>
+    </None>
+  </ItemGroup>
+
+  <!-- iOS Native Linking -->
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('iossimulator-x64'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native/libpjsua2.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <SmartLink>False</SmartLink>
+      <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-x64/native -lpjsua2 -ld_classic</LinkerFlags>
+    </NativeReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('iossimulator-arm64'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native/libpjsua2.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <SmartLink>False</SmartLink>
+      <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/iossimulator-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
+    </NativeReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('ios-arm64'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native/libpjsua2.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <SmartLink>False</SmartLink>
+      <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/ios-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
+    </NativeReference>
+  </ItemGroup>
+
+  <!-- MacOSX Native Linking -->
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('maccatalyst-arm64'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native/libpjsua2.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <SmartLink>False</SmartLink>
+      <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
+    </NativeReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('maccatalyst-x64'))">
+    <NativeReference
+      Include="$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-x64/native/libpjsua2.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <SmartLink>False</SmartLink>
+      <IsCxx>True</IsCxx>
+      <Frameworks>AVFoundation Metal MetalKit CoreMedia CoreVideo AudioToolbox</Frameworks>
+      <LinkerFlags>-L$(NuGetPathUnix)libpjsua2maui/$(LibVersion)/runtimes/maccatalyst-arm64/native -lpjsua2 -ld_classic</LinkerFlags>
+    </NativeReference>
+  </ItemGroup>
+
+  <!-- Windows Native Linking -->
+  <ItemGroup Condition="'$(IsWin)' == 'true'">
+    <None Condition="$(RuntimeIdentifier.Contains('x64')) Or '$(Platform)' == 'x64'"
+          Include="$(NuGetPackageRoot)libpjsua2maui\$(LibVersion)\runtimes\win-x64\native\pjsua2.dll">
+      <Link>Platforms\Windows\Native\x64\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>True</Visible>
+      <TargetPath>%(Filename)%(Extension)</TargetPath>
+    </None>
+
+    <None Condition="$(RuntimeIdentifier.Contains('arm64')) Or '$(Platform)' == 'ARM64' Or '$(Platform.ToLower())' == 'arm64'" 
+          Include="$(NuGetPackageRoot)libpjsua2maui\$(LibVersion)\runtimes\win-arm64\native\pjsua2.dll">
+      <Link>Platforms\Windows\Native\ARM64\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Visible>True</Visible>
+      <TargetPath>%(Filename)%(Extension)</TargetPath>
+    </None>
+  </ItemGroup>
+</Project>

@@ -43,7 +43,7 @@ jobs:
   bcg729-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       
       - name: Cache BCG729 Built SDK
         id: cache-libs
@@ -86,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
   
       - name: Cache H264 Built SDK
         id: cache-libs
@@ -131,7 +131,7 @@ jobs:
     steps:
         
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache SSL Built SDK
         id: cache-libs
@@ -175,7 +175,7 @@ jobs:
     runs-on: ubuntu-latest   
     steps:  
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         
       - name: Cache opus Built SDK
         id: cache-libs
@@ -228,7 +228,7 @@ jobs:
       contents: write
 
     steps: 
-    - uses: actions/checkout@v6 
+    - uses: actions/checkout@v7 
   
     - name: Cache opus Built SDK
       id: cache-libs
@@ -251,28 +251,24 @@ jobs:
         java-version: '17'
         check-latest: true
       
-    - name: Setup Android SDK
+    - name: Setup Android SDK e NDK
       if: steps.cache-libs.outputs.cache-hit != 'true'
       uses: android-actions/setup-android@v3
       with:
-        cmdline-tools-version: 11076708 
-        packages: platforms;android-28 tools platform-tools build-tools;34.0.0
+        cmdline-tools-version: 11076708
+        # Removemos o pacote 'tools' e adicionamos o NDK diretamente aqui
+        packages: 'platforms;android-28 platform-tools build-tools;34.0.0 ndk;28.0.12433566'
     
-    - uses: nttld/setup-ndk@v1
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      id: setup-ndk
-      with:
-        ndk-version: r28
-        add-to-path: true
-        link-to-sdk: true
-      
+    - name: Setup ENV
+      run: |
+        echo "ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/28.0.12433566" >> $GITHUB_ENV
     - name: Debug NDK
       if: steps.cache-libs.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        ls -R $ANDROID_NDK_HOME
+        ls -R ${{ env.ANDROID_NDK_ROOT }}
       env: 
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
 
     - name: Prepare Environment
       if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -360,9 +356,6 @@ jobs:
         cp -v ${{ env.PJSUA_BASE_DIR }}/csharp/pjsua2maui/pjsua2maui/Platforms/Android/org/pjsip/*.java ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
         cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }}/*.cs ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
          
-      env:
-        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
-
     - name: Upload pjsip artifacts
       uses: actions/upload-artifact@v7
       with:
@@ -507,7 +500,7 @@ jobs:
       contents: write
     steps:
          
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       
     - name: Cache H264 Built SDK
       id: cache-libs
@@ -631,7 +624,7 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v6 
+    - uses: actions/checkout@v7 
     
     - name: Cache SSL Built SDK
       id: cache-libs
@@ -892,7 +885,7 @@ jobs:
       contents: write
     steps:
       
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       
       - name: Cache pjsip Built SDK
         uses: actions/cache@v5
@@ -1463,7 +1456,7 @@ jobs:
         - platform: MacOSX
         - sdk: macosx
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       
       - name: Cache pjsip Built SDK
         uses: actions/cache@v5
@@ -1766,7 +1759,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6 
+        uses: actions/checkout@v7 
 
       - name: Cache H264 Built SDK
         id: cache-libs
@@ -1878,7 +1871,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache SSL Built SDK
         id: cache-libs
@@ -1992,7 +1985,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache opus Built SDK
         id: cache-libs
@@ -2106,7 +2099,7 @@ jobs:
       matrix:
         arch: [x64, arm64]
     steps: 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Cache pjsip Built SDK
         id: cache-libs
@@ -2641,7 +2634,7 @@ jobs:
 
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref }}
       
@@ -2717,7 +2710,7 @@ jobs:
 
     steps: 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set VERSION variable
         run: |

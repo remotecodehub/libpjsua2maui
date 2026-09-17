@@ -2921,8 +2921,7 @@ jobs:
       - name: Pack NuGet Package
         if: steps.cache-libs.outputs.cache-hit != 'true'
         working-directory: ${{ github.workspace }}/src/libpjsua2maui
-        run: |
-          dotnet pack libpjsua2maui.csproj -c Release  -o ${{ github.workspace }}/nupkg "-p:IsOfficialBuild=true"
+        run: dotnet pack libpjsua2maui.csproj -c Release  -o ${{ github.workspace }}/nupkg "-p:IsOfficialBuild=true"
       
       - uses: actions/upload-artifact@v7
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -2937,9 +2936,10 @@ jobs:
 
       - name: Push to NuGet.org (OIDC / Key)
         if: startsWith(github.ref, 'refs/tags/')
+        working-directory: ${{ github.workspace }}/nupkg/
         shell: bash
         run: |
-          dotnet nuget push ${{ github.workspace }}/nupkg/libpjsua2maui.${{ env.VERSION }}.nupkg \
+          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
             --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
@@ -2949,9 +2949,9 @@ jobs:
       - name: Push symbols to NuGet.org
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
+        working-directory: ${{ github.workspace }}/nupkg/
         run: |
-          dotnet nuget push \
-            ${{ github.workspace }}/nupkg/libpjsua2maui.${{ env.VERSION }}.snupkg \
+          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.snupkg \
             --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
@@ -2960,9 +2960,10 @@ jobs:
 
       - name: Push to GitHub Packages
         if: startsWith(github.ref, 'refs/tags/')
+        working-directory: ${{ github.workspace }}/nupkg/
         shell: bash
         run: |
-          dotnet nuget push ${{ github.workspace }}/nupkg/libpjsua2maui.${{ env.VERSION }}.nupkg \
+          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
             --api-key "${{ secrets.GH_TOKEN }}" \
             --skip-duplicate

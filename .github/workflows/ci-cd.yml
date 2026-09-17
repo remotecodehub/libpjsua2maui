@@ -2680,24 +2680,37 @@ jobs:
       - name: Synchronize generated SWIG sources
         shell: bash
         run: |
-            set -e
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            echo "Adding generated C# files..."
-            git add \
-              src/libpjsua2maui/Platforms/Android/org/pjsip/*.java \
-              src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/*.cs \
-              src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/*.cs \
-              src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/*.cs
-              src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/*.cs
-            if git diff --cached --quiet; then
-              echo "No generated sources changed."
-            else
-              git commit -m "feat: Update generated SWIG bindings"
-              git push origin HEAD:${{ github.head_ref }}
-              echo "Generated bindings committed successfully."
-              exit 0
-            fi
+          set -e
+          
+          # 1. Verifica se há arquivos modificados ou novos nos paths específicos
+          CHANGES=$(git status --porcelain \
+            src/libpjsua2maui/Platforms/Android/org/pjsip/ \
+            src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/)
+          
+          # 2. Condicional: se a variável estiver vazia, não há diff
+          if [ -z "$CHANGES" ]; then
+            echo "No changes detected."
+            exit 0
+          fi
+          
+          # 3. Executa o commit apenas se houver mudanças
+          echo "Changes detected. Setting up git and commiting..."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add \
+            src/libpjsua2maui/Platforms/Android/org/pjsip/ \
+            src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/
+          
+          git commit -m "feat: Update generated SWIG bindings"
+          git push origin HEAD:${{ github.head_ref }}
+          echo "Generated bindings committed successfully."
   nupkg:
     runs-on: macos-26
     name: libpjsua2.nupkg

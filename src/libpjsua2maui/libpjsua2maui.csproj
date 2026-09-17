@@ -19,6 +19,11 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(OS)' != 'Windows_NT'">
+		<!-- Disables extraction and build of WinUI/Windows resources when build at Mac/Linux -->
+		<EnableCoreMrtTooling>false</EnableCoreMrtTooling>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(IsOfficialBuild)' == 'true'">
 		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>

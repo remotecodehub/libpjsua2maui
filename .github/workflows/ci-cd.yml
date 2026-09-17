@@ -2712,7 +2712,7 @@ jobs:
           git push origin HEAD:${{ github.head_ref }}
           echo "Generated bindings committed successfully."
   nupkg:
-    runs-on: windows-latest
+    runs-on: macos-26
     name: libpjsua2.nupkg
     needs: [pjsip-android, pjsip-ios, pjsip-mac, pjsip-win]
     permissions:

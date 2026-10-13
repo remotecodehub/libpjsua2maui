@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describe event descriptor to fully identify a SIP event. It
+/// corresponds to the pjsip_event structure in PJSIP library.
 public class SipEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class SipEvent : global::System.IDisposable {
     }
   }
 
+  /// The event type, can be any value of **pjsip_event_id_e**.
   public pjsip_event_id_e type {
     set {
       pjsua2PINVOKE.SipEvent_type_set(swigCPtr, (int)value);
@@ -67,6 +70,7 @@ public class SipEvent : global::System.IDisposable {
     } 
   }
 
+  /// The event body, which fields depends on the event type.
   public SipEventBody body {
     set {
       pjsua2PINVOKE.SipEvent_body_set(swigCPtr, SipEventBody.getCPtr(value));
@@ -78,6 +82,8 @@ public class SipEvent : global::System.IDisposable {
     } 
   }
 
+  /// Pointer to its original pjsip_event. Only valid when the struct is
+  /// constructed from PJSIP's pjsip_event.
   public System.IntPtr pjEvent {
     set {
       pjsua2PINVOKE.SipEvent_pjEvent_set(swigCPtr, value);
@@ -89,6 +95,7 @@ public class SipEvent : global::System.IDisposable {
   
   }
 
+  /// Default constructor.
   public SipEvent() : this(pjsua2PINVOKE.new_SipEvent(), true) {
   }
 

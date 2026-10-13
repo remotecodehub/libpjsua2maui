@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Video Preview
 
 public class VideoPreview : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,29 +58,41 @@ public class VideoPreview : global::System.IDisposable {
     }
   }
 
+  /// Constructor
   public VideoPreview(int dev_id) : this(pjsua2PINVOKE.new_VideoPreview(dev_id), true) {
   }
 
+  /// Determine if the specified video input device has built-in native
+  /// preview capability. This is a convenience function that is equal to
+  /// querying device's capability for PJMEDIA_VID_DEV_CAP_INPUT_PREVIEW
+  /// capability.
+  /// <returns>true if it has.</returns>
   public bool hasNative() {
     bool ret = pjsua2PINVOKE.VideoPreview_hasNative(swigCPtr);
     return ret;
   }
 
+  /// Start video preview window for the specified capture device.
+  /// <param name="param">     Video preview parameters.</param>
   public void start(VideoPreviewOpParam param) {
     pjsua2PINVOKE.VideoPreview_start(swigCPtr, VideoPreviewOpParam.getCPtr(param));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Stop video preview.
   public void stop() {
     pjsua2PINVOKE.VideoPreview_stop(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the preview window handle associated with the capture device,if any.
   public VideoWindow getVideoWindow() {
     VideoWindow ret = new VideoWindow(pjsua2PINVOKE.VideoPreview_getVideoWindow(swigCPtr), true);
     return ret;
   }
 
+  /// Get video media or conference bridge port of the video capture device.
+  /// <returns>Video media of the video capture device.</returns>
   public VideoMedia getVideoMedia() {
     VideoMedia ret = new VideoMedia(pjsua2PINVOKE.VideoPreview_getVideoMedia(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

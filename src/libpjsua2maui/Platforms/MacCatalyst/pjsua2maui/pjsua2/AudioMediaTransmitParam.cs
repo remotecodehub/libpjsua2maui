@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameters for AudioMedia::startTransmit2() method.
 public class AudioMediaTransmitParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,9 @@ public class AudioMediaTransmitParam : global::System.IDisposable {
     }
   }
 
+  /// Signal level adjustment. Value 1.0 means no level adjustment,
+  /// while value 0 means to mute the port.
+  /// Default: 1.0
   public float level {
     set {
       pjsua2PINVOKE.AudioMediaTransmitParam_level_set(swigCPtr, value);
@@ -67,6 +71,7 @@ public class AudioMediaTransmitParam : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public AudioMediaTransmitParam() : this(pjsua2PINVOKE.new_AudioMediaTransmitParam(), true) {
   }
 

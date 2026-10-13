@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Parameters for presNotify() account method.
 
 public class PresNotifyParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class PresNotifyParam : global::System.IDisposable {
     }
   }
 
+  /// Server presence subscription instance.
   public System.IntPtr srvPres {
     set {
       pjsua2PINVOKE.PresNotifyParam_srvPres_set(swigCPtr, value);
@@ -68,6 +70,7 @@ public class PresNotifyParam : global::System.IDisposable {
   
   }
 
+  /// Server presence subscription state to set.
   public pjsip_evsub_state state {
     set {
       pjsua2PINVOKE.PresNotifyParam_state_set(swigCPtr, (int)value);
@@ -78,6 +81,8 @@ public class PresNotifyParam : global::System.IDisposable {
     } 
   }
 
+  /// Optionally specify the state string name, if state is not "active",
+  /// "pending", or "terminated".
   public string stateStr {
     set {
       pjsua2PINVOKE.PresNotifyParam_stateStr_set(swigCPtr, value);
@@ -90,6 +95,8 @@ public class PresNotifyParam : global::System.IDisposable {
     } 
   }
 
+  /// If the new state is PJSIP_EVSUB_STATE_TERMINATED, optionally specify
+  /// the termination reason.
   public string reason {
     set {
       pjsua2PINVOKE.PresNotifyParam_reason_set(swigCPtr, value);
@@ -102,6 +109,9 @@ public class PresNotifyParam : global::System.IDisposable {
     } 
   }
 
+  /// If the new state is PJSIP_EVSUB_STATE_TERMINATED, this specifies
+  /// whether the NOTIFY request should contain message body containing
+  /// account's presence information.
   public bool withBody {
     set {
       pjsua2PINVOKE.PresNotifyParam_withBody_set(swigCPtr, value);
@@ -112,6 +122,7 @@ public class PresNotifyParam : global::System.IDisposable {
     } 
   }
 
+  /// Optional list of headers to be sent with the NOTIFY request.
   public SipTxOption txOption {
     set {
       pjsua2PINVOKE.PresNotifyParam_txOption_set(swigCPtr, SipTxOption.getCPtr(value));

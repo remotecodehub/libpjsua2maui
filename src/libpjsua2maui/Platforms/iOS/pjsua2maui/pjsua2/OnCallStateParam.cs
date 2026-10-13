@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCallState() callback.
 public class OnCallStateParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnCallStateParam : global::System.IDisposable {
     }
   }
 
+  /// Event which causes the call state to change.
   public SipEvent e {
     set {
       pjsua2PINVOKE.OnCallStateParam_e_set(swigCPtr, SipEvent.getCPtr(value));

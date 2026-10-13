@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+///  Raise Error exception if the expression fails  Raise Error exception if the status fails  Raise Error exception if the expression fails  Run the statement and catch and ignore Error exception
+/// Version information.
 public class Version : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class Version : global::System.IDisposable {
     }
   }
 
+  ///  Major number
   public int major {
     set {
       pjsua2PINVOKE.Version_major_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class Version : global::System.IDisposable {
     } 
   }
 
+  ///  Minor number
   public int minor {
     set {
       pjsua2PINVOKE.Version_minor_set(swigCPtr, value);
@@ -77,6 +81,7 @@ public class Version : global::System.IDisposable {
     } 
   }
 
+  ///  Additional revision number
   public int rev {
     set {
       pjsua2PINVOKE.Version_rev_set(swigCPtr, value);
@@ -87,6 +92,7 @@ public class Version : global::System.IDisposable {
     } 
   }
 
+  ///  Version suffix (e.g. "-svn")
   public string suffix {
     set {
       pjsua2PINVOKE.Version_suffix_set(swigCPtr, value);
@@ -99,6 +105,7 @@ public class Version : global::System.IDisposable {
     } 
   }
 
+  ///  The full version info (e.g. "2.1.0-svn")
   public string full {
     set {
       pjsua2PINVOKE.Version_full_set(swigCPtr, value);
@@ -111,6 +118,9 @@ public class Version : global::System.IDisposable {
     } 
   }
 
+  /// PJLIB version number as three bytes with the following format:
+  /// 0xMMIIRR00, where MM: major number, II: minor number, RR: revision
+  /// number, 00: always zero for now.
   public uint numeric {
     set {
       pjsua2PINVOKE.Version_numeric_set(swigCPtr, value);

@@ -37,7 +37,7 @@
 	<PropertyGroup>
 		<PackageId>libpjsua2maui</PackageId>
 		<Title>libpjsua2maui</Title>
-		<Version>2.17.0.3</Version>
+		<Version>2.17.0.4</Version>
 		<Authors>Weslley Murdock</Authors>
 		<Company>Remote Code Hub</Company>
 		<Product>libpjsua2maui</Product>
@@ -49,10 +49,7 @@ android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64),
 also MacCatalyst (arm64, x86_64) and Windows (x64, ARM64) as well.
 		</Description>
 		<PackageReleaseNotes>
-- 🐞 BugFix: apple namespaces werent working
-- 🐞 BugFix: native libs on maccatalyst arm64 now use the correct binaries for the abi
-- 🧩 Improvement: Updated docs to include Windows and MacCatalyst support
-- 🧩 Improvement: Unified projects into a new libpjsua2maui.csproj for packaging
+- 🧩 Improvement: Produce xml documentation in C# SWIG bindings 
 		</PackageReleaseNotes>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -65,7 +62,8 @@ also MacCatalyst (arm64, x86_64) and Windows (x64, ARM64) as well.
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageIconUrl>https://raw.githubusercontent.com/remotecodehub/libpjsua2maui/main/src/icon.png</PackageIconUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	</PropertyGroup>
 
@@ -80,6 +78,8 @@ also MacCatalyst (arm64, x86_64) and Windows (x64, ARM64) as well.
 		<None Include="../../LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
 		<None Include="../../README.md" Pack="true" PackagePath="README.md" />
 		<None Include="../../docs/README.md" Pack="true" PackagePath="docs/README.md" />
+
+		<None Include="$(OutputPath)$(AssemblyName).xml" Pack="true" PackagePath="docs/libpjsua2maui.xml" Visible="false" Condition="Exists('$(OutputPath)$(AssemblyName).xml')" />
 
 		<None Include="build/libpjsua2maui.targets" Pack="true" PackagePath="build/" />
  

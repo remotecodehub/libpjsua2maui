@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// SIP media type containing type and subtype. For example, for
+/// "application/sdp", the type is "application" and the subtype is "sdp".
 public class SipMediaType : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class SipMediaType : global::System.IDisposable {
     }
   }
 
+  ///  Media type.
   public string type {
     set {
       pjsua2PINVOKE.SipMediaType_type_set(swigCPtr, value);
@@ -69,6 +72,7 @@ public class SipMediaType : global::System.IDisposable {
     } 
   }
 
+  ///  Media subtype.
   public string subType {
     set {
       pjsua2PINVOKE.SipMediaType_subType_set(swigCPtr, value);

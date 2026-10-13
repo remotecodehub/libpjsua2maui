@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes message arrival event.
 
 public class RxMsgEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class RxMsgEvent : global::System.IDisposable {
     }
   }
 
+  ///  The receive data buffer.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.RxMsgEvent_rdata_set(swigCPtr, SipRxData.getCPtr(value));

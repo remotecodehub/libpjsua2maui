@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// RTCP Feedback settings.
 public class RtcpFbConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,6 +48,12 @@ public class RtcpFbConfig : PersistentObject {
     }
   }
 
+  /// Specify whether transport protocol in SDP media description uses
+  /// RTP/AVP instead of RTP/AVPF. Note that the standard mandates to signal
+  /// AVPF profile, but it may cause SDP negotiation failure when negotiating
+  /// with endpoints that does not support RTCP Feedback (including older
+  /// version of PJSIP).
+  /// Default: false.
   public bool dontUseAvpf {
     set {
       pjsua2PINVOKE.RtcpFbConfig_dontUseAvpf_set(swigCPtr, value);
@@ -57,6 +64,7 @@ public class RtcpFbConfig : PersistentObject {
     } 
   }
 
+  /// RTCP Feedback capabilities.
   public RtcpFbCapVector caps {
     set {
       pjsua2PINVOKE.RtcpFbConfig_caps_set(swigCPtr, RtcpFbCapVector.getCPtr(value));
@@ -68,14 +76,19 @@ public class RtcpFbConfig : PersistentObject {
     } 
   }
 
+  /// Constructor.
   public RtcpFbConfig() : this(pjsua2PINVOKE.new_RtcpFbConfig(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.RtcpFbConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.RtcpFbConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

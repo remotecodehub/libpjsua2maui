@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Data containing log entry to be written by the LogWriter.
 
 public class LogEntry : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class LogEntry : global::System.IDisposable {
     }
   }
 
+  ///  Log verbosity level of this message
   public int level {
     set {
       pjsua2PINVOKE.LogEntry_level_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class LogEntry : global::System.IDisposable {
     } 
   }
 
+  ///  The log message
   public string msg {
     set {
       pjsua2PINVOKE.LogEntry_msg_set(swigCPtr, value);
@@ -79,6 +82,7 @@ public class LogEntry : global::System.IDisposable {
     } 
   }
 
+  ///  ID of current thread
   public int threadId {
     set {
       pjsua2PINVOKE.LogEntry_threadId_set(swigCPtr, value);
@@ -89,6 +93,7 @@ public class LogEntry : global::System.IDisposable {
     } 
   }
 
+  ///  The name of the thread that writes this log
   public string threadName {
     set {
       pjsua2PINVOKE.LogEntry_threadName_set(swigCPtr, value);

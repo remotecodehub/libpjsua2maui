@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This describes each multipart part.
 
 public class SipMultipartPart : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class SipMultipartPart : global::System.IDisposable {
     }
   }
 
+  /// Optional headers to be put in this multipart part.
   public SipHeaderVector headers {
     set {
       pjsua2PINVOKE.SipMultipartPart_headers_set(swigCPtr, SipHeaderVector.getCPtr(value));
@@ -68,6 +70,7 @@ public class SipMultipartPart : global::System.IDisposable {
     } 
   }
 
+  /// The MIME type of the body part of this multipart part.
   public SipMediaType contentType {
     set {
       pjsua2PINVOKE.SipMultipartPart_contentType_set(swigCPtr, SipMediaType.getCPtr(value));
@@ -79,6 +82,7 @@ public class SipMultipartPart : global::System.IDisposable {
     } 
   }
 
+  /// The body part of tthis multipart part.
   public string body {
     set {
       pjsua2PINVOKE.SipMultipartPart_body_set(swigCPtr, value);

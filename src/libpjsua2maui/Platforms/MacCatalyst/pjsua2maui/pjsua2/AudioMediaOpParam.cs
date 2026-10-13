@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Audio media operation parameter.
 public class AudioMediaOpParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class AudioMediaOpParam : global::System.IDisposable {
     }
   }
 
+  /// The information for adding audio media operation.
   public AudioMediaAddInfo addInfo {
     set {
       pjsua2PINVOKE.AudioMediaOpParam_addInfo_set(swigCPtr, AudioMediaAddInfo.getCPtr(value));
@@ -68,6 +70,7 @@ public class AudioMediaOpParam : global::System.IDisposable {
     } 
   }
 
+  /// The information for removing audio media operation.
   public AudioMediaRemoveInfo removeInfo {
     set {
       pjsua2PINVOKE.AudioMediaOpParam_removeInfo_set(swigCPtr, AudioMediaRemoveInfo.getCPtr(value));
@@ -79,6 +82,7 @@ public class AudioMediaOpParam : global::System.IDisposable {
     } 
   }
 
+  /// The information for start transmitting/connecting audio media operation.
   public AudioMediaConnectInfo connectInfo {
     set {
       pjsua2PINVOKE.AudioMediaOpParam_connectInfo_set(swigCPtr, AudioMediaConnectInfo.getCPtr(value));
@@ -90,6 +94,8 @@ public class AudioMediaOpParam : global::System.IDisposable {
     } 
   }
 
+  /// The information for stop transmitting/disconnecting audio media
+  /// operation.
   public AudioMediaDisconnectInfo disconnectInfo {
     set {
       pjsua2PINVOKE.AudioMediaOpParam_disconnectInfo_set(swigCPtr, AudioMediaDisconnectInfo.getCPtr(value));

@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameters for Account::sendResponse().
 public class SendResponseParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class SendResponseParam : global::System.IDisposable {
     }
   }
 
+  /// Deferred response object, which is valid until the response is sent.
   public DeferredResponse deferredResponse {
     set {
       pjsua2PINVOKE.SendResponseParam_deferredResponse_set(swigCPtr, DeferredResponse.getCPtr(value));
@@ -68,6 +70,7 @@ public class SendResponseParam : global::System.IDisposable {
     } 
   }
 
+  /// Status code of the response.
   public int code {
     set {
       pjsua2PINVOKE.SendResponseParam_code_set(swigCPtr, value);
@@ -78,6 +81,7 @@ public class SendResponseParam : global::System.IDisposable {
     } 
   }
 
+  /// Optional reason phrase of the response.
   public string reason {
     set {
       pjsua2PINVOKE.SendResponseParam_reason_set(swigCPtr, value);

@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for onRegStarted() account callback.
 public class OnRegStartedParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnRegStartedParam : global::System.IDisposable {
     }
   }
 
+  /// True for registration and False for unregistration.
   public bool renew {
     set {
       pjsua2PINVOKE.OnRegStartedParam_renew_set(swigCPtr, value);

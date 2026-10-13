@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Media event data.
 public class MediaEventData : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class MediaEventData : global::System.IDisposable {
     }
   }
 
+  /// Media format changed event data.
   public MediaFmtChangedEvent fmtChanged {
     set {
       pjsua2PINVOKE.MediaEventData_fmtChanged_set(swigCPtr, MediaFmtChangedEvent.getCPtr(value));
@@ -68,6 +70,7 @@ public class MediaEventData : global::System.IDisposable {
     } 
   }
 
+  /// Audio device error event data.
   public AudDevErrorEvent audDevError {
     set {
       pjsua2PINVOKE.MediaEventData_audDevError_set(swigCPtr, AudDevErrorEvent.getCPtr(value));
@@ -79,6 +82,8 @@ public class MediaEventData : global::System.IDisposable {
     } 
   }
 
+  /// Pointer to storage to user event data, if it's outside
+  /// this struct
   public System.IntPtr ptr {
     set {
       pjsua2PINVOKE.MediaEventData_ptr_set(swigCPtr, value);

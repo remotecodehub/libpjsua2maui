@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCreateMediaTransport()
+/// callback.
 public class OnCreateMediaTransportParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class OnCreateMediaTransportParam : global::System.IDisposable {
     }
   }
 
+  /// The media index in the SDP for which this media transport will be used.
   public uint mediaIdx {
     set {
       pjsua2PINVOKE.OnCreateMediaTransportParam_mediaIdx_set(swigCPtr, value);
@@ -67,6 +70,9 @@ public class OnCreateMediaTransportParam : global::System.IDisposable {
     } 
   }
 
+  /// The media transport which otherwise will be used by the call has this
+  /// callback not been implemented. Application can change this to its own
+  /// instance of media transport to be used by the call.
   public System.IntPtr mediaTp {
     set {
       pjsua2PINVOKE.OnCreateMediaTransportParam_mediaTp_set(swigCPtr, value);
@@ -78,6 +84,7 @@ public class OnCreateMediaTransportParam : global::System.IDisposable {
   
   }
 
+  /// Bitmask from pjsua_create_media_transport_flag.
   public uint flags {
     set {
       pjsua2PINVOKE.OnCreateMediaTransportParam_flags_set(swigCPtr, value);

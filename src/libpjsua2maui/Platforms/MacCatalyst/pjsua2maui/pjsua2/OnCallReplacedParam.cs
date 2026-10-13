@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCallReplaced() callback.
 public class OnCallReplacedParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnCallReplacedParam : global::System.IDisposable {
     }
   }
 
+  /// The new call id.
   public int newCallId {
     set {
       pjsua2PINVOKE.OnCallReplacedParam_newCallId_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class OnCallReplacedParam : global::System.IDisposable {
     } 
   }
 
+  /// New Call derived object instantiated by application.
   public Call newCall {
     set {
       pjsua2PINVOKE.OnCallReplacedParam_newCall_set(swigCPtr, Call.getCPtr(value));

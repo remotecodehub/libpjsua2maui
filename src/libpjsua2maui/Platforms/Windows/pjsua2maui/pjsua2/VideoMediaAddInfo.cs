@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes video media's register/add of operation info.
 
 public class VideoMediaAddInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class VideoMediaAddInfo : global::System.IDisposable {
     }
   }
 
+  ///  The media port id.
   public uint mediaId {
     set {
       pjsua2PINVOKE.VideoMediaAddInfo_mediaId_set(swigCPtr, value);

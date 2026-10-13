@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// TLS transport information.
 public class TlsInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,8 @@ public class TlsInfo : global::System.IDisposable {
     }
   }
 
+  /// Describes whether secure socket connection is established, i.e: TLS/SSL
+  /// handshaking has been done successfully.
   public bool established {
     set {
       pjsua2PINVOKE.TlsInfo_established_set(swigCPtr, value);
@@ -67,6 +70,8 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Describes secure socket protocol being used, see #pj_ssl_sock_proto.
+  /// Use bitwise OR operation to combine the protocol type.
   public uint protocol {
     set {
       pjsua2PINVOKE.TlsInfo_protocol_set(swigCPtr, value);
@@ -77,6 +82,8 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Describes cipher suite being used, this will only be set when connection
+  /// is established.
   public pj_ssl_cipher cipher {
     set {
       pjsua2PINVOKE.TlsInfo_cipher_set(swigCPtr, (int)value);
@@ -87,6 +94,8 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Describes cipher name being used, this will only be set when connection
+  /// is established.
   public string cipherName {
     set {
       pjsua2PINVOKE.TlsInfo_cipherName_set(swigCPtr, value);
@@ -99,6 +108,7 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Describes local address.
   public string localAddr {
     set {
       pjsua2PINVOKE.TlsInfo_localAddr_set(swigCPtr, value);
@@ -111,6 +121,7 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Describes remote address.
   public string remoteAddr {
     set {
       pjsua2PINVOKE.TlsInfo_remoteAddr_set(swigCPtr, value);
@@ -123,6 +134,8 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Describes active local certificate info. Use SslCertInfo.isEmpty()
+  /// to check if the local cert info is available.
   public SslCertInfo localCertInfo {
     set {
       pjsua2PINVOKE.TlsInfo_localCertInfo_set(swigCPtr, SslCertInfo.getCPtr(value));
@@ -134,6 +147,8 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Describes active remote certificate info. Use SslCertInfo.isEmpty()
+  /// to check if the remote cert info is available.
   public SslCertInfo remoteCertInfo {
     set {
       pjsua2PINVOKE.TlsInfo_remoteCertInfo_set(swigCPtr, SslCertInfo.getCPtr(value));
@@ -145,6 +160,7 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Status of peer certificate verification.
   public uint verifyStatus {
     set {
       pjsua2PINVOKE.TlsInfo_verifyStatus_set(swigCPtr, value);
@@ -155,6 +171,8 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Error messages (if any) of peer certificate verification, based on
+  /// the field verifyStatus above.
   public StringVector verifyMsgs {
     set {
       pjsua2PINVOKE.TlsInfo_verifyMsgs_set(swigCPtr, StringVector.getCPtr(value));
@@ -166,9 +184,12 @@ public class TlsInfo : global::System.IDisposable {
     } 
   }
 
+  /// Constructor.
   public TlsInfo() : this(pjsua2PINVOKE.new_TlsInfo(), true) {
   }
 
+  /// Check if the info is set with empty values.
+  /// <returns>True if the info is empty.</returns>
   public bool isEmpty() {
     bool ret = pjsua2PINVOKE.TlsInfo_isEmpty(swigCPtr);
     return ret;

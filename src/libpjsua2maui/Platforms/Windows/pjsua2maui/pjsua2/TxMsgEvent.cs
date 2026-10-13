@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes message transmission event.
 
 public class TxMsgEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class TxMsgEvent : global::System.IDisposable {
     }
   }
 
+  ///  The transmit data buffer.
   public SipTxData tdata {
     set {
       pjsua2PINVOKE.TxMsgEvent_tdata_set(swigCPtr, SipTxData.getCPtr(value));

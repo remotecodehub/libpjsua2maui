@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Representation of media size.
 public class MediaSize : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class MediaSize : global::System.IDisposable {
     }
   }
 
+  ///  The width.
   public uint w {
     set {
       pjsua2PINVOKE.MediaSize_w_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class MediaSize : global::System.IDisposable {
     } 
   }
 
+  ///  The height.
   public uint h {
     set {
       pjsua2PINVOKE.MediaSize_h_set(swigCPtr, value);

@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Simple SIP header.
 public class SipHeader : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class SipHeader : global::System.IDisposable {
     }
   }
 
+  /// Header name.
   public string hName {
     set {
       pjsua2PINVOKE.SipHeader_hName_set(swigCPtr, value);
@@ -69,6 +71,7 @@ public class SipHeader : global::System.IDisposable {
     } 
   }
 
+  /// Header value.
   public string hValue {
     set {
       pjsua2PINVOKE.SipHeader_hValue_set(swigCPtr, value);
@@ -81,6 +84,7 @@ public class SipHeader : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor.
   public SipHeader() : this(pjsua2PINVOKE.new_SipHeader(), true) {
   }
 

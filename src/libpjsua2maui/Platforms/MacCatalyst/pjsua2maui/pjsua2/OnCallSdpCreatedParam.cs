@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCallSdpCreated() callback.
 public class OnCallSdpCreatedParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnCallSdpCreatedParam : global::System.IDisposable {
     }
   }
 
+  /// The SDP has just been created.
   public SdpSession sdp {
     set {
       pjsua2PINVOKE.OnCallSdpCreatedParam_sdp_set(swigCPtr, SdpSession.getCPtr(value));
@@ -68,6 +70,7 @@ public class OnCallSdpCreatedParam : global::System.IDisposable {
     } 
   }
 
+  /// The remote SDP, will be empty if local is SDP offerer.
   public SdpSession remSdp {
     set {
       pjsua2PINVOKE.OnCallSdpCreatedParam_remSdp_set(swigCPtr, SdpSession.getCPtr(value));

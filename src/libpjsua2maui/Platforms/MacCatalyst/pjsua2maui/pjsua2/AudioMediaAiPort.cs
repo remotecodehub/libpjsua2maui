@@ -10,6 +10,18 @@
 
 namespace libpjsua2.maui {
 
+/// AI Media Port.
+/// This wraps pjmedia_ai_port as an AudioMedia object that can be
+/// connected to the conference bridge. It bridges audio to/from
+/// real-time AI services (e.g. OpenAI Realtime API) over WebSocket.
+/// Basic usage:
+/// 1. Create with createPort() (uses the OpenAI Realtime API backend).
+/// 2. Connect to the AI service with connect().
+/// 3. Use startTransmit()/stopTransmit() to route audio from/to
+///    other conference bridge ports (e.g. AudioMedia from a call).
+/// 4. Disconnect with disconnect() when done.
+/// Events (connected, transcript, etc.) are delivered via the
+/// virtual onEvent() callback.
 public class AudioMediaAiPort : AudioMedia {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,30 +59,50 @@ public class AudioMediaAiPort : AudioMedia {
     }
   }
 
+  /// Constructor.
   public AudioMediaAiPort() : this(pjsua2PINVOKE.new_AudioMediaAiPort(), true) {
     SwigDirectorConnect();
   }
 
+  /// Create an AI media port with the OpenAI Realtime API backend and
+  /// register it to the conference bridge. The port operates at the
+  /// backend's native clock rate (e.g. 24kHz for OpenAI); the
+  /// conference bridge handles resampling.
+  /// <param name="prm">       Creation parameters.</param>
   public void createPort(AiMediaPortParam prm) {
     pjsua2PINVOKE.AudioMediaAiPort_createPort__SWIG_0(swigCPtr, AiMediaPortParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create an AI media port with the OpenAI Realtime API backend and
+  /// register it to the conference bridge. The port operates at the
+  /// backend's native clock rate (e.g. 24kHz for OpenAI); the
+  /// conference bridge handles resampling.
   public void createPort() {
     pjsua2PINVOKE.AudioMediaAiPort_createPort__SWIG_1(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Connect to the AI service asynchronously. The onEvent() callback
+  /// will be called with PJMEDIA_AI_EVENT_CONNECTED or
+  /// PJMEDIA_AI_EVENT_DISCONNECTED when complete.
+  /// <param name="url">           WebSocket URL (e.g.
+  ///                          "wss://api.openai.com/v1/realtime?model=...")</param> 
+  /// <param name="authToken">     Authentication token (e.g. OpenAI API key).</param>
   public void connect(string url, string authToken) {
     pjsua2PINVOKE.AudioMediaAiPort_connect(swigCPtr, url, authToken);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Disconnect from the AI service gracefully.
   public void disconnect() {
     pjsua2PINVOKE.AudioMediaAiPort_disconnect(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Called when an AI event occurs (connected, transcript, etc.).
+  /// This may be called from the ioqueue worker thread.
+  /// <param name="event">     The event data.</param>
   public virtual void onEvent(AiMediaEvent event_) {
     if (SwigDerivedClassHasMethod("onEvent", swigMethodTypes0)) pjsua2PINVOKE.AudioMediaAiPort_onEventSwigExplicitAudioMediaAiPort(swigCPtr, AiMediaEvent.getCPtr(event_)); else pjsua2PINVOKE.AudioMediaAiPort_onEvent(swigCPtr, AiMediaEvent.getCPtr(event_));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

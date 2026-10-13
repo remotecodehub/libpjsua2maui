@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes an audio media's start transmit/connect operation
+/// info.
 public class AudioMediaConnectInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class AudioMediaConnectInfo : global::System.IDisposable {
     }
   }
 
+  ///  The source media port id.
   public uint mediaId {
     set {
       pjsua2PINVOKE.AudioMediaConnectInfo_mediaId_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class AudioMediaConnectInfo : global::System.IDisposable {
     } 
   }
 
+  ///  The destination media port id.
   public uint targetMediaId {
     set {
       pjsua2PINVOKE.AudioMediaConnectInfo_targetMediaId_set(swigCPtr, value);
@@ -77,6 +81,7 @@ public class AudioMediaConnectInfo : global::System.IDisposable {
     } 
   }
 
+  ///  The adjustment level.
   public int adjLevel {
     set {
       pjsua2PINVOKE.AudioMediaConnectInfo_adjLevel_set(swigCPtr, value);

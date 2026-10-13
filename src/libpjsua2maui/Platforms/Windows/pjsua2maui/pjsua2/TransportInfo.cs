@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes transport information returned by
+/// Endpoint::transportGetInfo() function.
 
 public class TransportInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class TransportInfo : global::System.IDisposable {
     }
   }
 
+  ///  PJSUA transport identification.
   public int id {
     set {
       pjsua2PINVOKE.TransportInfo_id_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class TransportInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Transport type.
   public pjsip_transport_type_e type {
     set {
       pjsua2PINVOKE.TransportInfo_type_set(swigCPtr, (int)value);
@@ -77,6 +81,7 @@ public class TransportInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Transport type name.
   public string typeName {
     set {
       pjsua2PINVOKE.TransportInfo_typeName_set(swigCPtr, value);
@@ -89,6 +94,7 @@ public class TransportInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Transport string info/description.
   public string info {
     set {
       pjsua2PINVOKE.TransportInfo_info_set(swigCPtr, value);
@@ -101,6 +107,7 @@ public class TransportInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Transport flags (see pjsip_transport_flags_e).
   public uint flags {
     set {
       pjsua2PINVOKE.TransportInfo_flags_set(swigCPtr, value);
@@ -111,6 +118,7 @@ public class TransportInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Local/bound address.
   public string localAddress {
     set {
       pjsua2PINVOKE.TransportInfo_localAddress_set(swigCPtr, value);
@@ -123,6 +131,7 @@ public class TransportInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Published address (or transport address name).
   public string localName {
     set {
       pjsua2PINVOKE.TransportInfo_localName_set(swigCPtr, value);
@@ -135,6 +144,7 @@ public class TransportInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Current number of objects currently referencing this transport.
   public uint usageCount {
     set {
       pjsua2PINVOKE.TransportInfo_usageCount_set(swigCPtr, value);
@@ -145,6 +155,7 @@ public class TransportInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor.
   public TransportInfo() : this(pjsua2PINVOKE.new_TransportInfo(), true) {
   }
 

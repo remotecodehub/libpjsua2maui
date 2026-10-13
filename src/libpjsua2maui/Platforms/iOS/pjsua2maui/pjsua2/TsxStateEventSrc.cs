@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes transaction state event source.
 public class TsxStateEventSrc : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class TsxStateEventSrc : global::System.IDisposable {
     }
   }
 
+  ///  The incoming message.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.TsxStateEventSrc_rdata_set(swigCPtr, SipRxData.getCPtr(value));
@@ -68,6 +70,7 @@ public class TsxStateEventSrc : global::System.IDisposable {
     } 
   }
 
+  ///  The outgoing message.
   public SipTxData tdata {
     set {
       pjsua2PINVOKE.TsxStateEventSrc_tdata_set(swigCPtr, SipTxData.getCPtr(value));
@@ -79,6 +82,7 @@ public class TsxStateEventSrc : global::System.IDisposable {
     } 
   }
 
+  ///  The timer.
   public System.IntPtr timer {
     set {
       pjsua2PINVOKE.TsxStateEventSrc_timer_set(swigCPtr, value);
@@ -90,6 +94,7 @@ public class TsxStateEventSrc : global::System.IDisposable {
   
   }
 
+  ///  Transport error status.
   public int status {
     set {
       pjsua2PINVOKE.TsxStateEventSrc_status_set(swigCPtr, value);
@@ -100,6 +105,7 @@ public class TsxStateEventSrc : global::System.IDisposable {
     } 
   }
 
+  ///  Generic data.
   public System.IntPtr data {
     set {
       pjsua2PINVOKE.TsxStateEventSrc_data_set(swigCPtr, value);

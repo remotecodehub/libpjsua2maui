@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCallTxOffer() callback.
 public class OnCallTxOfferParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,9 @@ public class OnCallTxOfferParam : global::System.IDisposable {
     }
   }
 
+  /// The current call setting, application can update this setting for
+  /// generating the offer. Note that application should maintain any
+  /// active media to avoid the need for the peer to reject the offer.
   public CallSetting opt {
     set {
       pjsua2PINVOKE.OnCallTxOfferParam_opt_set(swigCPtr, CallSetting.getCPtr(value));

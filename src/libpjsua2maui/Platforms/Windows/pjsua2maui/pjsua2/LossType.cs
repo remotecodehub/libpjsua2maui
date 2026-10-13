@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Types of loss detected.
 
 public class LossType : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class LossType : global::System.IDisposable {
     }
   }
 
+  ///  Burst/sequential packet lost detected
   public uint burst {
     set {
       pjsua2PINVOKE.LossType_burst_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class LossType : global::System.IDisposable {
     } 
   }
 
+  ///  Random packet lost detected.
   public uint random {
     set {
       pjsua2PINVOKE.LossType_random_set(swigCPtr, value);

@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Video window handle.
 public class VideoWindowHandle : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class VideoWindowHandle : global::System.IDisposable {
     }
   }
 
+  /// The window handle type.
   public pjmedia_vid_dev_hwnd_type type {
     set {
       pjsua2PINVOKE.VideoWindowHandle_type_set(swigCPtr, (int)value);
@@ -67,6 +69,7 @@ public class VideoWindowHandle : global::System.IDisposable {
     } 
   }
 
+  /// The window handle.
   public WindowHandle handle {
     set {
       pjsua2PINVOKE.VideoWindowHandle_handle_set(swigCPtr, WindowHandle.getCPtr(value));

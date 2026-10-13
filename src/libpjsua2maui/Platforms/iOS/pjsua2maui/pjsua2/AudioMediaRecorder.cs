@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Audio Media Recorder.
 public class AudioMediaRecorder : AudioMedia {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,29 +48,81 @@ public class AudioMediaRecorder : AudioMedia {
     }
   }
 
+  /// Constructor.
   public AudioMediaRecorder() : this(pjsua2PINVOKE.new_AudioMediaRecorder(), true) {
   }
 
+  /// Create a file recorder, and automatically connect this recorder to
+  /// the conference bridge. The recorder currently supports recording WAV
+  /// file. The type of the recorder to use is determined by the extension of
+  /// the file (e.g. ".wav").
+  /// <param name="file_name">  Output file name. The function will determine the
+  ///                       default format to be used based on the file extension.
+  ///                       Currently ".wav" is supported on all platforms.</param> 
+  /// <param name="enc_type">   Optionally specify the type of encoder to be used to
+  ///                       compress the media, if the file can support different
+  ///                       encodings. This value must be zero for now.</param> 
+  /// <param name="max_size">   Maximum file size. Specify zero or -1 to remove size
+  ///                       limitation. This value must be zero or -1 for now.</param> 
+  /// <param name="options">    Optional options, which can be used to specify the
+  ///                       recording file format. Supported options are
+  ///                       PJMEDIA_FILE_WRITE_PCM, PJMEDIA_FILE_WRITE_ALAW,
+  ///                       and PJMEDIA_FILE_WRITE_ULAW. Default is zero or
+  ///                       PJMEDIA_FILE_WRITE_PCM.</param>
   public void createRecorder(string file_name, uint enc_type, int max_size, uint options) {
     pjsua2PINVOKE.AudioMediaRecorder_createRecorder__SWIG_0(swigCPtr, file_name, enc_type, max_size, options);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create a file recorder, and automatically connect this recorder to
+  /// the conference bridge. The recorder currently supports recording WAV
+  /// file. The type of the recorder to use is determined by the extension of
+  /// the file (e.g. ".wav").
+  /// <param name="file_name">  Output file name. The function will determine the
+  ///                       default format to be used based on the file extension.
+  ///                       Currently ".wav" is supported on all platforms.</param> 
+  /// <param name="enc_type">   Optionally specify the type of encoder to be used to
+  ///                       compress the media, if the file can support different
+  ///                       encodings. This value must be zero for now.</param> 
+  /// <param name="max_size">   Maximum file size. Specify zero or -1 to remove size
+  ///                       limitation. This value must be zero or -1 for now.</param>
   public void createRecorder(string file_name, uint enc_type, int max_size) {
     pjsua2PINVOKE.AudioMediaRecorder_createRecorder__SWIG_1(swigCPtr, file_name, enc_type, max_size);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create a file recorder, and automatically connect this recorder to
+  /// the conference bridge. The recorder currently supports recording WAV
+  /// file. The type of the recorder to use is determined by the extension of
+  /// the file (e.g. ".wav").
+  /// <param name="file_name">  Output file name. The function will determine the
+  ///                       default format to be used based on the file extension.
+  ///                       Currently ".wav" is supported on all platforms.</param> 
+  /// <param name="enc_type">   Optionally specify the type of encoder to be used to
+  ///                       compress the media, if the file can support different
+  ///                       encodings. This value must be zero for now.</param>
   public void createRecorder(string file_name, uint enc_type) {
     pjsua2PINVOKE.AudioMediaRecorder_createRecorder__SWIG_2(swigCPtr, file_name, enc_type);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create a file recorder, and automatically connect this recorder to
+  /// the conference bridge. The recorder currently supports recording WAV
+  /// file. The type of the recorder to use is determined by the extension of
+  /// the file (e.g. ".wav").
+  /// <param name="file_name">  Output file name. The function will determine the
+  ///                       default format to be used based on the file extension.
+  ///                       Currently ".wav" is supported on all platforms.</param>
   public void createRecorder(string file_name) {
     pjsua2PINVOKE.AudioMediaRecorder_createRecorder__SWIG_3(swigCPtr, file_name);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Warning: deprecated and will be removed in future release.
+  /// Typecast from base class AudioMedia. This is useful for application
+  /// written in language that does not support downcasting such as Python.
+  /// <param name="media">             The object to be downcasted</param> 
+  /// <returns>The object as AudioMediaRecorder instance</returns>
   public static AudioMediaRecorder typecastFromAudioMedia(AudioMedia media) {
     global::System.IntPtr cPtr = pjsua2PINVOKE.AudioMediaRecorder_typecastFromAudioMedia(AudioMedia.getCPtr(media));
     AudioMediaRecorder ret = (cPtr == global::System.IntPtr.Zero) ? null : new AudioMediaRecorder(cPtr, false);

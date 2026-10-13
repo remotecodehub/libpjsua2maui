@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes a media frame.
 public class MediaFrame : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class MediaFrame : global::System.IDisposable {
     }
   }
 
+  ///  Frame type.
   public pjmedia_frame_type type {
     set {
       pjsua2PINVOKE.MediaFrame_type_set(swigCPtr, (int)value);
@@ -67,6 +69,7 @@ public class MediaFrame : global::System.IDisposable {
     } 
   }
 
+  ///  Frame buffer content.
   public ByteVector buf {
     set {
       pjsua2PINVOKE.MediaFrame_buf_set(swigCPtr, ByteVector.getCPtr(value));
@@ -78,6 +81,7 @@ public class MediaFrame : global::System.IDisposable {
     } 
   }
 
+  ///  Frame size in bytes.
   public uint size {
     set {
       pjsua2PINVOKE.MediaFrame_size_set(swigCPtr, value);
@@ -88,6 +92,7 @@ public class MediaFrame : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public MediaFrame() : this(pjsua2PINVOKE.new_MediaFrame(), true) {
   }
 

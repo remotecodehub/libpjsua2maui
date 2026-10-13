@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes authentication challenge used in Proxy-Authenticate
+/// or WWW-Authenticate for digest authentication scheme.
 public class DigestChallenge : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class DigestChallenge : global::System.IDisposable {
     }
   }
 
+  /// Realm for the challenge.
   public string realm {
     set {
       pjsua2PINVOKE.DigestChallenge_realm_set(swigCPtr, value);
@@ -69,6 +72,7 @@ public class DigestChallenge : global::System.IDisposable {
     } 
   }
 
+  /// Other parameters.
   public StringToStringMap otherParam {
     set {
       pjsua2PINVOKE.DigestChallenge_otherParam_set(swigCPtr, StringToStringMap.getCPtr(value));
@@ -80,6 +84,7 @@ public class DigestChallenge : global::System.IDisposable {
     } 
   }
 
+  /// Domain.
   public string domain {
     set {
       pjsua2PINVOKE.DigestChallenge_domain_set(swigCPtr, value);
@@ -92,6 +97,7 @@ public class DigestChallenge : global::System.IDisposable {
     } 
   }
 
+  /// Nonce challenge.
   public string nonce {
     set {
       pjsua2PINVOKE.DigestChallenge_nonce_set(swigCPtr, value);
@@ -104,6 +110,7 @@ public class DigestChallenge : global::System.IDisposable {
     } 
   }
 
+  /// Opaque value.
   public string opaque {
     set {
       pjsua2PINVOKE.DigestChallenge_opaque_set(swigCPtr, value);
@@ -116,6 +123,7 @@ public class DigestChallenge : global::System.IDisposable {
     } 
   }
 
+  /// Stale parameter.
   public int stale {
     set {
       pjsua2PINVOKE.DigestChallenge_stale_set(swigCPtr, value);
@@ -126,6 +134,7 @@ public class DigestChallenge : global::System.IDisposable {
     } 
   }
 
+  /// Algorithm parameter.
   public string algorithm {
     set {
       pjsua2PINVOKE.DigestChallenge_algorithm_set(swigCPtr, value);
@@ -138,6 +147,7 @@ public class DigestChallenge : global::System.IDisposable {
     } 
   }
 
+  /// Quality of protection.
   public string qop {
     set {
       pjsua2PINVOKE.DigestChallenge_qop_set(swigCPtr, value);

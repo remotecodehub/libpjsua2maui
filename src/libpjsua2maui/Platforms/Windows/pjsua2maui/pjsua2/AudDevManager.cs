@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Audio device manager.
 
 public class AudDevManager : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,271 +58,709 @@ public class AudDevManager : global::System.IDisposable {
     }
   }
 
+  /// Get currently active capture sound devices. If sound devices has not been
+  /// created, it is possible that the function returns -1 as device IDs.
+  /// <returns>Device ID of the capture device.</returns>
   public int getCaptureDev() {
     int ret = pjsua2PINVOKE.AudDevManager_getCaptureDev(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get the AudioMedia of the capture audio device.
+  /// <returns>Audio media for the capture device.</returns>
   public AudioMedia getCaptureDevMedia() {
     AudioMedia ret = new AudioMedia(pjsua2PINVOKE.AudDevManager_getCaptureDevMedia(swigCPtr), false);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get currently active playback sound devices. If sound devices has not
+  /// been created, it is possible that the function returns -1 as device IDs.
+  /// <returns>Device ID of the playback device.</returns>
   public int getPlaybackDev() {
     int ret = pjsua2PINVOKE.AudDevManager_getPlaybackDev(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get the AudioMedia of the speaker/playback audio device.
+  /// <returns>Audio media for the speaker/playback device.</returns>
   public AudioMedia getPlaybackDevMedia() {
     AudioMedia ret = new AudioMedia(pjsua2PINVOKE.AudDevManager_getPlaybackDevMedia(swigCPtr), false);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Select or change capture sound device. Application may call this
+  /// function at any time to replace current sound device. Calling this
+  /// method will not change the state of the sound device (opened/closed).
+  /// <param name="capture_dev">       Device ID of the capture device.</param>
   public void setCaptureDev(int capture_dev) {
     pjsua2PINVOKE.AudDevManager_setCaptureDev(swigCPtr, capture_dev);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Select or change playback sound device. Application may call this
+  /// function at any time to replace current sound device. Calling this
+  /// method will not change the state of the sound device (opened/closed).
+  /// <param name="playback_dev">      Device ID of the playback device.</param>
   public void setPlaybackDev(int playback_dev) {
     pjsua2PINVOKE.AudDevManager_setPlaybackDev(swigCPtr, playback_dev);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Enum all audio devices installed in the system.
+  /// <returns>The list of audio device info.</returns>
   public AudioDevInfoVector2 enumDev2() {
     AudioDevInfoVector2 ret = new AudioDevInfoVector2(pjsua2PINVOKE.AudDevManager_enumDev2(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Set pjsua to use null sound device. The null sound device only provides
+  /// the timing needed by the conference bridge, and will not interract with
+  /// any hardware.
   public void setNullDev() {
     pjsua2PINVOKE.AudDevManager_setNullDev(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Disconnect the main conference bridge from any sound devices, and let
+  /// application connect the bridge to it's own sound device/master port.
+  /// <returns>The port interface of the conference bridge,
+  ///                              so that application can connect this to it's
+  ///                              own sound device or master port.</returns>
   public SWIGTYPE_p_p_void setNoDev() {
     global::System.IntPtr cPtr = pjsua2PINVOKE.AudDevManager_setNoDev(swigCPtr);
     SWIGTYPE_p_p_void ret = (cPtr == global::System.IntPtr.Zero) ? null : new SWIGTYPE_p_p_void(cPtr, false);
     return ret;
   }
 
+  /// Set sound device mode.
+  /// Note that this method will open the sound device, using current
+  /// active IDs set via setCaptureDev() or setPlaybackDev(), if the flag
+  /// PJSUA_SND_DEV_NO_IMMEDIATE_OPEN is not specified.
+  /// <param name="mode">              The sound device mode, as bitmask combination
+  ///                              of #pjsua_snd_dev_mode</param>
   public void setSndDevMode(uint mode) {
     pjsua2PINVOKE.AudDevManager_setSndDevMode(swigCPtr, mode);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Change the echo cancellation settings.
+  /// The behavior of this function depends on whether the sound device is
+  /// currently active, and if it is, whether device or software AEC is
+  /// being used.
+  /// If the sound device is currently active, and if the device supports AEC,
+  /// this function will forward the change request to the device and it will
+  /// be up to the device on whether support the request. If software AEC is
+  /// being used (the software EC will be used if the device does not support
+  /// AEC), this function will change the software EC settings. In all cases,
+  /// the setting will be saved for future opening of the sound device.
+  /// If the sound device is not currently active, this will only change the
+  /// default AEC settings and the setting will be applied next time the
+  /// sound device is opened.
+  /// <param name="tail_msec">         The tail length, in miliseconds. Set to zero to
+  ///                              disable AEC.</param> 
+  /// <param name="options">           Options to be passed to pjmedia_echo_create().
+  ///                              Normally the value should be zero.</param>
   public void setEcOptions(uint tail_msec, uint options) {
     pjsua2PINVOKE.AudDevManager_setEcOptions(swigCPtr, tail_msec, options);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get current echo canceller tail length.
+  /// <returns>The EC tail length in milliseconds,
+  ///                              If AEC is disabled, the value will be zero.</returns>
   public uint getEcTail() {
     uint ret = pjsua2PINVOKE.AudDevManager_getEcTail(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Check whether the sound device is currently active. The sound device
+  /// may be inactive if the application has set the auto close feature to
+  /// non-zero (the sndAutoCloseTime setting in MediaConfig), or
+  /// if null sound device or no sound device has been configured via the
+  /// setNoDev() function.
   public bool sndIsActive() {
     bool ret = pjsua2PINVOKE.AudDevManager_sndIsActive(swigCPtr);
     return ret;
   }
 
+  /// Refresh the list of sound devices installed in the system. This method
+  /// will only refresh the list of audio device so all active audio streams
+  /// will be unaffected. After refreshing the device list, application MUST
+  /// make sure to update all index references to audio devices before calling
+  /// any method that accepts audio device index as its parameter.
   public void refreshDevs() {
     pjsua2PINVOKE.AudDevManager_refreshDevs(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the number of sound devices installed in the system.
+  /// <returns>The number of sound devices installed in the
+  ///                              system.</returns>
   public uint getDevCount() {
     uint ret = pjsua2PINVOKE.AudDevManager_getDevCount(swigCPtr);
     return ret;
   }
 
+  /// Get device information.
+  /// <param name="id">                The audio device ID.</param> 
+  /// <returns>The device information which will be filled in
+  ///                              by this method once it returns successfully.</returns>
   public AudioDevInfo getDevInfo(int id) {
     AudioDevInfo ret = new AudioDevInfo(pjsua2PINVOKE.AudDevManager_getDevInfo(swigCPtr, id), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Lookup device index based on the driver and device name.
+  /// <param name="drv_name">          The driver name.</param> 
+  /// <param name="dev_name">          The device name.</param> 
+  /// <returns>The device ID. If the device is not found,
+  ///                              Error will be thrown.</returns>
   public int lookupDev(string drv_name, string dev_name) {
     int ret = pjsua2PINVOKE.AudDevManager_lookupDev(swigCPtr, drv_name, dev_name);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get string info for the specified capability.
+  /// <param name="cap">               The capability ID.</param> 
+  /// <returns>Capability name.</returns>
   public string capName(pjmedia_aud_dev_cap cap) {
     string ret = pjsua2PINVOKE.AudDevManager_capName(swigCPtr, (int)cap);
     return ret;
   }
 
+  /// This will configure audio format capability (other than PCM) to the
+  /// sound device being used. If sound device is currently active, the method
+  /// will forward the setting to the sound device instance to be applied
+  /// immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_EXT_FORMAT capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="format">            The audio format.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept for
+  ///                              future use.</param>
   public void setExtFormat(MediaFormatAudio format, bool keep) {
     pjsua2PINVOKE.AudDevManager_setExtFormat__SWIG_0(swigCPtr, MediaFormatAudio.getCPtr(format), keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio format capability (other than PCM) to the
+  /// sound device being used. If sound device is currently active, the method
+  /// will forward the setting to the sound device instance to be applied
+  /// immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_EXT_FORMAT capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="format">            The audio format.</param>
   public void setExtFormat(MediaFormatAudio format) {
     pjsua2PINVOKE.AudDevManager_setExtFormat__SWIG_1(swigCPtr, MediaFormatAudio.getCPtr(format));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio format capability (other than PCM) of the sound device
+  /// being used. If sound device is currently active, the method will forward
+  /// the request to the sound device. If sound device is currently inactive,
+  /// and if application had previously set the setting and mark the setting
+  /// as kept, then that setting will be returned. Otherwise, this method
+  /// will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_EXT_FORMAT capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// <returns>The audio format.</returns>
   public MediaFormatAudio getExtFormat() {
     MediaFormatAudio ret = new MediaFormatAudio(pjsua2PINVOKE.AudDevManager_getExtFormat(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio input latency control or query capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance to be
+  /// applied immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_LATENCY capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="latency_msec">      The input latency.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept
+  ///                              for future use.</param>
   public void setInputLatency(uint latency_msec, bool keep) {
     pjsua2PINVOKE.AudDevManager_setInputLatency__SWIG_0(swigCPtr, latency_msec, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio input latency control or query capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance to be
+  /// applied immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_LATENCY capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="latency_msec">      The input latency.</param>
   public void setInputLatency(uint latency_msec) {
     pjsua2PINVOKE.AudDevManager_setInputLatency__SWIG_1(swigCPtr, latency_msec);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio input latency control or query capability of the sound
+  /// device being used. If sound device is currently active, the method will
+  /// forward the request to the sound device. If sound device is currently
+  /// inactive, and if application had previously set the setting and mark the
+  /// setting as kept, then that setting will be returned. Otherwise, this
+  /// method will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_LATENCY capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// <returns>The audio input latency.</returns>
   public uint getInputLatency() {
     uint ret = pjsua2PINVOKE.AudDevManager_getInputLatency(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio output latency control or query capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance to be
+  /// applied immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_LATENCY capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="latency_msec">      The output latency.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept
+  ///                              for future use.</param>
   public void setOutputLatency(uint latency_msec, bool keep) {
     pjsua2PINVOKE.AudDevManager_setOutputLatency__SWIG_0(swigCPtr, latency_msec, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio output latency control or query capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance to be
+  /// applied immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_LATENCY capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="latency_msec">      The output latency.</param>
   public void setOutputLatency(uint latency_msec) {
     pjsua2PINVOKE.AudDevManager_setOutputLatency__SWIG_1(swigCPtr, latency_msec);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio output latency control or query capability of the sound
+  /// device being used. If sound device is currently active, the method will
+  /// forward the request to the sound device. If sound device is currently
+  /// inactive, and if application had previously set the setting and mark the
+  /// setting as kept, then that setting will be returned. Otherwise, this
+  /// method will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_LATENCY capability in AudioDevInfo.caps flags,
+  /// otherwise Error will be thrown.
+  /// <returns>The audio output latency.</returns>
   public uint getOutputLatency() {
     uint ret = pjsua2PINVOKE.AudDevManager_getOutputLatency(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio input volume level capability to the
+  /// sound device being used.
+  /// If sound device is currently active, the method will forward the
+  /// setting to the sound device instance to be applied immediately,
+  /// if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_VOLUME_SETTING capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="volume">            The input volume level, in percent.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept for
+  ///                              future use.</param>
   public void setInputVolume(uint volume, bool keep) {
     pjsua2PINVOKE.AudDevManager_setInputVolume__SWIG_0(swigCPtr, volume, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio input volume level capability to the
+  /// sound device being used.
+  /// If sound device is currently active, the method will forward the
+  /// setting to the sound device instance to be applied immediately,
+  /// if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_VOLUME_SETTING capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="volume">            The input volume level, in percent.</param>
   public void setInputVolume(uint volume) {
     pjsua2PINVOKE.AudDevManager_setInputVolume__SWIG_1(swigCPtr, volume);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio input volume level capability of the sound device being
+  /// used. If sound device is currently active, the method will forward the
+  /// request to the sound device. If sound device is currently inactive,
+  /// and if application had previously set the setting and mark the setting
+  /// as kept, then that setting will be returned. Otherwise, this method
+  /// will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_VOLUME_SETTING capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.     *
+  /// <returns>The audio input volume level, in percent.</returns>
   public uint getInputVolume() {
     uint ret = pjsua2PINVOKE.AudDevManager_getInputVolume(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio output volume level capability to the sound
+  /// device being used. If sound device is currently active, the method will
+  /// forward the setting to the sound device instance to be applied
+  /// immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_VOLUME_SETTING capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="volume">            The output volume level, in percent.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept
+  ///                              for future use.</param>
   public void setOutputVolume(uint volume, bool keep) {
     pjsua2PINVOKE.AudDevManager_setOutputVolume__SWIG_0(swigCPtr, volume, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio output volume level capability to the sound
+  /// device being used. If sound device is currently active, the method will
+  /// forward the setting to the sound device instance to be applied
+  /// immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_VOLUME_SETTING capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="volume">            The output volume level, in percent.</param>
   public void setOutputVolume(uint volume) {
     pjsua2PINVOKE.AudDevManager_setOutputVolume__SWIG_1(swigCPtr, volume);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio output volume level capability of the sound device being
+  /// used. If sound device is currently active, the method will forward the
+  /// request to the sound device. If sound device is currently inactive,
+  /// and if application had previously set the setting and mark the setting
+  /// as kept, then that setting will be returned. Otherwise, this method
+  /// will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_VOLUME_SETTING capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// <returns>The audio output volume level, in percent.</returns>
   public uint getOutputVolume() {
     uint ret = pjsua2PINVOKE.AudDevManager_getOutputVolume(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get the audio input signal level capability of the sound device being
+  /// used. If sound device is currently active, the method will forward the
+  /// request to the sound device. If sound device is currently inactive,
+  /// and if application had previously set the setting and mark the setting
+  /// as kept, then that setting will be returned. Otherwise, this method
+  /// will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_SIGNAL_METER capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// <returns>The audio input signal level, in percent.</returns>
   public uint getInputSignal() {
     uint ret = pjsua2PINVOKE.AudDevManager_getInputSignal(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get the audio output signal level capability of the sound device being
+  /// used. If sound device is currently active, the method will forward the
+  /// request to the sound device. If sound device is currently inactive,
+  /// and if application had previously set the setting and mark the setting
+  /// as kept, then that setting will be returned. Otherwise, this method
+  /// will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_SIGNAL_METER capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// <returns>The audio output signal level, in percent.</returns>
   public uint getOutputSignal() {
     uint ret = pjsua2PINVOKE.AudDevManager_getOutputSignal(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio input route capability to the sound device
+  /// being used. If sound device is currently active, the method will
+  /// forward the setting to the sound device instance to be applied
+  /// immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_ROUTE capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="route">             The audio input route.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept
+  ///                              for future use.</param>
   public void setInputRoute(pjmedia_aud_dev_route route, bool keep) {
     pjsua2PINVOKE.AudDevManager_setInputRoute__SWIG_0(swigCPtr, (int)route, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio input route capability to the sound device
+  /// being used. If sound device is currently active, the method will
+  /// forward the setting to the sound device instance to be applied
+  /// immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_ROUTE capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="route">             The audio input route.</param>
   public void setInputRoute(pjmedia_aud_dev_route route) {
     pjsua2PINVOKE.AudDevManager_setInputRoute__SWIG_1(swigCPtr, (int)route);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio input route capability of the sound device being used.
+  /// If sound device is currently active, the method will forward the
+  /// request to the sound device. If sound device is currently inactive,
+  /// and if application had previously set the setting and mark the setting
+  /// as kept, then that setting will be returned. Otherwise, this method
+  /// will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_INPUT_ROUTE capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// <returns>The audio input route.</returns>
   public pjmedia_aud_dev_route getInputRoute() {
     pjmedia_aud_dev_route ret = (pjmedia_aud_dev_route)pjsua2PINVOKE.AudDevManager_getInputRoute(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio output route capability to the sound device
+  /// being used. If sound device is currently active, the method will
+  /// forward the setting to the sound device instance to be applied
+  /// immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_ROUTE capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="route">             The audio output route.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept
+  ///                              for future use.</param>
   public void setOutputRoute(pjmedia_aud_dev_route route, bool keep) {
     pjsua2PINVOKE.AudDevManager_setOutputRoute__SWIG_0(swigCPtr, (int)route, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio output route capability to the sound device
+  /// being used. If sound device is currently active, the method will
+  /// forward the setting to the sound device instance to be applied
+  /// immediately, if it supports it.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_ROUTE capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="route">             The audio output route.</param>
   public void setOutputRoute(pjmedia_aud_dev_route route) {
     pjsua2PINVOKE.AudDevManager_setOutputRoute__SWIG_1(swigCPtr, (int)route);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio output route capability of the sound device being used.
+  /// If sound device is currently active, the method will forward the
+  /// request to the sound device. If sound device is currently inactive,
+  /// and if application had previously set the setting and mark the setting
+  /// as kept, then that setting will be returned. Otherwise, this method
+  /// will raise error.
+  /// This method is only valid if the device has
+  /// PJMEDIA_AUD_DEV_CAP_OUTPUT_ROUTE capability in AudioDevInfo.caps
+  /// flags, otherwise Error will be thrown.
+  /// <returns>The audio output route.</returns>
   public pjmedia_aud_dev_route getOutputRoute() {
     pjmedia_aud_dev_route ret = (pjmedia_aud_dev_route)pjsua2PINVOKE.AudDevManager_getOutputRoute(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio voice activity detection capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance
+  /// to be applied immediately, if it supports it.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_VAD
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="enable">            Enable/disable voice activity detection
+  ///                              feature. Set true to enable.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept for
+  ///                              future use.</param>
   public void setVad(bool enable, bool keep) {
     pjsua2PINVOKE.AudDevManager_setVad__SWIG_0(swigCPtr, enable, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio voice activity detection capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance
+  /// to be applied immediately, if it supports it.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_VAD
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="enable">            Enable/disable voice activity detection
+  ///                              feature. Set true to enable.</param>
   public void setVad(bool enable) {
     pjsua2PINVOKE.AudDevManager_setVad__SWIG_1(swigCPtr, enable);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio voice activity detection capability of the sound device
+  /// being used. If sound device is currently active, the method will
+  /// forward the request to the sound device. If sound device is currently
+  /// inactive, and if application had previously set the setting and mark
+  /// the setting as kept, then that setting will be returned. Otherwise,
+  /// this method will raise error.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_VAD
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// <returns>The audio voice activity detection feature.</returns>
   public bool getVad() {
     bool ret = pjsua2PINVOKE.AudDevManager_getVad(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio comfort noise generation capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance
+  /// to be applied immediately, if it supports it.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_CNG
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="enable">            Enable/disable comfort noise generation
+  ///                              feature. Set true to enable.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept for
+  ///                              future use.</param>
   public void setCng(bool enable, bool keep) {
     pjsua2PINVOKE.AudDevManager_setCng__SWIG_0(swigCPtr, enable, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio comfort noise generation capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance
+  /// to be applied immediately, if it supports it.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_CNG
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="enable">            Enable/disable comfort noise generation
+  ///                              feature. Set true to enable.</param>
   public void setCng(bool enable) {
     pjsua2PINVOKE.AudDevManager_setCng__SWIG_1(swigCPtr, enable);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio comfort noise generation capability of the sound device
+  /// being used. If sound device is currently active, the method will
+  /// forward the request to the sound device. If sound device is currently
+  /// inactive, and if application had previously set the setting and mark
+  /// the setting as kept, then that setting will be returned. Otherwise,
+  /// this method will raise error.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_CNG
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// <returns>The audio comfort noise generation feature.</returns>
   public bool getCng() {
     bool ret = pjsua2PINVOKE.AudDevManager_getCng(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This will configure audio packet loss concealment capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance
+  /// to be applied immediately, if it supports it.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_PLC
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="enable">            Enable/disable packet loss concealment
+  ///                              feature. Set true to enable.</param> 
+  /// <param name="keep">              Specify whether the setting is to be kept for
+  ///                              future use.</param>
   public void setPlc(bool enable, bool keep) {
     pjsua2PINVOKE.AudDevManager_setPlc__SWIG_0(swigCPtr, enable, keep);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This will configure audio packet loss concealment capability to
+  /// the sound device being used. If sound device is currently active,
+  /// the method will forward the setting to the sound device instance
+  /// to be applied immediately, if it supports it.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_PLC
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// Note that in case the setting is kept for future use, it will be applied
+  /// to any devices, even when application has changed the sound device to be
+  /// used.
+  /// <param name="enable">            Enable/disable packet loss concealment
+  ///                              feature. Set true to enable.</param>
   public void setPlc(bool enable) {
     pjsua2PINVOKE.AudDevManager_setPlc__SWIG_1(swigCPtr, enable);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the audio packet loss concealment capability of the sound device
+  /// being used. If sound device is currently active, the method will
+  /// forward the request to the sound device. If sound device is currently
+  /// inactive, and if application had previously set the setting and mark
+  /// the setting as kept, then that setting will be returned. Otherwise,
+  /// this method will raise error.
+  /// This method is only valid if the device has PJMEDIA_AUD_DEV_CAP_PLC
+  /// capability in AudioDevInfo.caps flags, otherwise Error will be thrown.
+  /// <returns>The audio packet loss concealment feature.</returns>
   public bool getPlc() {
     bool ret = pjsua2PINVOKE.AudDevManager_getPlc(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes transaction state changed event.
 
 public class TsxStateEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class TsxStateEvent : global::System.IDisposable {
     }
   }
 
+  ///  Event source.
   public TsxStateEventSrc src {
     set {
       pjsua2PINVOKE.TsxStateEvent_src_set(swigCPtr, TsxStateEventSrc.getCPtr(value));
@@ -68,6 +70,7 @@ public class TsxStateEvent : global::System.IDisposable {
     } 
   }
 
+  ///  The transaction.
   public SipTransaction tsx {
     set {
       pjsua2PINVOKE.TsxStateEvent_tsx_set(swigCPtr, SipTransaction.getCPtr(value));
@@ -79,6 +82,7 @@ public class TsxStateEvent : global::System.IDisposable {
     } 
   }
 
+  ///  Previous state.
   public pjsip_tsx_state_e prevState {
     set {
       pjsua2PINVOKE.TsxStateEvent_prevState_set(swigCPtr, (int)value);
@@ -89,6 +93,12 @@ public class TsxStateEvent : global::System.IDisposable {
     } 
   }
 
+  /// Type of event source:
+  ///    - PJSIP_EVENT_TX_MSG
+  ///    - PJSIP_EVENT_RX_MSG,
+  ///    - PJSIP_EVENT_TRANSPORT_ERROR
+  ///    - PJSIP_EVENT_TIMER
+  ///    - PJSIP_EVENT_USER
   public pjsip_event_id_e type {
     set {
       pjsua2PINVOKE.TsxStateEvent_type_set(swigCPtr, (int)value);

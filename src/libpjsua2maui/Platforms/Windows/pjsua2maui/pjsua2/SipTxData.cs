@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes an outgoing SIP message. It corresponds to the
+/// pjsip_tx_data structure in PJSIP library.
 
 public class SipTxData : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,8 @@ public class SipTxData : global::System.IDisposable {
     }
   }
 
+  /// A short info string describing the request, which normally contains
+  /// the request method and its CSeq.
   public string info {
     set {
       pjsua2PINVOKE.SipTxData_info_set(swigCPtr, value);
@@ -69,6 +73,8 @@ public class SipTxData : global::System.IDisposable {
     } 
   }
 
+  /// The whole message data as a string, containing both the header section
+  /// and message body section.
   public string wholeMsg {
     set {
       pjsua2PINVOKE.SipTxData_wholeMsg_set(swigCPtr, value);
@@ -81,6 +87,7 @@ public class SipTxData : global::System.IDisposable {
     } 
   }
 
+  /// Destination address of the message.
   public string dstAddress {
     set {
       pjsua2PINVOKE.SipTxData_dstAddress_set(swigCPtr, value);
@@ -93,6 +100,8 @@ public class SipTxData : global::System.IDisposable {
     } 
   }
 
+  /// Pointer to original pjsip_tx_data. Only valid when the struct
+  /// is constructed from PJSIP's pjsip_tx_data.
   public System.IntPtr pjTxData {
     set {
       pjsua2PINVOKE.SipTxData_pjTxData_set(swigCPtr, value);
@@ -104,6 +113,7 @@ public class SipTxData : global::System.IDisposable {
   
   }
 
+  /// Default constructor.
   public SipTxData() : this(pjsua2PINVOKE.new_SipTxData(), true) {
   }
 

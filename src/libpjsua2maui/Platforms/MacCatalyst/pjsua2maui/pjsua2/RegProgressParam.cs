@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Information of Update contact on IP change progress.
 public class RegProgressParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class RegProgressParam : global::System.IDisposable {
     }
   }
 
+  /// Indicate if this is a Register or Un-Register message.
   public bool isRegister {
     set {
       pjsua2PINVOKE.RegProgressParam_isRegister_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class RegProgressParam : global::System.IDisposable {
     } 
   }
 
+  /// SIP status code received.
   public int code {
     set {
       pjsua2PINVOKE.RegProgressParam_code_set(swigCPtr, value);

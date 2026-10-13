@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Tone descriptor (abstraction for pjmedia_tone_desc)
 
 public class ToneDesc : pjmedia_tone_desc {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;

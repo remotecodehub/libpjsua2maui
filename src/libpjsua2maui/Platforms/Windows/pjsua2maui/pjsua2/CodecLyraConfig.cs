@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Lyra codec setting;
 
 public class CodecLyraConfig : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,13 @@ public class CodecLyraConfig : global::System.IDisposable {
     }
   }
 
+  /// The value represents the decoder bitrate requested by the receiver.
+  /// Endpoints can be configured with different bitrates. For example,
+  /// the local endpoint might be set to a bitrate of 3200, while
+  /// the remote endpoint is set to 6000. In this scenario, the remote
+  /// endpoint will send data at 3200 bitrate, while the local endpoint
+  /// will send data at 6000 bitrate. Valid bitrate: 3200, 6000, 9200.
+  /// By default it is set to PJMEDIA_CODEC_LYRA_DEFAULT_BIT_RATE.
   public uint bitRate {
     set {
       pjsua2PINVOKE.CodecLyraConfig_bitRate_set(swigCPtr, value);
@@ -67,6 +75,12 @@ public class CodecLyraConfig : global::System.IDisposable {
     } 
   }
 
+  /// Lyra required some additional (model) files, including
+  /// **lyra_config.binarypb** , **lyragan.tflite** , **quantizer.tflite** and
+  /// **soundstream_encoder.tflite** .
+  /// This setting represents the folder containing the above files.
+  /// The specified folder should contain these files. If an invalid folder
+  /// is provided, the codec creation will fail.
   public string modelPath {
     set {
       pjsua2PINVOKE.CodecLyraConfig_modelPath_set(swigCPtr, value);

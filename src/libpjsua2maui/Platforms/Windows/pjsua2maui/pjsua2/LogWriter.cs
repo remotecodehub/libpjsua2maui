@@ -9,6 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Interface for writing log messages. Applications can inherit this class
+/// and supply it in the LogConfig structure to implement custom log
+/// writing facility.
 
 public class LogWriter : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +60,7 @@ public class LogWriter : global::System.IDisposable {
     }
   }
 
+  ///  Write a log entry.
   public virtual void write(LogEntry entry) {
     pjsua2PINVOKE.LogWriter_write(swigCPtr, LogEntry.getCPtr(entry));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

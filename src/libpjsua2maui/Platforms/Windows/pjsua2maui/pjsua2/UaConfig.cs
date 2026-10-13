@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// SIP User Agent related settings.
 
 public class UaConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -47,6 +48,11 @@ public class UaConfig : PersistentObject {
     }
   }
 
+  /// Maximum calls to support (default: 4). The value specified here
+  /// must be smaller than the compile time maximum settings
+  /// PJSUA_MAX_CALLS, which by default is 32. To increase this
+  /// limit, the library must be recompiled with new PJSUA_MAX_CALLS
+  /// value.
   public uint maxCalls {
     set {
       pjsua2PINVOKE.UaConfig_maxCalls_set(swigCPtr, value);
@@ -57,6 +63,10 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Number of worker threads. Normally application will want to have at
+  /// least one worker thread, unless when it wants to poll the library
+  /// periodically, which in this case the worker thread can be set to
+  /// zero.
   public uint threadCnt {
     set {
       pjsua2PINVOKE.UaConfig_threadCnt_set(swigCPtr, value);
@@ -67,6 +77,14 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// When this flag is non-zero, all callbacks that come from thread
+  /// other than main thread will be posted to the main thread and
+  /// to be executed by Endpoint::libHandleEvents() function. This
+  /// includes the logging callback. Note that this will only work if
+  /// threadCnt is set to zero and Endpoint::libHandleEvents() is
+  /// performed by main thread. By default, the main thread is set
+  /// from the thread that invoke Endpoint::libCreate()
+  /// Default: false
   public bool mainThreadOnly {
     set {
       pjsua2PINVOKE.UaConfig_mainThreadOnly_set(swigCPtr, value);
@@ -77,6 +95,9 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Array of nameservers to be used by the SIP resolver subsystem.
+  /// The order of the name server specifies the priority (first name
+  /// server will be used first, unless it is not reachable).
   public StringVector nameserver {
     set {
       pjsua2PINVOKE.UaConfig_nameserver_set(swigCPtr, StringVector.getCPtr(value));
@@ -88,6 +109,11 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Specify the URL of outbound proxies to visit for all outgoing requests.
+  /// The outbound proxies will be used for all accounts, and it will
+  /// be used to build the route set for outgoing requests. The final
+  /// route set for outgoing requests will consists of the outbound proxies
+  /// and the proxy configured in the account.
   public StringVector outboundProxies {
     set {
       pjsua2PINVOKE.UaConfig_outboundProxies_set(swigCPtr, StringVector.getCPtr(value));
@@ -99,6 +125,8 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Optional user agent string (default empty). If it's empty, no
+  /// User-Agent header will be sent with outgoing requests.
   public string userAgent {
     set {
       pjsua2PINVOKE.UaConfig_userAgent_set(swigCPtr, value);
@@ -111,6 +139,22 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Array of STUN servers to try. The library will try to resolve and
+  /// contact each of the STUN server entry until it finds one that is
+  /// usable. Each entry may be a domain name, host name, IP address, and
+  /// it may contain an optional port number. For example:
+  ///  - "pjsip.org" (domain name)
+  ///  - "sip.pjsip.org" (host name)
+  ///  - "pjsip.org:33478" (domain name and a non-standard port number)
+  ///  - "10.0.0.1:3478" (IP address and port number)
+  /// When nameserver is configured in the *pjsua_config.nameserver* field,
+  /// if entry is not an IP address, it will be resolved with DNS SRV
+  /// resolution first, and it will fallback to use DNS A resolution if this
+  /// fails. Port number may be specified even if the entry is a domain name,
+  /// in case the DNS SRV resolution should fallback to a non-standard port.
+  /// When nameserver is not configured, entries will be resolved with
+  /// pj_gethostbyname() if it's not an IP address. Port number may be
+  /// specified if the server is not listening in standard STUN port.
   public StringVector stunServer {
     set {
       pjsua2PINVOKE.UaConfig_stunServer_set(swigCPtr, StringVector.getCPtr(value));
@@ -122,6 +166,10 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// This specifies if the library should try to do an IPv6 resolution of
+  /// the STUN servers if the IPv4 resolution fails. It can be useful
+  /// in an IPv6-only environment, including on NAT64.
+  /// Default: FALSE
   public bool stunTryIpv6 {
     set {
       pjsua2PINVOKE.UaConfig_stunTryIpv6_set(swigCPtr, value);
@@ -132,6 +180,10 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// This specifies if the library startup should ignore failure with the
+  /// STUN servers. If this is set to PJ_FALSE, the library will refuse to
+  /// start if it fails to resolve or contact any of the STUN servers.
+  /// Default: TRUE
   public bool stunIgnoreFailure {
     set {
       pjsua2PINVOKE.UaConfig_stunIgnoreFailure_set(swigCPtr, value);
@@ -142,6 +194,12 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Support for adding and parsing NAT type in the SDP to assist
+  /// troubleshooting. The valid values are:
+  ///  - 0: no information will be added in SDP, and parsing is disabled.
+  ///  - 1: only the NAT type number is added.
+  ///  - 2: add both NAT type number and name.
+  /// Default: 1
   public int natTypeInSdp {
     set {
       pjsua2PINVOKE.UaConfig_natTypeInSdp_set(swigCPtr, value);
@@ -152,6 +210,15 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Handle unsolicited NOTIFY requests containing message waiting
+  /// indication (MWI) info. Unsolicited MWI is incoming NOTIFY requests
+  /// which are not requested by client with SUBSCRIBE request.
+  /// If this is enabled, the library will respond 200/OK to the NOTIFY
+  /// request and forward the request to Endpoint::onMwiInfo() callback.
+  /// Note: the callback will not be invoked and 481/"No account to handle" response
+  /// will be sent if this is enabled but no account is configured.
+  /// See also AccountMwiConfig.enabled.
+  /// Default: PJ_TRUE
   public bool mwiUnsolicitedEnabled {
     set {
       pjsua2PINVOKE.UaConfig_mwiUnsolicitedEnabled_set(swigCPtr, value);
@@ -162,6 +229,10 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether to enable UPnP.
+  /// Note that this setting can be further customized in account
+  /// configuration (#pjsua_acc_config).
+  /// Default: FALSE
   public bool enableUpnp {
     set {
       pjsua2PINVOKE.UaConfig_enableUpnp_set(swigCPtr, value);
@@ -172,6 +243,10 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Specify which interface to use for UPnP. If empty, UPnP will use
+  /// the first suitable interface found.
+  /// Note that this setting is only applicable if UPnP is enabled.
+  /// Default: empty string
   public string upnpIfName {
     set {
       pjsua2PINVOKE.UaConfig_upnpIfName_set(swigCPtr, value);
@@ -184,6 +259,12 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// When set to true, "norefersub" is advertised in the SIP Supported
+  /// header per RFC 4488, indicating that this endpoint is capable of
+  /// suppressing the implicit REFER event subscription.  The actual
+  /// suppression is negotiated per-call via the Refer-Sub header; this
+  /// flag only controls whether the capability is announced.
+  /// Default: true
   public bool noRefersub {
     set {
       pjsua2PINVOKE.UaConfig_noRefersub_set(swigCPtr, value);
@@ -194,14 +275,19 @@ public class UaConfig : PersistentObject {
     } 
   }
 
+  /// Default constructor to initialize with default values.
   public UaConfig() : this(pjsua2PINVOKE.new_UaConfig(), true) {
   }
 
+  /// Read this object from a container.
+  /// <param name="node">              Container to write values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.UaConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.UaConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

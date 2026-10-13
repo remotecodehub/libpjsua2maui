@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// TLS transport settings, to be specified in TransportConfig.
 public class TlsConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,6 +48,7 @@ public class TlsConfig : PersistentObject {
     }
   }
 
+  /// Certificate of Authority (CA) list file.
   public string CaListFile {
     set {
       pjsua2PINVOKE.TlsConfig_CaListFile_set(swigCPtr, value);
@@ -59,6 +61,9 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Public endpoint certificate file, which will be used as client-
+  /// side  certificate for outgoing TLS connection, and server-side
+  /// certificate for incoming TLS connection.
   public string certFile {
     set {
       pjsua2PINVOKE.TlsConfig_certFile_set(swigCPtr, value);
@@ -71,6 +76,7 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Optional private key of the endpoint certificate to be used.
   public string privKeyFile {
     set {
       pjsua2PINVOKE.TlsConfig_privKeyFile_set(swigCPtr, value);
@@ -83,6 +89,7 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Password to open private key.
   public string password {
     set {
       pjsua2PINVOKE.TlsConfig_password_set(swigCPtr, value);
@@ -95,6 +102,8 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Certificate of Authority (CA) buffer. If CaListFile, certFile or
+  /// privKeyFile are set, this setting will be ignored.
   public string CaBuf {
     set {
       pjsua2PINVOKE.TlsConfig_CaBuf_set(swigCPtr, value);
@@ -107,6 +116,10 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Public endpoint certificate buffer, which will be used as client-
+  /// side  certificate for outgoing TLS connection, and server-side
+  /// certificate for incoming TLS connection. If CaListFile, certFile or
+  /// privKeyFile are set, this setting will be ignored.
   public string certBuf {
     set {
       pjsua2PINVOKE.TlsConfig_certBuf_set(swigCPtr, value);
@@ -119,6 +132,9 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Optional private key buffer of the endpoint certificate to be used.
+  /// If CaListFile, certFile or privKeyFile are set, this setting will
+  /// be ignored.
   public string privKeyBuf {
     set {
       pjsua2PINVOKE.TlsConfig_privKeyBuf_set(swigCPtr, value);
@@ -131,6 +147,10 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Lookup certificate from OS certificate store, this setting will
+  /// specify the field type to lookup.
+  /// Currently only used by Windows Schannel backend, see also
+  /// *pj_ssl_cert_load_from_store()* for more info.
   public pj_ssl_cert_lookup_type certLookupType {
     set {
       pjsua2PINVOKE.TlsConfig_certLookupType_set(swigCPtr, (int)value);
@@ -141,6 +161,11 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Lookup certificate from OS certificate store, this setting will
+  /// specify the keyword to match on the field specified in
+  /// *certLookupType* above.
+  /// Currently only used by Windows Schannel backend, see also
+  /// *pj_ssl_cert_load_from_store()* for more info.
   public string certLookupKeyword {
     set {
       pjsua2PINVOKE.TlsConfig_certLookupKeyword_set(swigCPtr, value);
@@ -153,6 +178,8 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// When using backend specific credentials objects, specify the backend
+  /// object types using this bit flag, see also \ref pj_ssl_cert_direct_type.
   public uint credDirectType {
     set {
       pjsua2PINVOKE.TlsConfig_credDirectType_set(swigCPtr, value);
@@ -163,6 +190,11 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Optional backend specific private key. See also
+  /// *pj_ssl_cert_load_direct()*.
+  /// Currently only the OpenSSL backend is supported. This setting
+  /// corresponds to an OpenSSL EVP_PKEY instance. When this is set,
+  /// specify PJ_SSL_CERT_DIRECT_OPENSSL_EVP_PKEY flag in *certDirectType*.
   public System.IntPtr privKeyDirect {
     set {
       pjsua2PINVOKE.TlsConfig_privKeyDirect_set(swigCPtr, value);
@@ -174,6 +206,11 @@ public class TlsConfig : PersistentObject {
   
   }
 
+  /// Optional backend specific certificate. See also
+  /// *pj_ssl_cert_load_direct()*.
+  /// Currently only the OpenSSL backend is supported, this setting
+  /// corresponds to an OpenSSL X509 instance. When this is set,
+  /// specify PJ_SSL_CERT_DIRECT_OPENSSL_X509_CERT flag in *certDirectType*.
   public System.IntPtr certDirect {
     set {
       pjsua2PINVOKE.TlsConfig_certDirect_set(swigCPtr, value);
@@ -185,6 +222,11 @@ public class TlsConfig : PersistentObject {
   
   }
 
+  /// TLS protocol method from #pjsip_ssl_method. In the future, this field
+  /// might be deprecated in favor of **proto** field. For now, this field
+  /// is only applicable only when **proto** field is set to zero.
+  /// Default is PJSIP_SSL_UNSPECIFIED_METHOD (0), which in turn will
+  /// use PJSIP_SSL_DEFAULT_METHOD, which default value is PJSIP_TLSV1_METHOD.
   public pjsip_ssl_method method {
     set {
       pjsua2PINVOKE.TlsConfig_method_set(swigCPtr, (int)value);
@@ -195,6 +237,10 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// TLS protocol type from #pj_ssl_sock_proto. Use this field to enable
+  /// specific protocol type. Use bitwise OR operation to combine the protocol
+  /// type.
+  /// Default is PJSIP_SSL_DEFAULT_PROTO.
   public uint proto {
     set {
       pjsua2PINVOKE.TlsConfig_proto_set(swigCPtr, value);
@@ -205,6 +251,10 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Ciphers and order preference. The Endpoint::utilSslGetAvailableCiphers()
+  /// can be used to check the available ciphers supported by backend.
+  /// If the array is empty, then default cipher list of the backend
+  /// will be used.
   public IntVector ciphers {
     set {
       pjsua2PINVOKE.TlsConfig_ciphers_set(swigCPtr, IntVector.getCPtr(value));
@@ -216,6 +266,18 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Specifies TLS transport behavior on the server TLS certificate
+  /// verification result:
+  /// - If *verifyServer* is disabled, TLS transport will just notify
+  ///   the application via pjsip_tp_state_callback with state
+  ///   PJSIP_TP_STATE_CONNECTED regardless TLS verification result.
+  /// - If *verifyServer* is enabled, TLS transport will be shutdown
+  ///   and application will be notified with state
+  ///   PJSIP_TP_STATE_DISCONNECTED whenever there is any TLS verification
+  ///   error, otherwise PJSIP_TP_STATE_CONNECTED will be notified.
+  /// In any cases, application can inspect pjsip_tls_state_info in the
+  /// callback to see the verification detail.
+  /// Default value is false.
   public bool verifyServer {
     set {
       pjsua2PINVOKE.TlsConfig_verifyServer_set(swigCPtr, value);
@@ -226,6 +288,18 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Specifies TLS transport behavior on the client TLS certificate
+  /// verification result:
+  /// - If *verifyClient* is disabled, TLS transport will just notify
+  ///   the application via pjsip_tp_state_callback with state
+  ///   PJSIP_TP_STATE_CONNECTED regardless TLS verification result.
+  /// - If *verifyClient* is enabled, TLS transport will be shutdown
+  ///   and application will be notified with state
+  ///   PJSIP_TP_STATE_DISCONNECTED whenever there is any TLS verification
+  ///   error, otherwise PJSIP_TP_STATE_CONNECTED will be notified.
+  /// In any cases, application can inspect pjsip_tls_state_info in the
+  /// callback to see the verification detail.
+  /// Default value is PJ_FALSE.
   public bool verifyClient {
     set {
       pjsua2PINVOKE.TlsConfig_verifyClient_set(swigCPtr, value);
@@ -236,6 +310,10 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// When acting as server (incoming TLS connections), reject incoming
+  /// connection if client doesn't supply a TLS certificate.
+  /// This setting corresponds to SSL_VERIFY_FAIL_IF_NO_PEER_CERT flag.
+  /// Default value is PJ_FALSE.
   public bool requireClientCert {
     set {
       pjsua2PINVOKE.TlsConfig_requireClientCert_set(swigCPtr, value);
@@ -246,6 +324,10 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// TLS negotiation timeout to be applied for both outgoing and incoming
+  /// connection, in milliseconds. If zero, the SSL negotiation doesn't
+  /// have a timeout.
+  /// Default: zero
   public uint msecTimeout {
     set {
       pjsua2PINVOKE.TlsConfig_msecTimeout_set(swigCPtr, value);
@@ -256,6 +338,10 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// QoS traffic type to be set on this transport. When application wants
+  /// to apply QoS tagging to the transport, it's preferable to set this
+  /// field rather than *qosParam* fields since this is more portable.
+  /// Default value is PJ_QOS_TYPE_BEST_EFFORT.
   public pj_qos_type qosType {
     set {
       pjsua2PINVOKE.TlsConfig_qosType_set(swigCPtr, (int)value);
@@ -266,6 +352,10 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Set the low level QoS parameters to the transport. This is a lower
+  /// level operation than setting the *qosType* field and may not be
+  /// supported on all platforms.
+  /// By default all settings in this structure are disabled.
   public pj_qos_params qosParams {
     set {
       pjsua2PINVOKE.TlsConfig_qosParams_set(swigCPtr, pj_qos_params.getCPtr(value));
@@ -277,6 +367,9 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Specify if the transport should ignore any errors when setting the QoS
+  /// traffic type/parameters.
+  /// Default: PJ_TRUE
   public bool qosIgnoreError {
     set {
       pjsua2PINVOKE.TlsConfig_qosIgnoreError_set(swigCPtr, value);
@@ -287,6 +380,9 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Specify options to be set on the transport.
+  /// By default, this is unset, which means that the underlying sockopt
+  /// params as returned by #pj_ssl_sock_param_default() will be used.
   public SockOptParams sockOptParams {
     set {
       pjsua2PINVOKE.TlsConfig_sockOptParams_set(swigCPtr, SockOptParams.getCPtr(value));
@@ -298,6 +394,9 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Specify if the transport should ignore any errors when setting the
+  /// sockopt parameters.
+  /// Default: true
   public bool sockOptIgnoreError {
     set {
       pjsua2PINVOKE.TlsConfig_sockOptIgnoreError_set(swigCPtr, value);
@@ -308,6 +407,8 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  /// Specify if renegotiation is enabled for TLSv1.2 or earlier.
+  /// Default: PJ_TRUE
   public bool enableRenegotiation {
     set {
       pjsua2PINVOKE.TlsConfig_enableRenegotiation_set(swigCPtr, value);
@@ -318,14 +419,19 @@ public class TlsConfig : PersistentObject {
     } 
   }
 
+  ///  Default constructor initialises with default values
   public TlsConfig() : this(pjsua2PINVOKE.new_TlsConfig(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.TlsConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.TlsConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Account config specific to IP address change.
 public class AccountIpChangeConfig : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,11 @@ public class AccountIpChangeConfig : global::System.IDisposable {
     }
   }
 
+  /// Shutdown the transport used for account registration. If this is set to
+  /// PJ_TRUE, the transport will be shutdown altough it's used by multiple
+  /// account. Shutdown transport will be followed by re-Registration if
+  /// AccountConfig.natConfig.contactRewriteUse is enabled.
+  /// Default: true
   public bool shutdownTp {
     set {
       pjsua2PINVOKE.AccountIpChangeConfig_shutdownTp_set(swigCPtr, value);
@@ -67,6 +73,9 @@ public class AccountIpChangeConfig : global::System.IDisposable {
     } 
   }
 
+  /// Hangup active calls associated with the acount. If this is set to true,
+  /// then the calls will be hang up.
+  /// Default: false
   public bool hangupCalls {
     set {
       pjsua2PINVOKE.AccountIpChangeConfig_hangupCalls_set(swigCPtr, value);
@@ -77,6 +86,11 @@ public class AccountIpChangeConfig : global::System.IDisposable {
     } 
   }
 
+  /// Specify the call flags used in the re-INVITE when *hangupCalls* is set
+  /// to false. If this is set to 0, no re-INVITE will be sent. The
+  /// re-INVITE will be sent after re-Registration is finished.
+  /// Default: PJSUA_CALL_REINIT_MEDIA | PJSUA_CALL_UPDATE_CONTACT |
+  ///          PJSUA_CALL_UPDATE_VIA
   public uint reinviteFlags {
     set {
       pjsua2PINVOKE.AccountIpChangeConfig_reinviteFlags_set(swigCPtr, value);
@@ -87,6 +101,12 @@ public class AccountIpChangeConfig : global::System.IDisposable {
     } 
   }
 
+  /// For refreshing the call, use SIP UPDATE, instead of re-INVITE, if
+  /// remote supports it (by publishing it in Allow header). If remote
+  /// does not support UPDATE method or somehow the UPDATE attempt fails,
+  /// it will fallback to using re-INVITE. The *reinviteFlags* will be
+  /// used regardless whether it is re-INVITE or UPDATE that is sent.
+  /// Default: PJ_FALSE (using re-INVITE).
   public uint reinvUseUpdate {
     set {
       pjsua2PINVOKE.AccountIpChangeConfig_reinvUseUpdate_set(swigCPtr, value);
@@ -97,11 +117,15 @@ public class AccountIpChangeConfig : global::System.IDisposable {
     } 
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public virtual void readObject(ContainerNode node) {
     pjsua2PINVOKE.AccountIpChangeConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public virtual void writeObject(ContainerNode node) {
     pjsua2PINVOKE.AccountIpChangeConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Audio codec parameters info.
 
 public class CodecParamInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class CodecParamInfo : global::System.IDisposable {
     }
   }
 
+  ///  Sampling rate in Hz
   public uint clockRate {
     set {
       pjsua2PINVOKE.CodecParamInfo_clockRate_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Channel count.
   public uint channelCnt {
     set {
       pjsua2PINVOKE.CodecParamInfo_channelCnt_set(swigCPtr, value);
@@ -77,6 +80,7 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Average bandwidth in bits/sec
   public uint avgBps {
     set {
       pjsua2PINVOKE.CodecParamInfo_avgBps_set(swigCPtr, value);
@@ -87,6 +91,7 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Maximum bandwidth in bits/sec
   public uint maxBps {
     set {
       pjsua2PINVOKE.CodecParamInfo_maxBps_set(swigCPtr, value);
@@ -97,6 +102,7 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Maximum frame size
   public uint maxRxFrameSize {
     set {
       pjsua2PINVOKE.CodecParamInfo_maxRxFrameSize_set(swigCPtr, value);
@@ -107,6 +113,7 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Decoder frame ptime in msec.
   public uint frameLen {
     set {
       pjsua2PINVOKE.CodecParamInfo_frameLen_set(swigCPtr, value);
@@ -117,6 +124,8 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Decoder frame ptime denum, or
+  ///                                             zero if ptime is integer.
   public uint frameLenDenum {
     set {
       pjsua2PINVOKE.CodecParamInfo_frameLenDenum_set(swigCPtr, value);
@@ -127,6 +136,8 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Encoder ptime, or zero if it's
+  ///                                             equal to decoder ptime.
   public uint encFrameLen {
     set {
       pjsua2PINVOKE.CodecParamInfo_encFrameLen_set(swigCPtr, value);
@@ -137,6 +148,8 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Encoder ptime denum, or zero
+  ///                                             if ptime is integer.
   public uint encFrameLenDenum {
     set {
       pjsua2PINVOKE.CodecParamInfo_encFrameLenDenum_set(swigCPtr, value);
@@ -147,6 +160,7 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Bits/sample in the PCM side
   public uint pcmBitsPerSample {
     set {
       pjsua2PINVOKE.CodecParamInfo_pcmBitsPerSample_set(swigCPtr, value);
@@ -157,6 +171,7 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  ///  Payload type.
   public uint pt {
     set {
       pjsua2PINVOKE.CodecParamInfo_pt_set(swigCPtr, value);
@@ -167,6 +182,9 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Source format, it's format of
+  ///                                             encoder input and decoder
+  ///                                             output.
   public pjmedia_format_id fmtId {
     set {
       pjsua2PINVOKE.CodecParamInfo_fmtId_set(swigCPtr, (int)value);
@@ -177,6 +195,7 @@ public class CodecParamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public CodecParamInfo() : this(pjsua2PINVOKE.new_CodecParamInfo(), true) {
   }
 

@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Account's call settings. This will be specified in AccountConfig.
 public class AccountCallConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,6 +48,9 @@ public class AccountCallConfig : PersistentObject {
     }
   }
 
+  /// Specify how to offer call hold to remote peer. Please see the
+  /// documentation on pjsua_call_hold_type for more info.
+  /// Default: PJSUA_CALL_HOLD_TYPE_DEFAULT
   public pjsua_call_hold_type holdType {
     set {
       pjsua2PINVOKE.AccountCallConfig_holdType_set(swigCPtr, (int)value);
@@ -57,6 +61,10 @@ public class AccountCallConfig : PersistentObject {
     } 
   }
 
+  /// Specify how support for reliable provisional response (100rel/
+  /// PRACK) should be used for all sessions in this account. See the
+  /// documentation of pjsua_100rel_use enumeration for more info.
+  /// Default: PJSUA_100REL_NOT_USED
   public pjsua_100rel_use prackUse {
     set {
       pjsua2PINVOKE.AccountCallConfig_prackUse_set(swigCPtr, (int)value);
@@ -67,6 +75,9 @@ public class AccountCallConfig : PersistentObject {
     } 
   }
 
+  /// Specify the usage of Session Timers for all sessions. See the
+  /// pjsua_sip_timer_use for possible values.
+  /// Default: PJSUA_SIP_TIMER_OPTIONAL
   public pjsua_sip_timer_use timerUse {
     set {
       pjsua2PINVOKE.AccountCallConfig_timerUse_set(swigCPtr, (int)value);
@@ -77,6 +88,9 @@ public class AccountCallConfig : PersistentObject {
     } 
   }
 
+  /// Specify the usage of SIPREC INVITE request. See the
+  /// pjsua_sip_siprec_use for possible values.
+  /// Default: PJSUA_SIP_SIPREC_INACTIVE
   public pjsua_sip_siprec_use siprecUse {
     set {
       pjsua2PINVOKE.AccountCallConfig_siprecUse_set(swigCPtr, (int)value);
@@ -87,6 +101,8 @@ public class AccountCallConfig : PersistentObject {
     } 
   }
 
+  /// Specify minimum Session Timer expiration period, in seconds.
+  /// Must not be lower than 90. Default is 90.
   public uint timerMinSESec {
     set {
       pjsua2PINVOKE.AccountCallConfig_timerMinSESec_set(swigCPtr, value);
@@ -97,6 +113,8 @@ public class AccountCallConfig : PersistentObject {
     } 
   }
 
+  /// Specify Session Timer expiration period, in seconds.
+  /// Must not be lower than timerMinSE. Default is 1800.
   public uint timerSessExpiresSec {
     set {
       pjsua2PINVOKE.AccountCallConfig_timerSessExpiresSec_set(swigCPtr, value);
@@ -107,14 +125,19 @@ public class AccountCallConfig : PersistentObject {
     } 
   }
 
+  /// Default constructor
   public AccountCallConfig() : this(pjsua2PINVOKE.new_AccountCallConfig(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.AccountCallConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.AccountCallConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

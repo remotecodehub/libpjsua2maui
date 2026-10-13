@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Account::onSendRequest() callback.
 public class OnSendRequestParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,8 @@ public class OnSendRequestParam : global::System.IDisposable {
     }
   }
 
+  /// Token or arbitrary user data owned by the application,
+  /// which was passed to Endpoint::sendRquest() function.
   public System.IntPtr userData {
     set {
       pjsua2PINVOKE.OnSendRequestParam_userData_set(swigCPtr, value);
@@ -68,6 +71,7 @@ public class OnSendRequestParam : global::System.IDisposable {
   
   }
 
+  /// Transaction event that caused the state change.
   public SipEvent e {
     set {
       pjsua2PINVOKE.OnSendRequestParam_e_set(swigCPtr, SipEvent.getCPtr(value));

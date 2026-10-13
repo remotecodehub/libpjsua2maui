@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Media stream statistic.
 
 public class StreamStat : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class StreamStat : global::System.IDisposable {
     }
   }
 
+  /// RTCP statistic.
   public RtcpStat rtcp {
     set {
       pjsua2PINVOKE.StreamStat_rtcp_set(swigCPtr, RtcpStat.getCPtr(value));
@@ -68,6 +70,7 @@ public class StreamStat : global::System.IDisposable {
     } 
   }
 
+  /// Jitter buffer statistic.
   public JbufState jbuf {
     set {
       pjsua2PINVOKE.StreamStat_jbuf_set(swigCPtr, JbufState.getCPtr(value));

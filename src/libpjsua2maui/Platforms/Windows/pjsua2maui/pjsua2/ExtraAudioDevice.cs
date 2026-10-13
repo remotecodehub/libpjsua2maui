@@ -9,6 +9,16 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Extra audio device. This class allows application to have multiple
+/// sound device instances active concurrently.
+/// Application may also use this class to improve media clock. Normally
+/// media clock is driven by sound device in master port, but unfortunately
+/// some sound devices may produce jittery clock. To improve media clock,
+/// application can install Null Sound Device (i.e: using
+/// AudDevManager::setNullDev()), which will act as a master port, and
+/// install the sound device as extra sound device.
+/// Note that extra sound device will not have auto-close upon idle feature.
+/// Also note that the extra sound device only supports mono channel.
 
 public class ExtraAudioDevice : AudioMedia {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -47,18 +57,29 @@ public class ExtraAudioDevice : AudioMedia {
     }
   }
 
+  /// Constructor.
+  /// <param name="playdev">           Playback device ID.</param> 
+  /// <param name="recdev">            Record device ID.</param>
   public ExtraAudioDevice(int playdev, int recdev) : this(pjsua2PINVOKE.new_ExtraAudioDevice(playdev, recdev), true) {
   }
 
+  /// Open the audio device using format (e.g.: clock rate, bit per sample,
+  /// samples per frame) matched to the conference bridge's format, except
+  /// the channel count, which will be set to one (mono channel). This will
+  /// also register the audio device port to conference bridge.
   public void open() {
     pjsua2PINVOKE.ExtraAudioDevice_open(swigCPtr);
   }
 
+  /// Close the audio device and unregister the audio device port from the
+  /// conference bridge.
   public void close() {
     pjsua2PINVOKE.ExtraAudioDevice_close(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Is the extra audio device opened?
+  /// <returns>'true' if it is opened.</returns>
   public bool isOpened() {
     bool ret = pjsua2PINVOKE.ExtraAudioDevice_isOpened(swigCPtr);
     return ret;

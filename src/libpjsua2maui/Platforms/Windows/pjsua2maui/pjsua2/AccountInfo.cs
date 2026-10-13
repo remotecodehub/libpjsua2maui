@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Account information. Application can query the account information
+/// by calling Account::getInfo().
 
 public class AccountInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class AccountInfo : global::System.IDisposable {
     }
   }
 
+  /// The account ID.
   public int id {
     set {
       pjsua2PINVOKE.AccountInfo_id_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Flag to indicate whether this is the default account.
   public bool isDefault {
     set {
       pjsua2PINVOKE.AccountInfo_isDefault_set(swigCPtr, value);
@@ -77,6 +81,7 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Account URI
   public string uri {
     set {
       pjsua2PINVOKE.AccountInfo_uri_set(swigCPtr, value);
@@ -89,6 +94,8 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Flag to tell whether this account has registration setting
+  /// (reg_uri is not empty).
   public bool regIsConfigured {
     set {
       pjsua2PINVOKE.AccountInfo_regIsConfigured_set(swigCPtr, value);
@@ -99,6 +106,8 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Flag to tell whether this account is currently registered
+  /// (has active registration session).
   public bool regIsActive {
     set {
       pjsua2PINVOKE.AccountInfo_regIsActive_set(swigCPtr, value);
@@ -109,6 +118,7 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// An up to date expiration interval for account registration session.
   public uint regExpiresSec {
     set {
       pjsua2PINVOKE.AccountInfo_regExpiresSec_set(swigCPtr, value);
@@ -119,6 +129,9 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Last registration status code. If status code is zero, the account
+  /// is currently not registered. Any other value indicates the SIP
+  /// status code of the registration.
   public pjsip_status_code regStatus {
     set {
       pjsua2PINVOKE.AccountInfo_regStatus_set(swigCPtr, (int)value);
@@ -129,6 +142,7 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// String describing the registration status.
   public string regStatusText {
     set {
       pjsua2PINVOKE.AccountInfo_regStatusText_set(swigCPtr, value);
@@ -141,6 +155,10 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Last registration error code. When the status field contains a SIP
+  /// status code that indicates a registration failure, last registration
+  /// error code contains the error code that causes the failure. In any
+  /// other case, its value is zero.
   public int regLastErr {
     set {
       pjsua2PINVOKE.AccountInfo_regLastErr_set(swigCPtr, value);
@@ -151,6 +169,7 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Presence online status for this account.
   public bool onlineStatus {
     set {
       pjsua2PINVOKE.AccountInfo_onlineStatus_set(swigCPtr, value);
@@ -161,6 +180,7 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Presence online status text.
   public string onlineStatusText {
     set {
       pjsua2PINVOKE.AccountInfo_onlineStatusText_set(swigCPtr, value);
@@ -173,6 +193,7 @@ public class AccountInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public AccountInfo() : this(pjsua2PINVOKE.new_AccountInfo(), true) {
   }
 

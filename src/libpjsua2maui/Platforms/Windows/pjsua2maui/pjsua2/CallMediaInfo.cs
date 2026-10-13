@@ -9,6 +9,11 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Call media information.
+/// Application can query conference bridge port of this media using
+/// Call::getAudioMedia() if the media type is audio,
+/// or Call::getEncodingVideoMedia() / Call::getDecodingVideoMedia()
+/// if the media type is video.
 
 public class CallMediaInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +62,7 @@ public class CallMediaInfo : global::System.IDisposable {
     }
   }
 
+  /// Media index in SDP.
   public uint index {
     set {
       pjsua2PINVOKE.CallMediaInfo_index_set(swigCPtr, value);
@@ -67,6 +73,7 @@ public class CallMediaInfo : global::System.IDisposable {
     } 
   }
 
+  /// Media type.
   public pjmedia_type type {
     set {
       pjsua2PINVOKE.CallMediaInfo_type_set(swigCPtr, (int)value);
@@ -77,6 +84,7 @@ public class CallMediaInfo : global::System.IDisposable {
     } 
   }
 
+  /// Media direction.
   public pjmedia_dir dir {
     set {
       pjsua2PINVOKE.CallMediaInfo_dir_set(swigCPtr, (int)value);
@@ -87,6 +95,7 @@ public class CallMediaInfo : global::System.IDisposable {
     } 
   }
 
+  /// Call media status.
   public pjsua_call_media_status status {
     set {
       pjsua2PINVOKE.CallMediaInfo_status_set(swigCPtr, (int)value);
@@ -97,6 +106,10 @@ public class CallMediaInfo : global::System.IDisposable {
     } 
   }
 
+  /// Warning: this is deprecated, application can query conference bridge
+  /// port of this media using Call::getAudioMedia().
+  /// The conference port number for the call. Only valid if the media type
+  /// is audio.
   public int audioConfSlot {
     set {
       pjsua2PINVOKE.CallMediaInfo_audioConfSlot_set(swigCPtr, value);
@@ -107,6 +120,8 @@ public class CallMediaInfo : global::System.IDisposable {
     } 
   }
 
+  /// The window id for incoming video, if any, or
+  /// PJSUA_INVALID_ID. Only valid if the media type is video.
   public int videoIncomingWindowId {
     set {
       pjsua2PINVOKE.CallMediaInfo_videoIncomingWindowId_set(swigCPtr, value);
@@ -117,6 +132,9 @@ public class CallMediaInfo : global::System.IDisposable {
     } 
   }
 
+  /// The video window instance for incoming video. Only valid if
+  /// videoIncomingWindowId is not PJSUA_INVALID_ID and
+  /// the media type is video.
   public VideoWindow videoWindow {
     set {
       pjsua2PINVOKE.CallMediaInfo_videoWindow_set(swigCPtr, VideoWindow.getCPtr(value));
@@ -128,6 +146,8 @@ public class CallMediaInfo : global::System.IDisposable {
     } 
   }
 
+  /// The video capture device for outgoing transmission, if any,
+  /// or PJMEDIA_VID_INVALID_DEV. Only valid if the media type is video.
   public int videoCapDev {
     set {
       pjsua2PINVOKE.CallMediaInfo_videoCapDev_set(swigCPtr, value);
@@ -138,6 +158,7 @@ public class CallMediaInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public CallMediaInfo() : this(pjsua2PINVOKE.new_CallMediaInfo(), true) {
   }
 

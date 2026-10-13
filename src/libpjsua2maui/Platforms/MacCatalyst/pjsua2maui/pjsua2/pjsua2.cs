@@ -11,6 +11,7 @@
 namespace libpjsua2.maui {
 
 public class pjsua2 {
+/// Constants
   public static readonly int INVALID_ID = pjsua2PINVOKE.INVALID_ID_get();
   public static readonly int SUCCESS = pjsua2PINVOKE.SUCCESS_get();
 

@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes audio media's unregister/remove of operation info.
 public class AudioMediaRemoveInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class AudioMediaRemoveInfo : global::System.IDisposable {
     }
   }
 
+  ///  The media port id.
   public uint mediaId {
     set {
       pjsua2PINVOKE.AudioMediaRemoveInfo_mediaId_set(swigCPtr, value);

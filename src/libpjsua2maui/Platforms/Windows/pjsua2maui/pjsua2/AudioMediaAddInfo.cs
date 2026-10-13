@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes audio media's register/add of operation info.
 
 public class AudioMediaAddInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class AudioMediaAddInfo : global::System.IDisposable {
     }
   }
 
+  ///  The media port id.
   public uint mediaId {
     set {
       pjsua2PINVOKE.AudioMediaAddInfo_mediaId_set(swigCPtr, value);

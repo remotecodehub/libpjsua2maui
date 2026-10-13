@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// Call information. Application can query the call information
+/// by calling Call::getInfo().
 public class CallInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class CallInfo : global::System.IDisposable {
     }
   }
 
+  /// Call identification.
   public int id {
     set {
       pjsua2PINVOKE.CallInfo_id_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Initial call role (UAC == caller)
   public pjsip_role_e role {
     set {
       pjsua2PINVOKE.CallInfo_role_set(swigCPtr, (int)value);
@@ -77,6 +81,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// The account ID where this call belongs.
   public int accId {
     set {
       pjsua2PINVOKE.CallInfo_accId_set(swigCPtr, value);
@@ -87,6 +92,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Local URI
   public string localUri {
     set {
       pjsua2PINVOKE.CallInfo_localUri_set(swigCPtr, value);
@@ -99,6 +105,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Local Contact
   public string localContact {
     set {
       pjsua2PINVOKE.CallInfo_localContact_set(swigCPtr, value);
@@ -111,6 +118,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Remote URI
   public string remoteUri {
     set {
       pjsua2PINVOKE.CallInfo_remoteUri_set(swigCPtr, value);
@@ -123,6 +131,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Remote contact
   public string remoteContact {
     set {
       pjsua2PINVOKE.CallInfo_remoteContact_set(swigCPtr, value);
@@ -135,6 +144,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Dialog Call-ID string.
   public string callIdString {
     set {
       pjsua2PINVOKE.CallInfo_callIdString_set(swigCPtr, value);
@@ -147,6 +157,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Call setting
   public CallSetting setting {
     set {
       pjsua2PINVOKE.CallInfo_setting_set(swigCPtr, CallSetting.getCPtr(value));
@@ -158,6 +169,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Call state
   public pjsip_inv_state state {
     set {
       pjsua2PINVOKE.CallInfo_state_set(swigCPtr, (int)value);
@@ -168,6 +180,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Text describing the state
   public string stateText {
     set {
       pjsua2PINVOKE.CallInfo_stateText_set(swigCPtr, value);
@@ -180,6 +193,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Last status code heard, which can be used as cause code
   public pjsip_status_code lastStatusCode {
     set {
       pjsua2PINVOKE.CallInfo_lastStatusCode_set(swigCPtr, (int)value);
@@ -190,6 +204,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// The reason phrase describing the last status.
   public string lastReason {
     set {
       pjsua2PINVOKE.CallInfo_lastReason_set(swigCPtr, value);
@@ -202,6 +217,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Array of active media information.
   public CallMediaInfoVector media {
     set {
       pjsua2PINVOKE.CallInfo_media_set(swigCPtr, CallMediaInfoVector.getCPtr(value));
@@ -213,6 +229,9 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Array of provisional media information. This contains the media info
+  /// in the provisioning state, that is when the media session is being
+  /// created/updated (SDP offer/answer is on progress).
   public CallMediaInfoVector provMedia {
     set {
       pjsua2PINVOKE.CallInfo_provMedia_set(swigCPtr, CallMediaInfoVector.getCPtr(value));
@@ -224,6 +243,8 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Up-to-date call connected duration (zero when call is not
+  /// established)
   public TimeVal connectDuration {
     set {
       pjsua2PINVOKE.CallInfo_connectDuration_set(swigCPtr, TimeVal.getCPtr(value));
@@ -235,6 +256,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Total call duration, including set-up time
   public TimeVal totalDuration {
     set {
       pjsua2PINVOKE.CallInfo_totalDuration_set(swigCPtr, TimeVal.getCPtr(value));
@@ -246,6 +268,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Flag if remote was SDP offerer
   public bool remOfferer {
     set {
       pjsua2PINVOKE.CallInfo_remOfferer_set(swigCPtr, value);
@@ -256,6 +279,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Number of audio streams offered by remote
   public uint remAudioCount {
     set {
       pjsua2PINVOKE.CallInfo_remAudioCount_set(swigCPtr, value);
@@ -266,6 +290,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Number of video streams offered by remote
   public uint remVideoCount {
     set {
       pjsua2PINVOKE.CallInfo_remVideoCount_set(swigCPtr, value);
@@ -276,6 +301,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Number of text streams offered by remote
   public uint remTextCount {
     set {
       pjsua2PINVOKE.CallInfo_remTextCount_set(swigCPtr, value);
@@ -286,6 +312,7 @@ public class CallInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public CallInfo() : this(pjsua2PINVOKE.new_CallInfo(), true) {
   }
 

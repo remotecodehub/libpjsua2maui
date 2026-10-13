@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Call::onCallRxText()
+/// callback.
 
 public class OnCallRxTextParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class OnCallRxTextParam : global::System.IDisposable {
     }
   }
 
+  /// The sequence of the incoming text block data.
   public int seq {
     set {
       pjsua2PINVOKE.OnCallRxTextParam_seq_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class OnCallRxTextParam : global::System.IDisposable {
     } 
   }
 
+  /// The timestamp of the text block data.
   public uint ts {
     set {
       pjsua2PINVOKE.OnCallRxTextParam_ts_set(swigCPtr, value);
@@ -77,6 +81,8 @@ public class OnCallRxTextParam : global::System.IDisposable {
     } 
   }
 
+  /// The content of the text block.
+  /// Note that the text can be empty.
   public string text {
     set {
       pjsua2PINVOKE.OnCallRxTextParam_text_set(swigCPtr, value);

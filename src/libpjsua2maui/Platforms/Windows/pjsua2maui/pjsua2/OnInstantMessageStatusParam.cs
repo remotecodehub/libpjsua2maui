@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Parameters for onInstantMessageStatus() account callback.
 
 public class OnInstantMessageStatusParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,8 @@ public class OnInstantMessageStatusParam : global::System.IDisposable {
     }
   }
 
+  /// Token or a user data that was associated with the pager
+  /// transmission.
   public System.IntPtr userData {
     set {
       pjsua2PINVOKE.OnInstantMessageStatusParam_userData_set(swigCPtr, value);
@@ -68,6 +71,7 @@ public class OnInstantMessageStatusParam : global::System.IDisposable {
   
   }
 
+  /// Destination URI.
   public string toUri {
     set {
       pjsua2PINVOKE.OnInstantMessageStatusParam_toUri_set(swigCPtr, value);
@@ -80,6 +84,7 @@ public class OnInstantMessageStatusParam : global::System.IDisposable {
     } 
   }
 
+  /// The message body.
   public string msgBody {
     set {
       pjsua2PINVOKE.OnInstantMessageStatusParam_msgBody_set(swigCPtr, value);
@@ -92,6 +97,7 @@ public class OnInstantMessageStatusParam : global::System.IDisposable {
     } 
   }
 
+  /// The SIP status code of the transaction.
   public pjsip_status_code code {
     set {
       pjsua2PINVOKE.OnInstantMessageStatusParam_code_set(swigCPtr, (int)value);
@@ -102,6 +108,7 @@ public class OnInstantMessageStatusParam : global::System.IDisposable {
     } 
   }
 
+  /// The reason phrase of the transaction.
   public string reason {
     set {
       pjsua2PINVOKE.OnInstantMessageStatusParam_reason_set(swigCPtr, value);
@@ -114,6 +121,9 @@ public class OnInstantMessageStatusParam : global::System.IDisposable {
     } 
   }
 
+  /// The incoming response that causes this callback to be called.
+  /// If the transaction fails because of time out or transport error,
+  /// the content will be empty.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnInstantMessageStatusParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));

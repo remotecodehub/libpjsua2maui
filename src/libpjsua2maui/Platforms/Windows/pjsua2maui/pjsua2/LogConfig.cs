@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Logging configuration, which can be (optionally) specified when calling
+/// Lib::init().
 
 public class LogConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -47,6 +49,7 @@ public class LogConfig : PersistentObject {
     }
   }
 
+  ///  Log incoming and outgoing SIP message? Yes!
   public uint msgLogging {
     set {
       pjsua2PINVOKE.LogConfig_msgLogging_set(swigCPtr, value);
@@ -57,6 +60,7 @@ public class LogConfig : PersistentObject {
     } 
   }
 
+  ///  Input verbosity level. Value 5 is reasonable.
   public uint level {
     set {
       pjsua2PINVOKE.LogConfig_level_set(swigCPtr, value);
@@ -67,6 +71,7 @@ public class LogConfig : PersistentObject {
     } 
   }
 
+  ///  Verbosity level for console. Value 4 is reasonable.
   public uint consoleLevel {
     set {
       pjsua2PINVOKE.LogConfig_consoleLevel_set(swigCPtr, value);
@@ -77,6 +82,7 @@ public class LogConfig : PersistentObject {
     } 
   }
 
+  ///  Log decoration.
   public uint decor {
     set {
       pjsua2PINVOKE.LogConfig_decor_set(swigCPtr, value);
@@ -87,6 +93,7 @@ public class LogConfig : PersistentObject {
     } 
   }
 
+  ///  Optional log filename if app wishes the library to write to log file.
   public string filename {
     set {
       pjsua2PINVOKE.LogConfig_filename_set(swigCPtr, value);
@@ -99,6 +106,11 @@ public class LogConfig : PersistentObject {
     } 
   }
 
+  /// Additional flags to be given to pj_file_open() when opening
+  /// the log file. By default, the flag is PJ_O_WRONLY. Application
+  /// may set PJ_O_APPEND here so that logs are appended to existing
+  /// file instead of overwriting it.
+  /// Default is 0.
   public uint fileFlags {
     set {
       pjsua2PINVOKE.LogConfig_fileFlags_set(swigCPtr, value);
@@ -109,6 +121,8 @@ public class LogConfig : PersistentObject {
     } 
   }
 
+  /// Custom log writer, if required. This instance will be destroyed
+  /// by the endpoint when the endpoint is destroyed.
   public LogWriter writer {
     set {
       pjsua2PINVOKE.LogConfig_writer_set(swigCPtr, LogWriter.getCPtr(value));
@@ -120,14 +134,19 @@ public class LogConfig : PersistentObject {
     } 
   }
 
+  ///  Default constructor initialises with default values
   public LogConfig() : this(pjsua2PINVOKE.new_LogConfig(), true) {
   }
 
+  /// Read this object from a container.
+  /// <param name="node">              Container to write values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.LogConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.LogConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

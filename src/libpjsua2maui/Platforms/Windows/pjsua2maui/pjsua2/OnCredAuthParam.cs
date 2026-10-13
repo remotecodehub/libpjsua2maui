@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Parameter of Endpoint::onCredAuth() callback.
 
 public class OnCredAuthParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,9 @@ public class OnCredAuthParam : global::System.IDisposable {
     }
   }
 
+  /// Digest challenge.
+  /// The authentication challenge sent by server in 401 or 401 response,
+  /// as either Proxy-Authenticate or WWW-Authenticate header.
   public DigestChallenge digestChallenge {
     set {
       pjsua2PINVOKE.OnCredAuthParam_digestChallenge_set(swigCPtr, DigestChallenge.getCPtr(value));
@@ -68,6 +72,7 @@ public class OnCredAuthParam : global::System.IDisposable {
     } 
   }
 
+  /// Credential info.
   public AuthCredInfo credentialInfo {
     set {
       pjsua2PINVOKE.OnCredAuthParam_credentialInfo_set(swigCPtr, AuthCredInfo.getCPtr(value));
@@ -79,6 +84,7 @@ public class OnCredAuthParam : global::System.IDisposable {
     } 
   }
 
+  /// The request method.
   public string method {
     set {
       pjsua2PINVOKE.OnCredAuthParam_method_set(swigCPtr, value);
@@ -91,6 +97,11 @@ public class OnCredAuthParam : global::System.IDisposable {
     } 
   }
 
+  /// The digest credential where the digest response will be placed to.
+  /// Upon calling this function, the nonce, nc, cnonce, qop, uri, and realm
+  /// fields of this structure must be set by the caller.
+  /// Upon return, the callback must set the response in
+  /// *DigestCredential.response*.
   public DigestCredential digestCredential {
     set {
       pjsua2PINVOKE.OnCredAuthParam_digestCredential_set(swigCPtr, DigestCredential.getCPtr(value));

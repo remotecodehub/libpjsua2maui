@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Account presence config. This will be specified in AccountConfig.
 
 public class AccountPresConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -47,6 +48,8 @@ public class AccountPresConfig : PersistentObject {
     }
   }
 
+  /// The optional custom SIP headers to be put in the presence
+  /// subscription request.
   public SipHeaderVector headers {
     set {
       pjsua2PINVOKE.AccountPresConfig_headers_set(swigCPtr, SipHeaderVector.getCPtr(value));
@@ -58,6 +61,9 @@ public class AccountPresConfig : PersistentObject {
     } 
   }
 
+  /// If this flag is set, the presence information of this account will
+  /// be PUBLISH-ed to the server where the account belongs.
+  /// Default: PJ_FALSE
   public bool publishEnabled {
     set {
       pjsua2PINVOKE.AccountPresConfig_publishEnabled_set(swigCPtr, value);
@@ -68,6 +74,12 @@ public class AccountPresConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether the client publication session should queue the
+  /// PUBLISH request should there be another PUBLISH transaction still
+  /// pending. If this is set to false, the client will return error
+  /// on the PUBLISH request if there is another PUBLISH transaction still
+  /// in progress.
+  /// Default: PJSIP_PUBLISHC_QUEUE_REQUEST (TRUE)
   public bool publishQueue {
     set {
       pjsua2PINVOKE.AccountPresConfig_publishQueue_set(swigCPtr, value);
@@ -78,6 +90,15 @@ public class AccountPresConfig : PersistentObject {
     } 
   }
 
+  /// Maximum time to wait for unpublication transaction(s) to complete
+  /// during shutdown process, before sending unregistration. The library
+  /// tries to wait for the unpublication (un-PUBLISH) to complete before
+  /// sending REGISTER request to unregister the account, during library
+  /// shutdown process. If the value is set too short, it is possible that
+  /// the unregistration is sent before unpublication completes, causing
+  /// unpublication request to fail.
+  /// Value is in milliseconds.
+  /// Default: PJSUA_UNPUBLISH_MAX_WAIT_TIME_MSEC (2000)
   public uint publishShutdownWaitMsec {
     set {
       pjsua2PINVOKE.AccountPresConfig_publishShutdownWaitMsec_set(swigCPtr, value);
@@ -88,6 +109,8 @@ public class AccountPresConfig : PersistentObject {
     } 
   }
 
+  /// Optional PIDF tuple ID for outgoing PUBLISH and NOTIFY. If this value
+  /// is not specified, a random string will be used.
   public string pidfTupleId {
     set {
       pjsua2PINVOKE.AccountPresConfig_pidfTupleId_set(swigCPtr, value);
@@ -100,11 +123,15 @@ public class AccountPresConfig : PersistentObject {
     } 
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.AccountPresConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.AccountPresConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

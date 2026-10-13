@@ -9,6 +9,11 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Wrapper class for Buddy matching algo.
+/// Default algo is a simple substring lookup of search-token in the
+/// Buddy URIs, with case sensitive. Application can implement its own
+/// matching algo by overriding this class and specifying its instance
+/// in Account::findBuddy().
 
 public class FindBuddyMatch : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +62,7 @@ public class FindBuddyMatch : global::System.IDisposable {
     }
   }
 
+  /// Default algo implementation.
   public virtual bool match(string token, Buddy buddy) {
     bool ret = (SwigDerivedClassHasMethod("match", swigMethodTypes0) ? pjsua2PINVOKE.FindBuddyMatch_matchSwigExplicitFindBuddyMatch(swigCPtr, token, Buddy.getCPtr(buddy)) : pjsua2PINVOKE.FindBuddyMatch_match(swigCPtr, token, Buddy.getCPtr(buddy)));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

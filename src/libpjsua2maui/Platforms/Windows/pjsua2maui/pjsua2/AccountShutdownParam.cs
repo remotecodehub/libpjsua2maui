@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Parameters for Account::shutdown2().
 
 public class AccountShutdownParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,10 @@ public class AccountShutdownParam : global::System.IDisposable {
     }
   }
 
+  /// If true, the account will always be deleted even when there are
+  /// active calls using it (a warning will be logged). If false, the
+  /// function will throw an Error with PJ_EBUSY when active calls exist.
+  /// Default: false
   public bool force {
     set {
       pjsua2PINVOKE.AccountShutdownParam_force_set(swigCPtr, value);
@@ -67,6 +72,7 @@ public class AccountShutdownParam : global::System.IDisposable {
     } 
   }
 
+  ///  Default constructor
   public AccountShutdownParam() : this(pjsua2PINVOKE.new_AccountShutdownParam(), true) {
   }
 

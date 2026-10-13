@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Account.
 
 public class Account : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,153 +58,314 @@ public class Account : global::System.IDisposable {
     }
   }
 
+  /// Constructor.
   public Account() : this(pjsua2PINVOKE.new_Account(), true) {
     SwigDirectorConnect();
   }
 
+  /// Create the account.
+  /// If application implements a derived class, the derived class should
+  /// call shutdown() in the beginning stage in its destructor, or
+  /// alternatively application should call shutdown() before deleting
+  /// the derived class instance. This is to avoid race condition between
+  /// the derived class destructor and Account callbacks.
+  /// <param name="cfg">               The account config.</param> 
+  /// <param name="make_default">      Make this the default account.</param>
   public void create(AccountConfig cfg, bool make_default) {
     pjsua2PINVOKE.Account_create__SWIG_0(swigCPtr, AccountConfig.getCPtr(cfg), make_default);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create the account.
+  /// If application implements a derived class, the derived class should
+  /// call shutdown() in the beginning stage in its destructor, or
+  /// alternatively application should call shutdown() before deleting
+  /// the derived class instance. This is to avoid race condition between
+  /// the derived class destructor and Account callbacks.
+  /// <param name="cfg">               The account config.</param>
   public void create(AccountConfig cfg) {
     pjsua2PINVOKE.Account_create__SWIG_1(swigCPtr, AccountConfig.getCPtr(cfg));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Shutdown the account. This will always delete the account
+  /// (force=true), initiating unregistration if needed, and deleting the
+  /// corresponding account in the PJSUA-LIB. Active calls will not
+  /// prevent deletion; a warning will be logged if any exist.
+  /// This method does not throw an exception. Any error will be logged
+  /// internally. For safer behavior that checks for active calls, use
+  /// shutdown2() instead.
+  /// Note that application must delete all Buddy instances belong to this
+  /// account before shutting down the account.
+  /// If application implements a derived class, the derived class should
+  /// call this method in the beginning stage in its destructor, or
+  /// alternatively application should call this method before deleting
+  /// the derived class instance. This is to avoid race condition between
+  /// the derived class destructor and Account callbacks.
   public void shutdown() {
     pjsua2PINVOKE.Account_shutdown(swigCPtr);
   }
 
+  /// Shutdown the account, with additional options. This will initiate
+  /// unregistration if needed, and delete the corresponding account in
+  /// the PJSUA-LIB.
+  /// Unlike shutdown(), this method throws an Error exception on failure.
+  /// By default (force=false), if there are active calls still using this
+  /// account, it will throw an Error with PJ_EBUSY status. Set force=true
+  /// to always delete the account regardless.
+  /// <param name="prm">               Shutdown parameters.</param>
   public void shutdown2(AccountShutdownParam prm) {
     pjsua2PINVOKE.Account_shutdown2(swigCPtr, AccountShutdownParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Modify the account to use the specified account configuration.
+  /// Depending on the changes, this may cause unregistration or
+  /// reregistration on the account.
+  /// <param name="cfg">               New account config to be applied to the
+  ///                              account.</param>
   public void modify(AccountConfig cfg) {
     pjsua2PINVOKE.Account_modify(swigCPtr, AccountConfig.getCPtr(cfg));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Check if this account is still valid.
+  /// <returns>True if it is.</returns>
   public bool isValid() {
     bool ret = pjsua2PINVOKE.Account_isValid(swigCPtr);
     return ret;
   }
 
+  /// Set this as default account to be used when incoming and outgoing
+  /// requests don't match any accounts.
   public void setDefault() {
     pjsua2PINVOKE.Account_setDefault(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Check if this account is the default account. Default account will be
+  /// used for incoming and outgoing requests that don't match any other
+  /// accounts.
+  /// <returns>True if this is the default account.</returns>
   public bool isDefault() {
     bool ret = pjsua2PINVOKE.Account_isDefault(swigCPtr);
     return ret;
   }
 
+  /// Get PJSUA-LIB account ID or index associated with this account.
+  /// <returns>Integer greater than or equal to zero.</returns>
   public int getId() {
     int ret = pjsua2PINVOKE.Account_getId(swigCPtr);
     return ret;
   }
 
+  /// Get the Account class for the specified account Id.
+  /// <param name="acc_id">            The account ID to lookup</param> 
+  /// <returns>The Account instance or NULL if not found.</returns>
   public static Account lookup(int acc_id) {
     global::System.IntPtr cPtr = pjsua2PINVOKE.Account_lookup(acc_id);
     Account ret = (cPtr == global::System.IntPtr.Zero) ? null : new Account(cPtr, false);
     return ret;
   }
 
+  /// Get account info.
+  /// <returns>Account info.</returns>
   public AccountInfo getInfo() {
     AccountInfo ret = new AccountInfo(pjsua2PINVOKE.Account_getInfo(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Send arbitrary requests using the account. Application should only use
+  /// this function to create auxiliary requests outside dialog, such as
+  /// OPTIONS, and use the call or presence API to create dialog related
+  /// requests.
   public void sendRequest(SendRequestParam prm) {
     pjsua2PINVOKE.Account_sendRequest(swigCPtr, SendRequestParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send response for incoming request that was deferred earlier
+  /// using DeferredResponse object.
+  /// <param name="prm">                   The response's parameters.</param>
   public void sendResponse(SendResponseParam prm) {
     pjsua2PINVOKE.Account_sendResponse(swigCPtr, SendResponseParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Update registration or perform unregistration. Application normally
+  /// only needs to call this function if it wants to manually update the
+  /// registration or to unregister from the server.
+  /// <param name="renew">             If False, this will start unregistration
+  ///                              process.</param>
   public void setRegistration(bool renew) {
     pjsua2PINVOKE.Account_setRegistration(swigCPtr, renew);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Set or modify account's presence online status to be advertised to
+  /// remote/presence subscribers. This would trigger the sending of
+  /// outgoing NOTIFY request if there are server side presence subscription
+  /// for this account, and/or outgoing PUBLISH if presence publication is
+  /// enabled for this account.
+  /// <param name="pres_st">           Presence online status.</param>
   public void setOnlineStatus(PresenceStatus pres_st) {
     pjsua2PINVOKE.Account_setOnlineStatus(swigCPtr, PresenceStatus.getCPtr(pres_st));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Lock/bind this account to a specific transport/listener. Normally
+  /// application shouldn't need to do this, as transports will be selected
+  /// automatically by the library according to the destination.
+  /// When account is locked/bound to a specific transport, all outgoing
+  /// requests from this account will use the specified transport (this
+  /// includes SIP registration, dialog (call and event subscription), and
+  /// out-of-dialog requests such as MESSAGE).
+  /// Note that transport id may be specified in AccountConfig too.
+  /// <param name="tp_id">             The transport ID.</param>
   public void setTransport(int tp_id) {
     pjsua2PINVOKE.Account_setTransport(swigCPtr, tp_id);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send NOTIFY to inform account presence status or to terminate server
+  /// side presence subscription. If application wants to reject the incoming
+  /// request, it should set the param *PresNotifyParam.state* to
+  /// PJSIP_EVSUB_STATE_TERMINATED.
+  /// <param name="prm">               The sending NOTIFY parameter.</param>
   public void presNotify(PresNotifyParam prm) {
     pjsua2PINVOKE.Account_presNotify(swigCPtr, PresNotifyParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Enumerate all buddies of the account.
+  /// <returns>The buddy list.</returns>
   public BuddyVector2 enumBuddies2() {
     BuddyVector2 ret = new BuddyVector2(pjsua2PINVOKE.Account_enumBuddies2(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Find a buddy in the buddy list with the specified URI.
+  /// Exception: if buddy is not found, PJ_ENOTFOUND will be thrown.
+  /// <param name="uri">               The buddy URI.</param> 
+  /// <returns>The pointer to buddy.</returns>
   public Buddy findBuddy2(string uri) {
     Buddy ret = new Buddy(pjsua2PINVOKE.Account_findBuddy2(swigCPtr, uri), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Notify application on incoming call.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onIncomingCall(OnIncomingCallParam prm) {
     if (SwigDerivedClassHasMethod("onIncomingCall", swigMethodTypes0)) pjsua2PINVOKE.Account_onIncomingCallSwigExplicitAccount(swigCPtr, OnIncomingCallParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onIncomingCall(swigCPtr, OnIncomingCallParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when registration or unregistration has been
+  /// initiated. Note that this only notifies the initial registration
+  /// and unregistration. Once registration session is active, subsequent
+  /// refresh will not cause this callback to be called.
+  /// <param name="prm">           Callback parameter.</param>
   public virtual void onRegStarted(OnRegStartedParam prm) {
     if (SwigDerivedClassHasMethod("onRegStarted", swigMethodTypes1)) pjsua2PINVOKE.Account_onRegStartedSwigExplicitAccount(swigCPtr, OnRegStartedParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onRegStarted(swigCPtr, OnRegStartedParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when registration status has changed.
+  /// Application may then query the account info to get the
+  /// registration details.
+  /// <param name="prm">           Callback parameter.</param>
   public virtual void onRegState(OnRegStateParam prm) {
     if (SwigDerivedClassHasMethod("onRegState", swigMethodTypes2)) pjsua2PINVOKE.Account_onRegStateSwigExplicitAccount(swigCPtr, OnRegStateParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onRegState(swigCPtr, OnRegStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notification when incoming SUBSCRIBE request is received. Application
+  /// may use this callback to authorize the incoming subscribe request
+  /// (e.g. ask user permission if the request should be granted).
+  /// If this callback is not implemented, all incoming presence subscription
+  /// requests will be accepted.
+  /// If this callback is implemented, application has several choices on
+  /// what to do with the incoming request:
+  ///  - it may reject the request immediately by specifying non-200 class
+  ///    final response in the IncomingSubscribeParam.code parameter.
+  ///  - it may immediately accept the request by specifying 200 as the
+  ///    IncomingSubscribeParam.code parameter. This is the default value if
+  ///    application doesn't set any value to the IncomingSubscribeParam.code
+  ///    parameter. In this case, the library will automatically send NOTIFY
+  ///    request upon returning from this callback.
+  ///  - it may delay the processing of the request, for example to request
+  ///    user permission whether to accept or reject the request. In this
+  ///    case, the application MUST set the IncomingSubscribeParam.code
+  ///    argument to 202, then IMMEDIATELY calls presNotify() with
+  ///    state PJSIP_EVSUB_STATE_PENDING and later calls presNotify()
+  ///    again to accept or reject the subscription request.
+  /// Any IncomingSubscribeParam.code other than 200 and 202 will be treated
+  /// as 200.
+  /// Application MUST return from this callback immediately (e.g. it must
+  /// not block in this callback while waiting for user confirmation).
+  /// <param name="prm">           Callback parameter.</param>
   public virtual void onIncomingSubscribe(OnIncomingSubscribeParam prm) {
     if (SwigDerivedClassHasMethod("onIncomingSubscribe", swigMethodTypes3)) pjsua2PINVOKE.Account_onIncomingSubscribeSwigExplicitAccount(swigCPtr, OnIncomingSubscribeParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onIncomingSubscribe(swigCPtr, OnIncomingSubscribeParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application on incoming instant message or pager (i.e. MESSAGE
+  /// request) that was received outside call context.
+  /// <param name="prm">           Callback parameter.</param>
   public virtual void onInstantMessage(OnInstantMessageParam prm) {
     if (SwigDerivedClassHasMethod("onInstantMessage", swigMethodTypes4)) pjsua2PINVOKE.Account_onInstantMessageSwigExplicitAccount(swigCPtr, OnInstantMessageParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onInstantMessage(swigCPtr, OnInstantMessageParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application about the delivery status of outgoing pager/instant
+  /// message (i.e. MESSAGE) request.
+  /// <param name="prm">           Callback parameter.</param>
   public virtual void onInstantMessageStatus(OnInstantMessageStatusParam prm) {
     if (SwigDerivedClassHasMethod("onInstantMessageStatus", swigMethodTypes5)) pjsua2PINVOKE.Account_onInstantMessageStatusSwigExplicitAccount(swigCPtr, OnInstantMessageStatusParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onInstantMessageStatus(swigCPtr, OnInstantMessageStatusParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when a transaction started by Account::sendRequest()
+  /// has been completed,i.e. when a response has been received.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onSendRequest(OnSendRequestParam prm) {
     if (SwigDerivedClassHasMethod("onSendRequest", swigMethodTypes6)) pjsua2PINVOKE.Account_onSendRequestSwigExplicitAccount(swigCPtr, OnSendRequestParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onSendRequest(swigCPtr, OnSendRequestParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application about typing indication.
+  /// <param name="prm">           Callback parameter.</param>
   public virtual void onTypingIndication(OnTypingIndicationParam prm) {
     if (SwigDerivedClassHasMethod("onTypingIndication", swigMethodTypes7)) pjsua2PINVOKE.Account_onTypingIndicationSwigExplicitAccount(swigCPtr, OnTypingIndicationParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onTypingIndication(swigCPtr, OnTypingIndicationParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notification about MWI (Message Waiting Indication) status change.
+  /// This callback can be called upon the status change of the
+  /// SUBSCRIBE request (for example, 202/Accepted to SUBSCRIBE is received)
+  /// or when a NOTIFY reqeust is received.
+  /// <param name="prm">           Callback parameter.</param>
   public virtual void onMwiInfo(OnMwiInfoParam prm) {
     if (SwigDerivedClassHasMethod("onMwiInfo", swigMethodTypes8)) pjsua2PINVOKE.Account_onMwiInfoSwigExplicitAccount(swigCPtr, OnMwiInfoParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onMwiInfo(swigCPtr, OnMwiInfoParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Called when a 401/407 challenge is received. Override to handle
+  /// authentication challenges. Three usage patterns are supported:
+  /// - Synchronous: call prm.challenge.respond() or
+  ///   prm.challenge.respond(creds) directly within this callback.
+  /// - Asynchronous: call prm.challenge.defer() to obtain a
+  ///   heap-allocated AuthChallenge, then call respond() or abandon()
+  ///   on it later from any context. The caller owns the returned object.
+  /// - Default: if neither respond(), abandon(), nor defer() is called,
+  ///   the library handles authentication automatically using configured
+  ///   credentials.
+  /// <param name="prm">       Callback parameter.</param> 
+  /// <seealso cref="AuthChallenge"/>
+  /// <seealso cref="OnAuthChallengeParam"/>
   public virtual void onAuthChallenge(OnAuthChallengeParam prm) {
     if (SwigDerivedClassHasMethod("onAuthChallenge", swigMethodTypes9)) pjsua2PINVOKE.Account_onAuthChallengeSwigExplicitAccount(swigCPtr, OnAuthChallengeParam.getCPtr(prm)); else pjsua2PINVOKE.Account_onAuthChallenge(swigCPtr, OnAuthChallengeParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

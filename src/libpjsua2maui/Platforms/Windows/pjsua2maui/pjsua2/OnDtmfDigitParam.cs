@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Call::onDtmfDigit()
+/// callback.
 
 public class OnDtmfDigitParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class OnDtmfDigitParam : global::System.IDisposable {
     }
   }
 
+  /// DTMF sending method.
   public pjsua_dtmf_method method {
     set {
       pjsua2PINVOKE.OnDtmfDigitParam_method_set(swigCPtr, (int)value);
@@ -67,6 +70,7 @@ public class OnDtmfDigitParam : global::System.IDisposable {
     } 
   }
 
+  /// DTMF ASCII digit.
   public string digit {
     set {
       pjsua2PINVOKE.OnDtmfDigitParam_digit_set(swigCPtr, value);
@@ -79,6 +83,8 @@ public class OnDtmfDigitParam : global::System.IDisposable {
     } 
   }
 
+  /// DTMF signal duration. If the duration is unknown, this value is set to
+  /// PJSUA_UNKNOWN_DTMF_DURATION.
   public uint duration {
     set {
       pjsua2PINVOKE.OnDtmfDigitParam_duration_set(swigCPtr, value);

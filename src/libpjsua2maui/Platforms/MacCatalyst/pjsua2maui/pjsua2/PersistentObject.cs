@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This is the abstract base class of objects that can be serialized to/from
+/// persistent document.
 public class PersistentObject : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,11 +59,15 @@ public class PersistentObject : global::System.IDisposable {
     }
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public virtual void readObject(ContainerNode node) {
     pjsua2PINVOKE.PersistentObject_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public virtual void writeObject(ContainerNode node) {
     pjsua2PINVOKE.PersistentObject_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Representation of time value.
 
 public class TimeVal : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class TimeVal : global::System.IDisposable {
     }
   }
 
+  /// The seconds part of the time.
   public int sec {
     set {
       pjsua2PINVOKE.TimeVal_sec_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class TimeVal : global::System.IDisposable {
     } 
   }
 
+  /// The miliseconds fraction of the time.
   public int msec {
     set {
       pjsua2PINVOKE.TimeVal_msec_set(swigCPtr, value);

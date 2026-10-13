@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Call settings.
 
 public class CallSetting : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,9 @@ public class CallSetting : global::System.IDisposable {
     }
   }
 
+  /// Bitmask of pjsua_call_flag constants.
+  /// Default: 0
+  /// (PJSUA_CALL_INCLUDE_DISABLED_MEDIA is the legacy default value).
   public uint flag {
     set {
       pjsua2PINVOKE.CallSetting_flag_set(swigCPtr, value);
@@ -67,6 +71,10 @@ public class CallSetting : global::System.IDisposable {
     } 
   }
 
+  /// This flag controls what methods to request keyframe are allowed on
+  /// the call. Value is bitmask of pjsua_vid_req_keyframe_method.
+  /// Default: PJSUA_VID_REQ_KEYFRAME_SIP_INFO |
+  ///          PJSUA_VID_REQ_KEYFRAME_RTCP_PLI
   public uint reqKeyframeMethod {
     set {
       pjsua2PINVOKE.CallSetting_reqKeyframeMethod_set(swigCPtr, value);
@@ -77,6 +85,9 @@ public class CallSetting : global::System.IDisposable {
     } 
   }
 
+  /// Number of simultaneous active audio streams for this call. Setting
+  /// this to zero will disable audio in this call.
+  /// Default: 1
   public uint audioCount {
     set {
       pjsua2PINVOKE.CallSetting_audioCount_set(swigCPtr, value);
@@ -87,6 +98,9 @@ public class CallSetting : global::System.IDisposable {
     } 
   }
 
+  /// Number of simultaneous active video streams for this call. Setting
+  /// this to zero will disable video in this call.
+  /// Default: 1 (if video feature is enabled, otherwise it is zero)
   public uint videoCount {
     set {
       pjsua2PINVOKE.CallSetting_videoCount_set(swigCPtr, value);
@@ -97,6 +111,9 @@ public class CallSetting : global::System.IDisposable {
     } 
   }
 
+  /// Number of simultaneous active text streams for this call. Setting
+  /// this to zero will disable text in this call.
+  /// Default: 1
   public uint textCount {
     set {
       pjsua2PINVOKE.CallSetting_textCount_set(swigCPtr, value);
@@ -107,6 +124,23 @@ public class CallSetting : global::System.IDisposable {
     } 
   }
 
+  /// Media direction. This setting will only be used if the flag
+  /// PJSUA_CALL_SET_MEDIA_DIR is set, and it will persist for subsequent
+  /// offers or answers.
+  /// For example, a media that is set as PJMEDIA_DIR_ENCODING can only
+  /// mark the stream in the SDP as sendonly or inactive, but will not
+  /// become sendrecv in subsequent offers and answers.
+  /// Application can update the media direction in any API or callback
+  /// that accepts CallSetting as a parameter, such as via
+  /// Call::reinvite/update() or in onCallRxOffer/Reinvite()
+  /// callback.
+  /// The index of the media dir will correspond to the provisional media
+  /// in CallInfo.provMedia.
+  /// For offers that involve adding new medias (such as initial offer),
+  /// the index will correspond to all new audio media first, then video.
+  /// For example, for a new call with 2 audios and 1 video, mediaDir[0]
+  /// and mediaDir[1] will be for the audios, and mediaDir[2] video.
+  /// Default: empty vector
   public IntVector mediaDir {
     set {
       pjsua2PINVOKE.CallSetting_mediaDir_set(swigCPtr, IntVector.getCPtr(value));
@@ -118,6 +152,13 @@ public class CallSetting : global::System.IDisposable {
     } 
   }
 
+  /// User defined Call-ID to be sent out with outgoing INVITE.
+  /// Note: It is up to the developer to verify uniqueness of the
+  /// Call-ID as there will be no verification. The developer must
+  /// change the Call-ID between calls creating a unique id for each
+  /// outgoing call.
+  /// This setting will only be used when creating a new outgoing call
+  /// via Call::makeCall().
   public string customCallId {
     set {
       pjsua2PINVOKE.CallSetting_customCallId_set(swigCPtr, value);
@@ -130,12 +171,16 @@ public class CallSetting : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor initializes with empty or default values.
   public CallSetting(bool useDefaultValues) : this(pjsua2PINVOKE.new_CallSetting__SWIG_0(useDefaultValues), true) {
   }
 
+  /// Default constructor initializes with empty or default values.
   public CallSetting() : this(pjsua2PINVOKE.new_CallSetting__SWIG_1(), true) {
   }
 
+  /// Check if the settings are set with empty values.
+  /// <returns>True if the settings are empty.</returns>
   public bool isEmpty() {
     bool ret = pjsua2PINVOKE.CallSetting_isEmpty(swigCPtr);
     return ret;

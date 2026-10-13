@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+///  Parameter of Endpoint::onVideoMediaOpCompleted() callback.
 
 public class OnVideoMediaOpCompletedParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class OnVideoMediaOpCompletedParam : global::System.IDisposable {
     }
   }
 
+  /// The operation type.
   public pjmedia_vid_conf_op_type opType {
     set {
       pjsua2PINVOKE.OnVideoMediaOpCompletedParam_opType_set(swigCPtr, (int)value);
@@ -67,6 +69,7 @@ public class OnVideoMediaOpCompletedParam : global::System.IDisposable {
     } 
   }
 
+  /// The operation status.
   public int status {
     set {
       pjsua2PINVOKE.OnVideoMediaOpCompletedParam_status_set(swigCPtr, value);
@@ -77,6 +80,9 @@ public class OnVideoMediaOpCompletedParam : global::System.IDisposable {
     } 
   }
 
+  /// Represents the VideoMedia's port id associated with the operation.
+  /// App can use *VIdeoMediaHelper* to get the VideoMedia instance based on
+  /// the video media port id.
   public VideoMediaOpParam opParam {
     set {
       pjsua2PINVOKE.OnVideoMediaOpCompletedParam_opParam_set(swigCPtr, VideoMediaOpParam.getCPtr(value));

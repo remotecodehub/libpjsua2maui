@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Tone digit (abstraction for pjmedia_tone_digit)
 
 public class ToneDigit : pjmedia_tone_digit {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;

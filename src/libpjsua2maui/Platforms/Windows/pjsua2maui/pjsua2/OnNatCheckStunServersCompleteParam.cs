@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Argument to Endpoint::onNatCheckStunServersComplete() callback.
 
 public class OnNatCheckStunServersCompleteParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,8 @@ public class OnNatCheckStunServersCompleteParam : global::System.IDisposable {
     }
   }
 
+  /// Arbitrary user data that was passed to Endpoint::natCheckStunServers()
+  /// function.
   public System.IntPtr userData {
     set {
       pjsua2PINVOKE.OnNatCheckStunServersCompleteParam_userData_set(swigCPtr, value);
@@ -68,6 +71,9 @@ public class OnNatCheckStunServersCompleteParam : global::System.IDisposable {
   
   }
 
+  /// This will contain PJ_SUCCESS if at least one usable STUN server
+  /// is found, otherwise it will contain the last error code during
+  /// the operation.
   public int status {
     set {
       pjsua2PINVOKE.OnNatCheckStunServersCompleteParam_status_set(swigCPtr, value);
@@ -78,6 +84,8 @@ public class OnNatCheckStunServersCompleteParam : global::System.IDisposable {
     } 
   }
 
+  /// The server name that yields successful result. This will only
+  /// contain value if status is successful.
   public string name {
     set {
       pjsua2PINVOKE.OnNatCheckStunServersCompleteParam_name_set(swigCPtr, value);
@@ -90,6 +98,8 @@ public class OnNatCheckStunServersCompleteParam : global::System.IDisposable {
     } 
   }
 
+  /// The server IP address and port in "IP:port" format. This will only
+  /// contain value if status is successful.
   public string addr {
     set {
       pjsua2PINVOKE.OnNatCheckStunServersCompleteParam_addr_set(swigCPtr, value);

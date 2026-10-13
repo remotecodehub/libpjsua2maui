@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This describes presence status.
 
 public class PresenceStatus : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class PresenceStatus : global::System.IDisposable {
     }
   }
 
+  /// Buddy's online status.
   public pjsua_buddy_status status {
     set {
       pjsua2PINVOKE.PresenceStatus_status_set(swigCPtr, (int)value);
@@ -67,6 +69,7 @@ public class PresenceStatus : global::System.IDisposable {
     } 
   }
 
+  /// Text to describe buddy's online status.
   public string statusText {
     set {
       pjsua2PINVOKE.PresenceStatus_statusText_set(swigCPtr, value);
@@ -79,6 +82,7 @@ public class PresenceStatus : global::System.IDisposable {
     } 
   }
 
+  /// Activity type.
   public pjrpid_activity activity {
     set {
       pjsua2PINVOKE.PresenceStatus_activity_set(swigCPtr, (int)value);
@@ -89,6 +93,7 @@ public class PresenceStatus : global::System.IDisposable {
     } 
   }
 
+  /// Optional text describing the person/element.
   public string note {
     set {
       pjsua2PINVOKE.PresenceStatus_note_set(swigCPtr, value);
@@ -101,6 +106,7 @@ public class PresenceStatus : global::System.IDisposable {
     } 
   }
 
+  /// Optional RPID ID string.
   public string rpidId {
     set {
       pjsua2PINVOKE.PresenceStatus_rpidId_set(swigCPtr, value);
@@ -113,6 +119,7 @@ public class PresenceStatus : global::System.IDisposable {
     } 
   }
 
+  /// Constructor.
   public PresenceStatus() : this(pjsua2PINVOKE.new_PresenceStatus(), true) {
   }
 

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// AI Media Port creation parameters.
 
 public class AiMediaPortParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,9 @@ public class AiMediaPortParam : global::System.IDisposable {
     }
   }
 
+  /// Enable voice activity detection (VAD) on the TX path.
+  /// When enabled, silence frames are not sent to the AI service.
+  /// Default: false
   public bool vadEnabled {
     set {
       pjsua2PINVOKE.AiMediaPortParam_vadEnabled_set(swigCPtr, value);
@@ -67,6 +71,8 @@ public class AiMediaPortParam : global::System.IDisposable {
     } 
   }
 
+  /// Ptime in milliseconds.
+  /// Default: 20
   public uint ptimeMsec {
     set {
       pjsua2PINVOKE.AiMediaPortParam_ptimeMsec_set(swigCPtr, value);
@@ -77,6 +83,7 @@ public class AiMediaPortParam : global::System.IDisposable {
     } 
   }
 
+  ///  Default constructor
   public AiMediaPortParam() : this(pjsua2PINVOKE.new_AiMediaPortParam(), true) {
   }
 

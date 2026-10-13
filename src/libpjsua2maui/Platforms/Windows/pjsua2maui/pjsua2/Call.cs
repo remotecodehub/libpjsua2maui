@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Call.
 
 public class Call : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,343 +58,751 @@ public class Call : global::System.IDisposable {
     }
   }
 
+  /// Constructor.
   public Call(Account acc, int call_id) : this(pjsua2PINVOKE.new_Call__SWIG_0(Account.getCPtr(acc), call_id), true) {
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     SwigDirectorConnect();
   }
 
+  /// Constructor.
   public Call(Account acc) : this(pjsua2PINVOKE.new_Call__SWIG_1(Account.getCPtr(acc)), true) {
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     SwigDirectorConnect();
   }
 
+  /// Obtain detail information about this call.
+  /// <returns>Call info.</returns>
   public CallInfo getInfo() {
     CallInfo ret = new CallInfo(pjsua2PINVOKE.Call_getInfo(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Check if this call has active INVITE session and the INVITE
+  /// session has not been disconnected.
+  /// <returns>True if call is active.</returns>
   public bool isActive() {
     bool ret = pjsua2PINVOKE.Call_isActive(swigCPtr);
     return ret;
   }
 
+  /// Get PJSUA-LIB call ID or index associated with this call.
+  /// <returns>Integer greater than or equal to zero.</returns>
   public int getId() {
     int ret = pjsua2PINVOKE.Call_getId(swigCPtr);
     return ret;
   }
 
+  /// Get the Call class for the specified call Id.
+  /// <param name="call_id">       The call ID to lookup</param> 
+  /// <returns>The Call instance or NULL if not found.</returns>
   public static Call lookup(int call_id) {
     global::System.IntPtr cPtr = pjsua2PINVOKE.Call_lookup(call_id);
     Call ret = (cPtr == global::System.IntPtr.Zero) ? null : new Call(cPtr, false);
     return ret;
   }
 
+  /// Check if call has an active media session.
+  /// <returns>True if yes.</returns>
   public bool hasMedia() {
     bool ret = pjsua2PINVOKE.Call_hasMedia(swigCPtr);
     return ret;
   }
 
+  /// Warning: deprecated, use getAudioMedia() instead. This function is not
+  /// safe in multithreaded environment.
+  /// Get media for the specified media index.
+  /// <param name="med_idx">       Media index.</param> 
+  /// <returns>The media or NULL if invalid or inactive.</returns>
   public Media getMedia(uint med_idx) {
     global::System.IntPtr cPtr = pjsua2PINVOKE.Call_getMedia(swigCPtr, med_idx);
     Media ret = (cPtr == global::System.IntPtr.Zero) ? null : new Media(cPtr, false);
     return ret;
   }
 
+  /// Get audio media for the specified media index. If the specified media
+  /// index is not audio or invalid or inactive, exception will be thrown.
+  /// <param name="med_idx">       Media index, or -1 to specify any first audio
+  ///                          media registered in the conference bridge.</param> 
+  /// <returns>The audio media.</returns>
   public AudioMedia getAudioMedia(int med_idx) {
     AudioMedia ret = new AudioMedia(pjsua2PINVOKE.Call_getAudioMedia(swigCPtr, med_idx), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get video media in encoding direction for the specified media index.
+  /// If the specified media index is not video or invalid or the direction
+  /// is receive only, exception will be thrown.
+  /// <param name="med_idx">       Media index, or -1 to specify any first video
+  ///                          media with encoding direction registered in the
+  ///                          conference bridge.</param> 
+  /// <returns>The video media.</returns>
   public VideoMedia getEncodingVideoMedia(int med_idx) {
     VideoMedia ret = new VideoMedia(pjsua2PINVOKE.Call_getEncodingVideoMedia(swigCPtr, med_idx), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get video media in decoding direction for the specified media index.
+  /// If the specified media index is not video or invalid or the direction
+  /// is send only, exception will be thrown.
+  /// <param name="med_idx">       Media index, or -1 to specify any first video
+  ///                          media with decoding direction registered in the
+  ///                          conference bridge.</param> 
+  /// <returns>The video media.</returns>
   public VideoMedia getDecodingVideoMedia(int med_idx) {
     VideoMedia ret = new VideoMedia(pjsua2PINVOKE.Call_getDecodingVideoMedia(swigCPtr, med_idx), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Check if remote peer support the specified capability.
+  /// <param name="htype">         The header type (pjsip_hdr_e) to be checked, which
+  ///                          value may be:
+  ///                          - PJSIP_H_ACCEPT
+  ///                          - PJSIP_H_ALLOW
+  ///                          - PJSIP_H_SUPPORTED</param> 
+  /// <param name="hname">         If htype specifies PJSIP_H_OTHER, then the header
+  ///                          name must be supplied in this argument. Otherwise
+  ///                          the value must be set to empty string ("").</param> 
+  /// <param name="token">         The capability token to check. For example, if
+  ///     *htype* is PJSIP_H_ALLOW, then *token* specifies the
+  ///                          method names; if *htype* is PJSIP_H_SUPPORTED, then
+  ///                          *token* specifies the extension names such as
+  ///                          "100rel".</param> 
+  /// <returns>PJSIP_DIALOG_CAP_SUPPORTED if the specified
+  ///                          capability is explicitly supported, see
+  ///                          pjsip_dialog_cap_status for more info.</returns>
   public pjsip_dialog_cap_status remoteHasCap(int htype, string hname, string token) {
     pjsip_dialog_cap_status ret = (pjsip_dialog_cap_status)pjsua2PINVOKE.Call_remoteHasCap(swigCPtr, htype, hname, token);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Attach application specific data to the call. Application can then
+  /// inspect this data by calling getUserData().
+  /// <param name="user_data">     Arbitrary data to be attached to the call.</param>
   public void setUserData(System.IntPtr user_data) {
     pjsua2PINVOKE.Call_setUserData(swigCPtr, user_data);
   }
 
+  /// Get user data attached to the call, which has been previously set with
+  /// setUserData().
+  /// <returns>The user data.</returns>
   public System.IntPtr getUserData() {
       System.IntPtr cPtr = pjsua2PINVOKE.Call_getUserData(swigCPtr);
       return cPtr;
   }
 
+  /// Get the NAT type of remote's endpoint. This is a proprietary feature
+  /// of PJSUA-LIB which sends its NAT type in the SDP when *natTypeInSdp*
+  /// is set in UaConfig.
+  /// This function can only be called after SDP has been received from remote,
+  /// which means for incoming call, this function can be called as soon as
+  /// call is received as long as incoming call contains SDP, and for outgoing
+  /// call, this function can be called only after SDP is received (normally in
+  /// PJSIP_SC_OK (200) response to INVITE). As a general case, application
+  /// should call this function after or in *onCallMediaState()* callback.
+  /// <returns>The NAT type.</returns> 
+  /// <seealso cref="Endpoint.natGetType"/>
   public pj_stun_nat_type getRemNatType() {
     pj_stun_nat_type ret = (pj_stun_nat_type)pjsua2PINVOKE.Call_getRemNatType(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Make outgoing call to the specified URI.
+  /// <param name="dst_uri">       URI to be put in the To header (normally is the same
+  ///                          as the target URI).</param>
   public void makeCall(string dst_uri, CallOpParam prm) {
     pjsua2PINVOKE.Call_makeCall(swigCPtr, dst_uri, CallOpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send response to incoming INVITE request with call setting param.
+  /// Depending on the status code specified as parameter, this function may
+  /// send provisional response, establish the call, or terminate the call.
+  /// Notes about call setting:
+  ///  - if call setting is changed in the subsequent call to this function,
+  ///    only the first call setting supplied will applied. So normally
+  ///    application will not supply call setting before getting confirmation
+  ///    from the user.
+  ///  - if no call setting is supplied when SDP has to be sent, i.e: answer
+  ///    with status code 183 or 2xx, the default call setting will be used,
+  ///    check CallSetting for its default values.
   public void answer(CallOpParam prm) {
     pjsua2PINVOKE.Call_answer(swigCPtr, CallOpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Hangup call by using method that is appropriate according to the
+  /// call state. This function is different than answering the call with
+  /// 3xx-6xx response (with answer()), in that this function
+  /// will hangup the call regardless of the state and role of the call,
+  /// while answer() only works with incoming calls on EARLY
+  /// state.
   public void hangup(CallOpParam prm) {
     pjsua2PINVOKE.Call_hangup(swigCPtr, CallOpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Put the specified call on hold. This will send re-INVITE with the
+  /// appropriate SDP to inform remote that the call is being put on hold.
+  /// The final status of the request itself will be reported on the
+  /// *onCallMediaState()* callback, which inform the application that
+  /// the media state of the call has changed.
   public void setHold(CallOpParam prm) {
     pjsua2PINVOKE.Call_setHold(swigCPtr, CallOpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send re-INVITE.
+  /// The final status of the request itself will be reported on the
+  /// *onCallMediaState()* callback, which inform the application that
+  /// the media state of the call has changed.
   public void reinvite(CallOpParam prm) {
     pjsua2PINVOKE.Call_reinvite(swigCPtr, CallOpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send UPDATE request.
   public void update(CallOpParam prm) {
     pjsua2PINVOKE.Call_update(swigCPtr, CallOpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Initiate call transfer to the specified address. This function will send
+  /// REFER request to instruct remote call party to initiate a new INVITE
+  /// session to the specified destination/target.
+  /// If application is interested to monitor the successfulness and
+  /// the progress of the transfer request, it can implement
+  /// *onCallTransferStatus()* callback which will report the progress
+  /// of the call transfer request.
+  /// <param name="dest">          URI of new target to be contacted. The URI may be
+  ///                          in name address or addr-spec format.</param>
   public void xfer(string dest, CallOpParam prm) {
     pjsua2PINVOKE.Call_xfer(swigCPtr, dest, CallOpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Initiate attended call transfer. This function will send REFER request
+  /// to instruct remote call party to initiate new INVITE session to the URL
+  /// of *destCall*. The party at *dest_call* then should "replace"
+  /// the call with us with the new call from the REFER recipient.
+  /// <param name="dest_call">     The call to be replaced.</param>
   public void xferReplaces(Call dest_call, CallOpParam prm) {
     pjsua2PINVOKE.Call_xferReplaces(swigCPtr, Call.getCPtr(dest_call), CallOpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Accept or reject redirection response. Application MUST call this
+  /// function after it signaled PJSIP_REDIRECT_PENDING in the
+  /// *onCallRedirected()* callback,
+  /// to notify the call whether to accept or reject the redirection
+  /// to the current target. Application can use the combination of
+  /// PJSIP_REDIRECT_PENDING command in *onCallRedirected()* callback and
+  /// this function to ask for user permission before redirecting the call.
+  /// Note that if the application chooses to reject or stop redirection (by
+  /// using PJSIP_REDIRECT_REJECT or PJSIP_REDIRECT_STOP respectively), the
+  /// call disconnection callback will be called before this function returns.
+  /// And if the application rejects the target, the *onCallRedirected()*
+  /// callback may also be called before this function returns if there is
+  /// another target to try.
+  /// <param name="cmd">           Redirection operation to be applied to the current
+  ///                          target. The semantic of this argument is similar
+  ///                          to the description in the *onCallRedirected()*
+  ///                          callback, except that the PJSIP_REDIRECT_PENDING is
+  ///                          not accepted here.</param>
   public void processRedirect(pjsip_redirect_op cmd) {
     pjsua2PINVOKE.Call_processRedirect(swigCPtr, (int)cmd);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send DTMF digits to remote using RFC 2833 payload formats.
+  /// <param name="digits">        DTMF string digits to be sent.</param>
   public void dialDtmf(string digits) {
     pjsua2PINVOKE.Call_dialDtmf(swigCPtr, digits);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send DTMF digits to remote.
+  /// <param name="param">     The send DTMF parameter.</param>
   public void sendDtmf(CallSendDtmfParam param) {
     pjsua2PINVOKE.Call_sendDtmf(swigCPtr, CallSendDtmfParam.getCPtr(param));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send real-time text to remote via RTP stream. This only works if
+  /// the call has text media.
+  /// <param name="param">     The send text parameter.</param>
   public void sendText(CallSendTextParam param) {
     pjsua2PINVOKE.Call_sendText(swigCPtr, CallSendTextParam.getCPtr(param));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send instant messaging inside INVITE session.
   public void sendInstantMessage(SendInstantMessageParam prm) {
     pjsua2PINVOKE.Call_sendInstantMessage(swigCPtr, SendInstantMessageParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send IM typing indication inside INVITE session.
   public void sendTypingIndication(SendTypingIndicationParam prm) {
     pjsua2PINVOKE.Call_sendTypingIndication(swigCPtr, SendTypingIndicationParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send arbitrary request with the call. This is useful for example to send
+  /// INFO request. Note that application should not use this function to send
+  /// requests which would change the invite session's state, such as
+  /// re-INVITE, UPDATE, PRACK, and BYE.
   public void sendRequest(CallSendRequestParam prm) {
     pjsua2PINVOKE.Call_sendRequest(swigCPtr, CallSendRequestParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Dump call and media statistics to string.
+  /// <param name="with_media">    True to include media information too.</param> 
+  /// <param name="indent">        Spaces for left indentation.</param> 
+  /// <returns>Call dump and media statistics string.</returns>
   public string dump(bool with_media, string indent) {
     string ret = pjsua2PINVOKE.Call_dump(swigCPtr, with_media, indent);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get the media stream index of the default video stream in the call.
+  /// Typically this will just retrieve the stream index of the first
+  /// activated video stream in the call. If none is active, it will return
+  /// the first inactive video stream.
+  /// <returns>The media stream index or -1 if no video stream
+  ///                          is present in the call.</returns>
   public int vidGetStreamIdx() {
     int ret = pjsua2PINVOKE.Call_vidGetStreamIdx(swigCPtr);
     return ret;
   }
 
+  /// Determine if video stream for the specified call is currently running
+  /// (i.e. has been created, started, and not being paused) for the specified
+  /// direction.
+  /// <param name="med_idx">       Media stream index, or -1 to specify default video
+  ///                          media.</param> 
+  /// <param name="dir">           The direction to be checked.</param> 
+  /// <returns>True if stream is currently running for the
+  ///                          specified direction.</returns>
   public bool vidStreamIsRunning(int med_idx, pjmedia_dir dir) {
     bool ret = pjsua2PINVOKE.Call_vidStreamIsRunning(swigCPtr, med_idx, (int)dir);
     return ret;
   }
 
+  /// Add, remove, modify, and/or manipulate video media stream for the
+  /// specified call. This may trigger a re-INVITE or UPDATE to be sent
+  /// for the call.
+  /// <param name="op">            The video stream operation to be performed,
+  ///                          possible values are pjsua_call_vid_strm_op.</param> 
+  /// <param name="param">         The parameters for the video stream operation
+  ///                          (see CallVidSetStreamParam).</param>
   public void vidSetStream(pjsua_call_vid_strm_op op, CallVidSetStreamParam param) {
     pjsua2PINVOKE.Call_vidSetStream(swigCPtr, (int)op, CallVidSetStreamParam.getCPtr(param));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Modify the video stream's codec parameter after the codec is opened.
+  /// Note that not all codec backends support modifying parameters during
+  /// runtime and only certain parameters can be changed.
+  /// Currently, only Video Toolbox and OpenH264 backends support runtime
+  /// adjustment of encoding bitrate (avg_bps and max_bps).
+  /// <param name="med_idx">       Video stream index.</param> 
+  /// <param name="param">         The new codec parameter.</param> 
+  /// <returns>PJ_SUCCESS on success.</returns>
   public void vidStreamModifyCodecParam(int med_idx, VidCodecParam param) {
     pjsua2PINVOKE.Call_vidStreamModifyCodecParam(swigCPtr, med_idx, VidCodecParam.getCPtr(param));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Modify the audio stream's codec parameter after the codec is opened.
+  /// Note that not all codec parameters can be modified during run-time.
+  /// Currently, only Opus codec supports changing key codec parameters
+  /// such as bitrate and bandwidth, while other codecs may only be able to
+  /// modify minor settings such as VAD or PLC.
+  /// <param name="med_idx">       Media stream index, or -1 to specify default audio
+  ///                          media.</param> 
+  /// <param name="param">         The new codec parameter.</param> 
+  /// <returns>PJ_SUCCESS on success.</returns>
   public void audStreamModifyCodecParam(int med_idx, CodecParam param) {
     pjsua2PINVOKE.Call_audStreamModifyCodecParam(swigCPtr, med_idx, CodecParam.getCPtr(param));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get media stream info for the specified media index.
+  /// <param name="med_idx">       Media stream index.</param> 
+  /// <returns>The stream info.</returns>
   public StreamInfo getStreamInfo(uint med_idx) {
     StreamInfo ret = new StreamInfo(pjsua2PINVOKE.Call_getStreamInfo(swigCPtr, med_idx), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get media stream statistic for the specified media index.
+  /// <param name="med_idx">       Media stream index.</param> 
+  /// <returns>The stream statistic.</returns>
   public StreamStat getStreamStat(uint med_idx) {
     StreamStat ret = new StreamStat(pjsua2PINVOKE.Call_getStreamStat(swigCPtr, med_idx), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get media transport info for the specified media index.
+  /// <param name="med_idx">       Media stream index.</param> 
+  /// <returns>The transport info.</returns>
   public MediaTransportInfo getMedTransportInfo(uint med_idx) {
     MediaTransportInfo ret = new MediaTransportInfo(pjsua2PINVOKE.Call_getMedTransportInfo(swigCPtr, med_idx), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Internal function (callled by Endpoint( to process update to call
+  /// medias when call media state changes.
   public void processMediaUpdate(OnCallMediaStateParam prm) {
     pjsua2PINVOKE.Call_processMediaUpdate(swigCPtr, OnCallMediaStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Internal function (called by Endpoint) to process call state change.
   public void processStateChange(OnCallStateParam prm) {
     pjsua2PINVOKE.Call_processStateChange(swigCPtr, OnCallStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when call state has changed.
+  /// Application may then query the call info to get the
+  /// detail call states by calling getInfo() function.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallState(OnCallStateParam prm) {
     if (SwigDerivedClassHasMethod("onCallState", swigMethodTypes0)) pjsua2PINVOKE.Call_onCallStateSwigExplicitCall(swigCPtr, OnCallStateParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallState(swigCPtr, OnCallStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This is a general notification callback which is called whenever
+  /// a transaction within the call has changed state. Application can
+  /// implement this callback for example to monitor the state of
+  /// outgoing requests, or to answer unhandled incoming requests
+  /// (such as INFO) with a final response.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallTsxState(OnCallTsxStateParam prm) {
     if (SwigDerivedClassHasMethod("onCallTsxState", swigMethodTypes1)) pjsua2PINVOKE.Call_onCallTsxStateSwigExplicitCall(swigCPtr, OnCallTsxStateParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallTsxState(swigCPtr, OnCallTsxStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when media state in the call has changed.
+  /// Normal application would need to implement this callback, e.g.
+  /// to connect the call's media to sound device. When ICE is used,
+  /// this callback will also be called to report ICE negotiation
+  /// failure.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallMediaState(OnCallMediaStateParam prm) {
     if (SwigDerivedClassHasMethod("onCallMediaState", swigMethodTypes2)) pjsua2PINVOKE.Call_onCallMediaStateSwigExplicitCall(swigCPtr, OnCallMediaStateParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallMediaState(swigCPtr, OnCallMediaStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when a call has just created a local SDP (for
+  /// initial or subsequent SDP offer/answer). Application can implement
+  /// this callback to modify the SDP, before it is being sent and/or
+  /// negotiated with remote SDP, for example to apply per account/call
+  /// basis codecs priority or to add custom/proprietary SDP attributes.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallSdpCreated(OnCallSdpCreatedParam prm) {
     if (SwigDerivedClassHasMethod("onCallSdpCreated", swigMethodTypes3)) pjsua2PINVOKE.Call_onCallSdpCreatedSwigExplicitCall(swigCPtr, OnCallSdpCreatedParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallSdpCreated(swigCPtr, OnCallSdpCreatedParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when an audio media session is about to be created
+  /// (as opposed to onStreamCreated(), which is called *after* the session
+  /// has been created). The application may change
+  /// some stream info parameter values, i.e: jbInit, jbMinPre, jbMaxPre,
+  /// jbMax, useKa, startCountKa, startIntervalKa, intervalKa,
+  /// rtcpSdesByeDisabled, jbDiscardAlgo (audio), vidCodecParam.encFmt (video).
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onStreamPreCreate(OnStreamPreCreateParam prm) {
     if (SwigDerivedClassHasMethod("onStreamPreCreate", swigMethodTypes4)) pjsua2PINVOKE.Call_onStreamPreCreateSwigExplicitCall(swigCPtr, OnStreamPreCreateParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onStreamPreCreate(swigCPtr, OnStreamPreCreateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when audio media session is created and before it is
+  /// registered to the conference bridge. Application may return different
+  /// audio media port if it has added media processing port to the stream.
+  /// This media port then will be added to the conference bridge instead.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onStreamCreated(OnStreamCreatedParam prm) {
     if (SwigDerivedClassHasMethod("onStreamCreated", swigMethodTypes5)) pjsua2PINVOKE.Call_onStreamCreatedSwigExplicitCall(swigCPtr, OnStreamCreatedParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onStreamCreated(swigCPtr, OnStreamCreatedParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when audio media session has been unregistered from
+  /// the conference bridge and about to be destroyed.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onStreamDestroyed(OnStreamDestroyedParam prm) {
     if (SwigDerivedClassHasMethod("onStreamDestroyed", swigMethodTypes6)) pjsua2PINVOKE.Call_onStreamDestroyedSwigExplicitCall(swigCPtr, OnStreamDestroyedParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onStreamDestroyed(swigCPtr, OnStreamDestroyedParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application upon incoming DTMF digits.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onDtmfDigit(OnDtmfDigitParam prm) {
     if (SwigDerivedClassHasMethod("onDtmfDigit", swigMethodTypes7)) pjsua2PINVOKE.Call_onDtmfDigitSwigExplicitCall(swigCPtr, OnDtmfDigitParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onDtmfDigit(swigCPtr, OnDtmfDigitParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application upon incoming DTMF events.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onDtmfEvent(OnDtmfEventParam prm) {
     if (SwigDerivedClassHasMethod("onDtmfEvent", swigMethodTypes8)) pjsua2PINVOKE.Call_onDtmfEventSwigExplicitCall(swigCPtr, OnDtmfEventParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onDtmfEvent(swigCPtr, OnDtmfEventParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application upon incoming text data from the text stream.
+  /// Note that the received text can be empty.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallRxText(OnCallRxTextParam prm) {
     if (SwigDerivedClassHasMethod("onCallRxText", swigMethodTypes9)) pjsua2PINVOKE.Call_onCallRxTextSwigExplicitCall(swigCPtr, OnCallRxTextParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallRxText(swigCPtr, OnCallRxTextParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application on call being transferred (i.e. REFER is received).
+  /// Application can decide to accept/reject transfer request by setting
+  /// the code (default is 202). When this callback is not implemented,
+  /// the default behavior is to accept the transfer.
+  /// If application decides to accept the transfer request, it must also
+  /// instantiate the new Call object for the transfer operation and return
+  /// this new Call object to prm.newCall. For the new Call instance,
+  /// the account should use the same account as this call and the call ID
+  /// must be set to PJSUA_INVALID_ID.
+  /// If application does not specify new Call object, library will reuse the
+  /// existing Call object for initiating the new call (to the transfer
+  /// destination). In this case, any events from both calls (transferred and
+  /// transferring) will be delivered to the same Call object, where the call
+  /// ID will be switched back and forth between callbacks. Application must
+  /// be careful to not destroy the Call object when receiving disconnection
+  /// event of the transferred call after the transfer process is completed.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallTransferRequest(OnCallTransferRequestParam prm) {
     if (SwigDerivedClassHasMethod("onCallTransferRequest", swigMethodTypes10)) pjsua2PINVOKE.Call_onCallTransferRequestSwigExplicitCall(swigCPtr, OnCallTransferRequestParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallTransferRequest(swigCPtr, OnCallTransferRequestParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application of the status of previously sent call
+  /// transfer request. Application can monitor the status of the
+  /// call transfer request, for example to decide whether to
+  /// terminate existing call.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallTransferStatus(OnCallTransferStatusParam prm) {
     if (SwigDerivedClassHasMethod("onCallTransferStatus", swigMethodTypes11)) pjsua2PINVOKE.Call_onCallTransferStatusSwigExplicitCall(swigCPtr, OnCallTransferStatusParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallTransferStatus(swigCPtr, OnCallTransferStatusParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application about incoming INVITE with Replaces header.
+  /// Application may reject the request by setting non-2xx code.
+  /// In this callback, application should create a new Call instance and
+  /// return the Call object via prm.newCall. In creating the new Call
+  /// instance, the account should use the same account as this call and
+  /// the call ID must be set to PJSUA_INVALID_ID.
+  /// If application does not specify new Call object, library will reuse the
+  /// existing Call object for callbacks. In this case, any events from
+  /// both calls (replaced and new) will be delivered to the same Call object,
+  /// where the call ID will be switched back and forth between callbacks.
+  /// Application must be careful to not destroy the Call object when
+  /// receiving disconnection event of the replaced call after the transfer
+  /// process is completed.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallReplaceRequest(OnCallReplaceRequestParam prm) {
     if (SwigDerivedClassHasMethod("onCallReplaceRequest", swigMethodTypes12)) pjsua2PINVOKE.Call_onCallReplaceRequestSwigExplicitCall(swigCPtr, OnCallReplaceRequestParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallReplaceRequest(swigCPtr, OnCallReplaceRequestParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application that an existing call has been replaced with
+  /// a new call. This happens when PJSUA-API receives incoming INVITE
+  /// request with Replaces header.
+  /// After this callback is called, normally PJSUA-API will disconnect
+  /// this call and establish a new call.
+  /// If not yet done in onCallReplaceRequest(), application can create
+  /// the new Call instance and return the Call object via prm.newCall.
+  /// In creating the new Call instance, the account should use the same
+  /// account as this call and the call ID must be set to prm.newCallId.
+  /// If the new Call instance has been setup in onCallReplaceRequest(),
+  /// the prm.newCall should contain the new Call instance and application
+  /// MUST not change it.
+  /// If application does not specify new Call object, library will reuse the
+  /// existing Call object for callbacks. In this case, any events from
+  /// both calls (replaced and new) will be delivered to the same Call object,
+  /// where the call ID will be switched back and forth between callbacks.
+  /// Application must be careful to not destroy the Call object when
+  /// receiving disconnection event of the replaced call after the transfer
+  /// process is completed.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallReplaced(OnCallReplacedParam prm) {
     if (SwigDerivedClassHasMethod("onCallReplaced", swigMethodTypes13)) pjsua2PINVOKE.Call_onCallReplacedSwigExplicitCall(swigCPtr, OnCallReplacedParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallReplaced(swigCPtr, OnCallReplacedParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when call has received new offer from remote
+  /// (i.e. re-INVITE/UPDATE with SDP is received). Application can
+  /// decide to accept/reject the offer by setting the code (default
+  /// is PJSIP_SC_OK (200)). If the offer is accepted, application can update
+  /// the call setting to be applied in the answer. When this callback is
+  /// not implemented, the default behavior is to accept the offer using
+  /// current call setting.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallRxOffer(OnCallRxOfferParam prm) {
     if (SwigDerivedClassHasMethod("onCallRxOffer", swigMethodTypes14)) pjsua2PINVOKE.Call_onCallRxOfferSwigExplicitCall(swigCPtr, OnCallRxOfferParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallRxOffer(swigCPtr, OnCallRxOfferParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when call has received a re-INVITE offer from
+  /// the peer. It allows more fine-grained control over the response to
+  /// a re-INVITE. If application sets prm.isAsync to true, it can send
+  /// the reply manually using the function #pj::Call::answer() and setting
+  /// the SDP answer. Otherwise, by default the re-INVITE will be
+  /// answered automatically after the callback returns.
+  /// Currently, this callback is only called for re-INVITE with
+  /// SDP, but app should be prepared to handle the case of re-INVITE
+  /// without SDP.
+  /// Remarks: If manually answering at a later timing, application may
+  /// need to monitor onCallTsxState() callback to check whether
+  /// the re-INVITE is already answered automatically with
+  /// PJSIP_SC_REQUEST_TERMINATED (487) due to being cancelled.
+  /// Note: onCallRxOffer() will still be called after this callback,
+  /// but only if prm.isAsync is false and prm.statusCode is PJSIP_SC_OK
+  /// (200).
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallRxReinvite(OnCallRxReinviteParam prm) {
     if (SwigDerivedClassHasMethod("onCallRxReinvite", swigMethodTypes15)) pjsua2PINVOKE.Call_onCallRxReinviteSwigExplicitCall(swigCPtr, OnCallRxReinviteParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallRxReinvite(swigCPtr, OnCallRxReinviteParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when call has received INVITE with no SDP offer.
+  /// Application can update the call setting (e.g: add audio/video), or
+  /// enable/disable codecs, or update other media session settings from
+  /// within the callback, however, as mandated by the standard (RFC3261
+  /// section 14.2), it must ensure that the update overlaps with the
+  /// existing media session (in codecs, transports, or other parameters)
+  /// that require support from the peer, this is to avoid the need for
+  /// the peer to reject the offer.
+  /// When this callback is not implemented, the default behavior is to send
+  /// SDP offer using current active media session (with all enabled codecs
+  /// on each media type).
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallTxOffer(OnCallTxOfferParam prm) {
     if (SwigDerivedClassHasMethod("onCallTxOffer", swigMethodTypes16)) pjsua2PINVOKE.Call_onCallTxOfferSwigExplicitCall(swigCPtr, OnCallTxOfferParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallTxOffer(swigCPtr, OnCallTxOfferParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application on incoming MESSAGE request.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onInstantMessage(OnInstantMessageParam prm) {
     if (SwigDerivedClassHasMethod("onInstantMessage", swigMethodTypes17)) pjsua2PINVOKE.Call_onInstantMessageSwigExplicitCall(swigCPtr, OnInstantMessageParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onInstantMessage(swigCPtr, OnInstantMessageParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application about the delivery status of outgoing MESSAGE
+  /// request.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onInstantMessageStatus(OnInstantMessageStatusParam prm) {
     if (SwigDerivedClassHasMethod("onInstantMessageStatus", swigMethodTypes18)) pjsua2PINVOKE.Call_onInstantMessageStatusSwigExplicitCall(swigCPtr, OnInstantMessageStatusParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onInstantMessageStatus(swigCPtr, OnInstantMessageStatusParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application about typing indication.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onTypingIndication(OnTypingIndicationParam prm) {
     if (SwigDerivedClassHasMethod("onTypingIndication", swigMethodTypes19)) pjsua2PINVOKE.Call_onTypingIndicationSwigExplicitCall(swigCPtr, OnTypingIndicationParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onTypingIndication(swigCPtr, OnTypingIndicationParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This callback is called when the call is about to resend the
+  /// INVITE request to the specified target, following the previously
+  /// received redirection response.
+  /// Application may accept the redirection to the specified target,
+  /// reject this target only and make the session continue to try the next
+  /// target in the list if such target exists, stop the whole
+  /// redirection process altogether and cause the session to be
+  /// disconnected, or defer the decision to ask for user confirmation.
+  /// This callback is optional,
+  /// the default behavior is to NOT follow the redirection response.
+  /// <param name="prm">       Callback parameter.</param> 
+  /// <returns>Action to be performed for the target. Set this
+  ///                      parameter to one of the value below:
+  ///                      - PJSIP_REDIRECT_ACCEPT: immediately accept the
+  ///                        redirection. When set, the call will immediately
+  ///                        resend INVITE request to the target.
+  ///                      - PJSIP_REDIRECT_ACCEPT_REPLACE: immediately accept
+  ///                        the redirection and replace the To header with the
+  ///                        current target. When set, the call will immediately
+  ///                        resend INVITE request to the target.
+  ///                      - PJSIP_REDIRECT_REJECT: immediately reject this
+  ///                        target. The call will continue retrying with
+  ///                        next target if present, or disconnect the call
+  ///                        if there is no more target to try.
+  ///                      - PJSIP_REDIRECT_STOP: stop the whole redirection
+  ///                        process and immediately disconnect the call. The
+  ///                        onCallState() callback will be called with
+  ///                        PJSIP_INV_STATE_DISCONNECTED state immediately
+  ///                        after this callback returns.
+  ///                      - PJSIP_REDIRECT_PENDING: set to this value if
+  ///                        no decision can be made immediately (for example
+  ///                        to request confirmation from user). Application
+  ///                        then MUST call processRedirect()
+  ///                        to either accept or reject the redirection upon
+  ///                        getting user decision.</returns>
   public virtual pjsip_redirect_op onCallRedirected(OnCallRedirectedParam prm) {
     pjsip_redirect_op ret = (pjsip_redirect_op)(SwigDerivedClassHasMethod("onCallRedirected", swigMethodTypes20) ? pjsua2PINVOKE.Call_onCallRedirectedSwigExplicitCall(swigCPtr, OnCallRedirectedParam.getCPtr(prm)) : pjsua2PINVOKE.Call_onCallRedirected(swigCPtr, OnCallRedirectedParam.getCPtr(prm)));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// This callback is called when media transport state is changed.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallMediaTransportState(OnCallMediaTransportStateParam prm) {
     if (SwigDerivedClassHasMethod("onCallMediaTransportState", swigMethodTypes21)) pjsua2PINVOKE.Call_onCallMediaTransportStateSwigExplicitCall(swigCPtr, OnCallMediaTransportStateParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallMediaTransportState(swigCPtr, OnCallMediaTransportStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notification about media events such as video notifications. This
+  /// callback will most likely be called from media threads, thus
+  /// application must not perform heavy processing in this callback.
+  /// Especially, application must not destroy the call or media in this
+  /// callback. If application needs to perform more complex tasks to
+  /// handle the event, it should post the task to another thread.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCallMediaEvent(OnCallMediaEventParam prm) {
     if (SwigDerivedClassHasMethod("onCallMediaEvent", swigMethodTypes22)) pjsua2PINVOKE.Call_onCallMediaEventSwigExplicitCall(swigCPtr, OnCallMediaEventParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCallMediaEvent(swigCPtr, OnCallMediaEventParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// This callback can be used by application to implement custom media
+  /// transport adapter for the call, or to replace the media transport
+  /// with something completely new altogether.
+  /// This callback is called when a new call is created. The library has
+  /// created a media transport for the call, and it is provided as the
+  /// *mediaTp* argument of this callback. The callback may change it
+  /// with the instance of media transport to be used by the call.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCreateMediaTransport(OnCreateMediaTransportParam prm) {
     if (SwigDerivedClassHasMethod("onCreateMediaTransport", swigMethodTypes23)) pjsua2PINVOKE.Call_onCreateMediaTransportSwigExplicitCall(swigCPtr, OnCreateMediaTransportParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCreateMediaTransport(swigCPtr, OnCreateMediaTransportParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Warning: deprecated and may be removed in future release.
+  /// Application can set SRTP crypto settings (including keys) and
+  /// keying methods via AccountConfig.mediaConfig.srtpOpt.
+  /// See also ticket #2100.
+  /// This callback is called when SRTP media transport is created.
+  /// Application can modify the SRTP setting *srtpOpt* to specify
+  /// the cryptos and keys which are going to be used. Note that
+  /// application should not modify the field
+  /// *pjmedia_srtp_setting.close_member_tp* and can only modify
+  /// the field *pjmedia_srtp_setting.use* for initial INVITE.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onCreateMediaTransportSrtp(OnCreateMediaTransportSrtpParam prm) {
     if (SwigDerivedClassHasMethod("onCreateMediaTransportSrtp", swigMethodTypes24)) pjsua2PINVOKE.Call_onCreateMediaTransportSrtpSwigExplicitCall(swigCPtr, OnCreateMediaTransportSrtpParam.getCPtr(prm)); else pjsua2PINVOKE.Call_onCreateMediaTransportSrtp(swigCPtr, OnCreateMediaTransportSrtpParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

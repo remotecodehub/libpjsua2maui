@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Argument to Endpoint::onNatDetectionComplete() callback.
 
 public class OnNatDetectionCompleteParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,9 @@ public class OnNatDetectionCompleteParam : global::System.IDisposable {
     }
   }
 
+  /// Status of the detection process. If this value is not PJ_SUCCESS,
+  /// the detection has failed and *nat_type* field will contain
+  /// PJ_STUN_NAT_TYPE_UNKNOWN.
   public int status {
     set {
       pjsua2PINVOKE.OnNatDetectionCompleteParam_status_set(swigCPtr, value);
@@ -67,6 +71,7 @@ public class OnNatDetectionCompleteParam : global::System.IDisposable {
     } 
   }
 
+  /// The text describing the status, if the status is not PJ_SUCCESS.
   public string reason {
     set {
       pjsua2PINVOKE.OnNatDetectionCompleteParam_reason_set(swigCPtr, value);
@@ -79,6 +84,8 @@ public class OnNatDetectionCompleteParam : global::System.IDisposable {
     } 
   }
 
+  /// This contains the NAT type as detected by the detection procedure.
+  /// This value is only valid when the *status* is PJ_SUCCESS.
   public pj_stun_nat_type natType {
     set {
       pjsua2PINVOKE.OnNatDetectionCompleteParam_natType_set(swigCPtr, (int)value);
@@ -89,6 +96,7 @@ public class OnNatDetectionCompleteParam : global::System.IDisposable {
     } 
   }
 
+  /// Text describing that NAT type.
   public string natTypeName {
     set {
       pjsua2PINVOKE.OnNatDetectionCompleteParam_natTypeName_set(swigCPtr, value);

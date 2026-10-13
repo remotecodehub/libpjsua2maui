@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Call::onCallMediaEvent() callback.
 
 public class OnCallMediaEventParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class OnCallMediaEventParam : global::System.IDisposable {
     }
   }
 
+  /// The media stream index.
   public uint medIdx {
     set {
       pjsua2PINVOKE.OnCallMediaEventParam_medIdx_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class OnCallMediaEventParam : global::System.IDisposable {
     } 
   }
 
+  /// The media event.
   public MediaEvent ev {
     set {
       pjsua2PINVOKE.OnCallMediaEventParam_ev_set(swigCPtr, MediaEvent.getCPtr(value));

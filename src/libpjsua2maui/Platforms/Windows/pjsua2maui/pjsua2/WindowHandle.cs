@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Window handle.
 
 public class WindowHandle : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class WindowHandle : global::System.IDisposable {
     }
   }
 
+  ///  Window
   public System.IntPtr window {
     set {
       pjsua2PINVOKE.WindowHandle_window_set(swigCPtr, value);
@@ -68,6 +70,7 @@ public class WindowHandle : global::System.IDisposable {
   
   }
 
+  ///  Display
   public System.IntPtr display {
     set {
       pjsua2PINVOKE.WindowHandle_display_set(swigCPtr, value);

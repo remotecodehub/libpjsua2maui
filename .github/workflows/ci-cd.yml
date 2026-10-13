@@ -2475,6 +2475,19 @@ jobs:
             (Get-Content $projectFile) `
             -replace [regex]::Escape($oldNs), $newNs |
             Set-Content $projectFile
+
+      - name: Patch c# docs
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            $projectFile = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+
+            $oldNs = '-c++ -csharp'
+            $newNs = '-c++ -csharp -doxygen'
+
+            (Get-Content $projectFile) `
+            -replace [regex]::Escape($oldNs), $newNs |
+            Set-Content $projectFile
             
       - name: Patch Windows SDK Tool Path for ARM64 Cross-Compile
         if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'arm64'

@@ -62,7 +62,8 @@ also MacCatalyst (arm64, x86_64) and Windows (x64, ARM64) as well.
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageIconUrl>https://raw.githubusercontent.com/remotecodehub/libpjsua2maui/main/src/icon.png</PackageIconUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	</PropertyGroup>
 
@@ -77,6 +78,8 @@ also MacCatalyst (arm64, x86_64) and Windows (x64, ARM64) as well.
 		<None Include="../../LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
 		<None Include="../../README.md" Pack="true" PackagePath="README.md" />
 		<None Include="../../docs/README.md" Pack="true" PackagePath="docs/README.md" />
+
+		<None Include="$(OutputPath)$(AssemblyName).xml" Pack="true" PackagePath="docs/libpjsua2maui.xml" Visible="false" Condition="Exists('$(OutputPath)$(AssemblyName).xml')" />
 
 		<None Include="build/libpjsua2maui.targets" Pack="true" PackagePath="build/" />
  

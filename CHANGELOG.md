@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 2.17.0.4
+
+    - 🧩 Improvement: Produce xml documentation in C# SWIG bindings 
+
 ## Version 2.17.0.3
 
     - 🐞 BugFix: apple namespaces werent working

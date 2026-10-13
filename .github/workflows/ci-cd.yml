@@ -38,7 +38,7 @@ env:
   ROOT_DIR: ${{ github.workspace }}
   LOGS_DIR: ${{ github.workspace }}\logs
   INSTALL_DIR: ${{ github.workspace }}\install
-
+  SWIG_VERSION: 4.5.1
 jobs:
   bcg729-android:
     runs-on: ubuntu-latest
@@ -277,11 +277,22 @@ jobs:
         sudo mkdir -p /home/runner/libpjsua2 
         
         DEPS="unzip git curl bzip2 binutils make autoconf openssl \
-          libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 swig libstdc++6 \
+          libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 libstdc++6 \
           libpthread-stubs0-dev \
           libc6-dev"
         sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
-    
+        
+        curl -L "https://github.com/swig/swig/archive/refs/tags/v${SWIG_VERSION}.tar.gz" \
+          -o /tmp/swig.tar.gz
+        tar -xzf /tmp/swig.tar.gz -C /tmp
+        cd "/tmp/swig-${SWIG_VERSION}"
+        ./autogen.sh
+        ./configure --prefix=/usr/local
+        make -j"$(nproc)"
+        sudo make install
+        hash -r
+        swig -version
+        
     - uses: actions/download-artifact@v8
       if: steps.cache-libs.outputs.cache-hit != 'true'
       with:

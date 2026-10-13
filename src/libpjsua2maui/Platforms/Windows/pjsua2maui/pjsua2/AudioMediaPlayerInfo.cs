@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains additional info about AudioMediaPlayer.
 
 public class AudioMediaPlayerInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class AudioMediaPlayerInfo : global::System.IDisposable {
     }
   }
 
+  /// Format ID of the payload.
   public pjmedia_format_id formatId {
     set {
       pjsua2PINVOKE.AudioMediaPlayerInfo_formatId_set(swigCPtr, (int)value);
@@ -67,6 +69,8 @@ public class AudioMediaPlayerInfo : global::System.IDisposable {
     } 
   }
 
+  /// The number of bits per sample of the file payload. For example,
+  /// the value is 16 for PCM WAV and 8 for Alaw/Ulas WAV files.
   public uint payloadBitsPerSample {
     set {
       pjsua2PINVOKE.AudioMediaPlayerInfo_payloadBitsPerSample_set(swigCPtr, value);
@@ -77,6 +81,7 @@ public class AudioMediaPlayerInfo : global::System.IDisposable {
     } 
   }
 
+  /// The WAV payload size in bytes.
   public uint sizeBytes {
     set {
       pjsua2PINVOKE.AudioMediaPlayerInfo_sizeBytes_set(swigCPtr, value);
@@ -87,6 +92,7 @@ public class AudioMediaPlayerInfo : global::System.IDisposable {
     } 
   }
 
+  /// The WAV payload size in samples.
   public uint sizeSamples {
     set {
       pjsua2PINVOKE.AudioMediaPlayerInfo_sizeSamples_set(swigCPtr, value);
@@ -97,6 +103,7 @@ public class AudioMediaPlayerInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public AudioMediaPlayerInfo() : this(pjsua2PINVOKE.new_AudioMediaPlayerInfo(), true) {
   }
 

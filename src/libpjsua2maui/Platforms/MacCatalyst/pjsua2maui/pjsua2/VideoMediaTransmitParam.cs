@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameters for VideoMedia::startTransmit() method.
 public class VideoMediaTransmitParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;

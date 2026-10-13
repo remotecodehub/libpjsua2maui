@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Video AVI Player.
 
 public class VideoPlayer : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,26 +58,40 @@ public class VideoPlayer : global::System.IDisposable {
     }
   }
 
+  /// Constructor.
   public VideoPlayer() : this(pjsua2PINVOKE.new_VideoPlayer(), true) {
   }
 
+  /// Create an avi file player, and automatically add this player to
+  /// the audio/video conference bridge. The player will create a virtual
+  /// video device and audio/video media port based on the streams contained
+  /// in the file.
+  /// The maximum number of stream is limited to PJSUA_MAX_AVI_NUM_STREAMS
+  /// and the video stream is limited to one stream.
   public void createVideoPlayer(string file_name) {
     pjsua2PINVOKE.VideoPlayer_createVideoPlayer(swigCPtr, file_name);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Enumerate all audio media port.
+  /// <returns>The list of audio media port.</returns>
   public AudioMediaVector2 mediaEnumPorts() {
     AudioMediaVector2 ret = new AudioMediaVector2(pjsua2PINVOKE.VideoPlayer_mediaEnumPorts(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Enumerate all video media port.
+  /// <returns>The list of video media port.</returns>
   public VideoMediaVector mediaEnumVidPorts() {
     VideoMediaVector ret = new VideoMediaVector(pjsua2PINVOKE.VideoPlayer_mediaEnumVidPorts(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get the video device index of the avi player. Application can use this
+  /// index as the video source/capture device.
+  /// <returns>The video device index.</returns>
   public int getVideoDevId() {
     int ret = pjsua2PINVOKE.VideoPlayer_getVideoDevId(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

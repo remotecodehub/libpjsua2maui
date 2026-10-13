@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// A digit in tone digit map
 public class ToneDigitMapDigit : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class ToneDigitMapDigit : global::System.IDisposable {
     }
   }
 
+  ///  the digit
   public string digit {
     set {
       pjsua2PINVOKE.ToneDigitMapDigit_digit_set(swigCPtr, value);
@@ -69,6 +71,7 @@ public class ToneDigitMapDigit : global::System.IDisposable {
     } 
   }
 
+  ///  first frequency
   public int freq1 {
     set {
       pjsua2PINVOKE.ToneDigitMapDigit_freq1_set(swigCPtr, value);
@@ -79,6 +82,7 @@ public class ToneDigitMapDigit : global::System.IDisposable {
     } 
   }
 
+  ///  second frequency
   public int freq2 {
     set {
       pjsua2PINVOKE.ToneDigitMapDigit_freq2_set(swigCPtr, value);

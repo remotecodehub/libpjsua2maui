@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Call::onStreamDestroyed()
+/// callback.
 
 public class OnStreamDestroyedParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class OnStreamDestroyedParam : global::System.IDisposable {
     }
   }
 
+  /// Audio media stream.
   public System.IntPtr stream {
     set {
       pjsua2PINVOKE.OnStreamDestroyedParam_stream_set(swigCPtr, value);
@@ -68,6 +71,7 @@ public class OnStreamDestroyedParam : global::System.IDisposable {
   
   }
 
+  /// Stream index in the audio media session.
   public uint streamIdx {
     set {
       pjsua2PINVOKE.OnStreamDestroyedParam_streamIdx_set(swigCPtr, value);

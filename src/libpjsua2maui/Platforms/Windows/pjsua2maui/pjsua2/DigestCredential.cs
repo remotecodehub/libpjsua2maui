@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describe credential used in Authorization and
+/// Proxy-Authorization header for digest authentication scheme.
 
 public class DigestCredential : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class DigestCredential : global::System.IDisposable {
     }
   }
 
+  /// Realm of the credential
   public string realm {
     set {
       pjsua2PINVOKE.DigestCredential_realm_set(swigCPtr, value);
@@ -69,6 +72,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Other parameters.
   public StringToStringMap otherParam {
     set {
       pjsua2PINVOKE.DigestCredential_otherParam_set(swigCPtr, StringToStringMap.getCPtr(value));
@@ -80,6 +84,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Username parameter.
   public string username {
     set {
       pjsua2PINVOKE.DigestCredential_username_set(swigCPtr, value);
@@ -92,6 +97,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Nonce parameter.
   public string nonce {
     set {
       pjsua2PINVOKE.DigestCredential_nonce_set(swigCPtr, value);
@@ -104,6 +110,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// URI parameter.
   public string uri {
     set {
       pjsua2PINVOKE.DigestCredential_uri_set(swigCPtr, value);
@@ -116,6 +123,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Response digest.
   public string response {
     set {
       pjsua2PINVOKE.DigestCredential_response_set(swigCPtr, value);
@@ -128,6 +136,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Algorithm.
   public string algorithm {
     set {
       pjsua2PINVOKE.DigestCredential_algorithm_set(swigCPtr, value);
@@ -140,6 +149,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Cnonce.
   public string cnonce {
     set {
       pjsua2PINVOKE.DigestCredential_cnonce_set(swigCPtr, value);
@@ -152,6 +162,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Opaque value.
   public string opaque {
     set {
       pjsua2PINVOKE.DigestCredential_opaque_set(swigCPtr, value);
@@ -164,6 +175,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Quality of protection.
   public string qop {
     set {
       pjsua2PINVOKE.DigestCredential_qop_set(swigCPtr, value);
@@ -176,6 +188,7 @@ public class DigestCredential : global::System.IDisposable {
     } 
   }
 
+  /// Nonce count.
   public string nc {
     set {
       pjsua2PINVOKE.DigestCredential_nc_set(swigCPtr, value);

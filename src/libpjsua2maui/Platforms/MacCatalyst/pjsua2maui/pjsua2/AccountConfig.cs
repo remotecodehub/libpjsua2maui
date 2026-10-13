@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Account configuration.
 public class AccountConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,6 +48,9 @@ public class AccountConfig : PersistentObject {
     }
   }
 
+  /// Account priority, which is used to control the order of matching
+  /// incoming/outgoing requests. The higher the number means the higher
+  /// the priority is, and the account will be matched first.
   public int priority {
     set {
       pjsua2PINVOKE.AccountConfig_priority_set(swigCPtr, value);
@@ -57,6 +61,10 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// The Address of Record or AOR, that is full SIP URL that identifies the
+  /// account. The value can take name address or URL format, and will look
+  /// something like "sip:account@serviceprovider".
+  /// This field is mandatory.
   public string idUri {
     set {
       pjsua2PINVOKE.AccountConfig_idUri_set(swigCPtr, value);
@@ -69,6 +77,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// Registration settings.
   public AccountRegConfig regConfig {
     set {
       pjsua2PINVOKE.AccountConfig_regConfig_set(swigCPtr, AccountRegConfig.getCPtr(value));
@@ -80,6 +89,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// SIP settings.
   public AccountSipConfig sipConfig {
     set {
       pjsua2PINVOKE.AccountConfig_sipConfig_set(swigCPtr, AccountSipConfig.getCPtr(value));
@@ -91,6 +101,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// Call settings.
   public AccountCallConfig callConfig {
     set {
       pjsua2PINVOKE.AccountConfig_callConfig_set(swigCPtr, AccountCallConfig.getCPtr(value));
@@ -102,6 +113,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// Presence settings.
   public AccountPresConfig presConfig {
     set {
       pjsua2PINVOKE.AccountConfig_presConfig_set(swigCPtr, AccountPresConfig.getCPtr(value));
@@ -113,6 +125,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// MWI (Message Waiting Indication) settings.
   public AccountMwiConfig mwiConfig {
     set {
       pjsua2PINVOKE.AccountConfig_mwiConfig_set(swigCPtr, AccountMwiConfig.getCPtr(value));
@@ -124,6 +137,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// NAT settings.
   public AccountNatConfig natConfig {
     set {
       pjsua2PINVOKE.AccountConfig_natConfig_set(swigCPtr, AccountNatConfig.getCPtr(value));
@@ -135,6 +149,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// Media settings (applicable for audio, video, and text).
   public AccountMediaConfig mediaConfig {
     set {
       pjsua2PINVOKE.AccountConfig_mediaConfig_set(swigCPtr, AccountMediaConfig.getCPtr(value));
@@ -146,6 +161,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// Video settings.
   public AccountVideoConfig videoConfig {
     set {
       pjsua2PINVOKE.AccountConfig_videoConfig_set(swigCPtr, AccountVideoConfig.getCPtr(value));
@@ -157,6 +173,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// Text settings.
   public AccountTextConfig textConfig {
     set {
       pjsua2PINVOKE.AccountConfig_textConfig_set(swigCPtr, AccountTextConfig.getCPtr(value));
@@ -168,6 +185,7 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// IP Change settings.
   public AccountIpChangeConfig ipChangeConfig {
     set {
       pjsua2PINVOKE.AccountConfig_ipChangeConfig_set(swigCPtr, AccountIpChangeConfig.getCPtr(value));
@@ -179,14 +197,19 @@ public class AccountConfig : PersistentObject {
     } 
   }
 
+  /// Default constructor will initialize with default values.
   public AccountConfig() : this(pjsua2PINVOKE.new_AccountConfig(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.AccountConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.AccountConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

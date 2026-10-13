@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes an video media's start transmit/connect operation
+/// info.
 public class VideoMediaConnectInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class VideoMediaConnectInfo : global::System.IDisposable {
     }
   }
 
+  ///  The source media port id.
   public uint mediaId {
     set {
       pjsua2PINVOKE.VideoMediaConnectInfo_mediaId_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class VideoMediaConnectInfo : global::System.IDisposable {
     } 
   }
 
+  ///  The destination media port id.
   public uint targetMediaId {
     set {
       pjsua2PINVOKE.VideoMediaConnectInfo_targetMediaId_set(swigCPtr, value);

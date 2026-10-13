@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Account::sendRequest()
 
 public class SendRequestParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,8 @@ public class SendRequestParam : global::System.IDisposable {
     }
   }
 
+  /// Token or arbitrary user data ownd by the application,
+  /// which will be passed back in callback Account::onSendRequest().
   public System.IntPtr userData {
     set {
       pjsua2PINVOKE.SendRequestParam_userData_set(swigCPtr, value);
@@ -68,6 +71,7 @@ public class SendRequestParam : global::System.IDisposable {
   
   }
 
+  /// SIP method of the request.
   public string method {
     set {
       pjsua2PINVOKE.SendRequestParam_method_set(swigCPtr, value);
@@ -80,6 +84,8 @@ public class SendRequestParam : global::System.IDisposable {
     } 
   }
 
+  /// Message body and/or list of headers etc. to be included in
+  /// the outgoing request.
   public SipTxOption txOption {
     set {
       pjsua2PINVOKE.SendRequestParam_txOption_set(swigCPtr, SipTxOption.getCPtr(value));
@@ -91,6 +97,7 @@ public class SendRequestParam : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor initializes with zero/empty values.
   public SendRequestParam() : this(pjsua2PINVOKE.new_SendRequestParam(), true) {
   }
 

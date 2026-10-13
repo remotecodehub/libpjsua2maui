@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes a media format changed event.
 public class MediaFmtChangedEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class MediaFmtChangedEvent : global::System.IDisposable {
     }
   }
 
+  ///  The new width.
   public uint newWidth {
     set {
       pjsua2PINVOKE.MediaFmtChangedEvent_newWidth_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class MediaFmtChangedEvent : global::System.IDisposable {
     } 
   }
 
+  ///  The new height.
   public uint newHeight {
     set {
       pjsua2PINVOKE.MediaFmtChangedEvent_newHeight_set(swigCPtr, value);

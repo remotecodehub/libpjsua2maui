@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes SIP transaction object. It corresponds to the
+/// pjsip_transaction structure in PJSIP library.
 
 public class SipTransaction : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class SipTransaction : global::System.IDisposable {
     }
   }
 
+  ///  Role (UAS or UAC)
   public pjsip_role_e role {
     set {
       pjsua2PINVOKE.SipTransaction_role_set(swigCPtr, (int)value);
@@ -67,6 +70,7 @@ public class SipTransaction : global::System.IDisposable {
     } 
   }
 
+  ///  The method.
   public string method {
     set {
       pjsua2PINVOKE.SipTransaction_method_set(swigCPtr, value);
@@ -79,6 +83,7 @@ public class SipTransaction : global::System.IDisposable {
     } 
   }
 
+  ///  Last status code seen.
   public int statusCode {
     set {
       pjsua2PINVOKE.SipTransaction_statusCode_set(swigCPtr, value);
@@ -89,6 +94,7 @@ public class SipTransaction : global::System.IDisposable {
     } 
   }
 
+  ///  Last reason phrase.
   public string statusText {
     set {
       pjsua2PINVOKE.SipTransaction_statusText_set(swigCPtr, value);
@@ -101,6 +107,7 @@ public class SipTransaction : global::System.IDisposable {
     } 
   }
 
+  ///  State.
   public pjsip_tsx_state_e state {
     set {
       pjsua2PINVOKE.SipTransaction_state_set(swigCPtr, (int)value);
@@ -111,6 +118,7 @@ public class SipTransaction : global::System.IDisposable {
     } 
   }
 
+  ///  Msg kept for retrans.
   public SipTxData lastTx {
     set {
       pjsua2PINVOKE.SipTransaction_lastTx_set(swigCPtr, SipTxData.getCPtr(value));
@@ -122,6 +130,7 @@ public class SipTransaction : global::System.IDisposable {
     } 
   }
 
+  ///  pjsip_transaction.
   public System.IntPtr pjTransaction {
     set {
       pjsua2PINVOKE.SipTransaction_pjTransaction_set(swigCPtr, value);
@@ -133,6 +142,7 @@ public class SipTransaction : global::System.IDisposable {
   
   }
 
+  /// Default constructor.
   public SipTransaction() : this(pjsua2PINVOKE.new_SipTransaction(), true) {
   }
 

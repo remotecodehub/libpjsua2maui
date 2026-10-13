@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+///  Parameter of Endpoint::onAudioMediaOpCompleted() callback.
 
 public class OnAudioMediaOpCompletedParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class OnAudioMediaOpCompletedParam : global::System.IDisposable {
     }
   }
 
+  /// The operation type.
   public pjmedia_conf_op_type opType {
     set {
       pjsua2PINVOKE.OnAudioMediaOpCompletedParam_opType_set(swigCPtr, (int)value);
@@ -67,6 +69,7 @@ public class OnAudioMediaOpCompletedParam : global::System.IDisposable {
     } 
   }
 
+  /// The operation status.
   public int status {
     set {
       pjsua2PINVOKE.OnAudioMediaOpCompletedParam_status_set(swigCPtr, value);
@@ -77,6 +80,9 @@ public class OnAudioMediaOpCompletedParam : global::System.IDisposable {
     } 
   }
 
+  /// The audio media operation information.
+  /// App can use *AudioMediaHelper* to get the AudioMedia instance based on
+  /// the audio media port id.
   public AudioMediaOpParam opParam {
     set {
       pjsua2PINVOKE.OnAudioMediaOpCompletedParam_opParam_set(swigCPtr, AudioMediaOpParam.getCPtr(value));

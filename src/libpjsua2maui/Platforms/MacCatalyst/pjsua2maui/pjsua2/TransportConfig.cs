@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameters to create a transport instance.
 public class TransportConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,6 +48,10 @@ public class TransportConfig : PersistentObject {
     }
   }
 
+  /// UDP port number to bind locally. This setting MUST be specified
+  /// even when default port is desired. If the value is zero, the
+  /// transport will be bound to any available port, and application
+  /// can query the port by querying the transport info.
   public uint port {
     set {
       pjsua2PINVOKE.TransportConfig_port_set(swigCPtr, value);
@@ -57,6 +62,14 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  /// Specify the port range for socket binding, relative to the start
+  /// port number specified in *port*. Note that this setting is only
+  /// applicable for media transport when the start port number is non zero.
+  /// Media transport is configurable via account setting,
+  /// i.e: AccountMediaConfig::transportConfig, please check the media
+  /// transport config docs for more info.
+  /// Available ports are in the range of [*port*, *port* + *portRange]*.
+  /// Default value is zero.
   public uint portRange {
     set {
       pjsua2PINVOKE.TransportConfig_portRange_set(swigCPtr, value);
@@ -67,6 +80,11 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether to randomly pick the starting port number from
+  /// the range of [*port*, *port* + *port_range]*. This setting is
+  /// used only if both port and port_range are non-zero, and only
+  /// applicable for the port selection of UDP and loop media transport.
+  /// Default is PJ_FALSE.
   public bool randomizePort {
     set {
       pjsua2PINVOKE.TransportConfig_randomizePort_set(swigCPtr, value);
@@ -77,6 +95,12 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  /// Optional address to advertise as the address of this transport.
+  /// Application can specify any address or hostname for this field,
+  /// for example it can point to one of the interface address in the
+  /// system, or it can point to the public address of a NAT router
+  /// where port mappings have been configured for the application.
+  /// Note: this option can be used for both UDP and TCP as well!
   public string publicAddress {
     set {
       pjsua2PINVOKE.TransportConfig_publicAddress_set(swigCPtr, value);
@@ -89,6 +113,14 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  /// Optional address where the socket should be bound to. This option
+  /// SHOULD only be used to selectively bind the socket to particular
+  /// interface (instead of 0.0.0.0), and SHOULD NOT be used to set the
+  /// published address of a transport (the public_addr field should be
+  /// used for that purpose).
+  /// Note that unlike public_addr field, the address (or hostname) here
+  /// MUST correspond to the actual interface address in the host, since
+  /// this address will be specified as bind() argument.
   public string boundAddress {
     set {
       pjsua2PINVOKE.TransportConfig_boundAddress_set(swigCPtr, value);
@@ -101,6 +133,8 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  /// This specifies TLS settings for TLS transport.
+  /// It's only used when creating a SIP TLS transport.
   public TlsConfig tlsConfig {
     set {
       pjsua2PINVOKE.TransportConfig_tlsConfig_set(swigCPtr, TlsConfig.getCPtr(value));
@@ -112,6 +146,12 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  /// QoS traffic type to be set on this transport. When application wants
+  /// to apply QoS tagging to the transport, it's preferable to set this
+  /// field rather than *qosParam* fields since this is more portable.
+  /// For TLS transport, this field will be ignored, the QoS traffic type
+  /// can be set via tlsConfig.
+  /// Default is QoS not set.
   public pj_qos_type qosType {
     set {
       pjsua2PINVOKE.TransportConfig_qosType_set(swigCPtr, (int)value);
@@ -122,6 +162,12 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  /// Set the low level QoS parameters to the transport. This is a lower
+  /// level operation than setting the *qosType* field and may not be
+  /// supported on all platforms.
+  /// For TLS transport, this field will be ignored, the low level QoS
+  /// parameters can be set via tlsConfig.
+  /// Default is QoS not set.
   public pj_qos_params qosParams {
     set {
       pjsua2PINVOKE.TransportConfig_qosParams_set(swigCPtr, pj_qos_params.getCPtr(value));
@@ -133,6 +179,10 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  /// Set the low level socket options to the transport.
+  /// For TLS transport, this field will be ignored, the socket options
+  /// can be set via tlsConfig.
+  /// Default is no socket option set.
   public SockOptParams sockOptParams {
     set {
       pjsua2PINVOKE.TransportConfig_sockOptParams_set(swigCPtr, SockOptParams.getCPtr(value));
@@ -144,14 +194,19 @@ public class TransportConfig : PersistentObject {
     } 
   }
 
+  ///  Default constructor initialises with default values
   public TransportConfig() : this(pjsua2PINVOKE.new_TransportConfig(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.TransportConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.TransportConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

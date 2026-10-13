@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Parameter of Endpoint::onRejectedIncomingCall() callback.
 
 public class OnRejectedIncomingCallParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,8 @@ public class OnRejectedIncomingCallParam : global::System.IDisposable {
     }
   }
 
+  /// The incoming call id. This will be set to PJSUA_INVALID_ID when there is
+  /// no available call slot at the time.
   public int callId {
     set {
       pjsua2PINVOKE.OnRejectedIncomingCallParam_callId_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class OnRejectedIncomingCallParam : global::System.IDisposable {
     } 
   }
 
+  /// Local URI.
   public string localInfo {
     set {
       pjsua2PINVOKE.OnRejectedIncomingCallParam_localInfo_set(swigCPtr, value);
@@ -79,6 +83,7 @@ public class OnRejectedIncomingCallParam : global::System.IDisposable {
     } 
   }
 
+  /// Remote URI.
   public string remoteInfo {
     set {
       pjsua2PINVOKE.OnRejectedIncomingCallParam_remoteInfo_set(swigCPtr, value);
@@ -91,6 +96,7 @@ public class OnRejectedIncomingCallParam : global::System.IDisposable {
     } 
   }
 
+  /// Rejection code.
   public int statusCode {
     set {
       pjsua2PINVOKE.OnRejectedIncomingCallParam_statusCode_set(swigCPtr, value);
@@ -101,6 +107,7 @@ public class OnRejectedIncomingCallParam : global::System.IDisposable {
     } 
   }
 
+  /// Rejection text.
   public string reason {
     set {
       pjsua2PINVOKE.OnRejectedIncomingCallParam_reason_set(swigCPtr, value);
@@ -113,6 +120,7 @@ public class OnRejectedIncomingCallParam : global::System.IDisposable {
     } 
   }
 
+  /// The original INVITE message, on some cases it is not available.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnRejectedIncomingCallParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));

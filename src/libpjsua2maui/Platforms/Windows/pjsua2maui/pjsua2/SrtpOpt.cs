@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// SRTP settings.
 
 public class SrtpOpt : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -47,6 +48,9 @@ public class SrtpOpt : PersistentObject {
     }
   }
 
+  /// Specify SRTP cryptos. If empty, all crypto will be enabled.
+  /// Available crypto can be enumerated using Endpoint::srtpCryptoEnum().
+  /// Default: empty.
   public SrtpCryptoVector cryptos {
     set {
       pjsua2PINVOKE.SrtpOpt_cryptos_set(swigCPtr, SrtpCryptoVector.getCPtr(value));
@@ -58,6 +62,10 @@ public class SrtpOpt : PersistentObject {
     } 
   }
 
+  /// Specify SRTP keying methods, valid keying method is defined in
+  /// pjmedia_srtp_keying_method. If empty, all keying methods will be
+  /// enabled with priority order: SDES, DTLS-SRTP.
+  /// Default: empty.
   public IntVector keyings {
     set {
       pjsua2PINVOKE.SrtpOpt_keyings_set(swigCPtr, IntVector.getCPtr(value));
@@ -69,14 +77,19 @@ public class SrtpOpt : PersistentObject {
     } 
   }
 
+  /// Default constructor initializes with default values.
   public SrtpOpt() : this(pjsua2PINVOKE.new_SrtpOpt(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.SrtpOpt_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.SrtpOpt_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

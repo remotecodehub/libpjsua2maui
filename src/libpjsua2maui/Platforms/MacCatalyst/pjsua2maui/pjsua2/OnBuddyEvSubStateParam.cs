@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Buddy::onBuddyEvSubState() callback.
 public class OnBuddyEvSubStateParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnBuddyEvSubStateParam : global::System.IDisposable {
     }
   }
 
+  /// * The event which triggers state change event.
   public SipEvent e {
     set {
       pjsua2PINVOKE.OnBuddyEvSubStateParam_e_set(swigCPtr, SipEvent.getCPtr(value));

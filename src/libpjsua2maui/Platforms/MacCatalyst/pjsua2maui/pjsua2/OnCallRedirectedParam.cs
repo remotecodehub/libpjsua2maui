@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCallRedirected() callback.
 public class OnCallRedirectedParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnCallRedirectedParam : global::System.IDisposable {
     }
   }
 
+  /// The current target to be tried.
   public string targetUri {
     set {
       pjsua2PINVOKE.OnCallRedirectedParam_targetUri_set(swigCPtr, value);
@@ -69,6 +71,11 @@ public class OnCallRedirectedParam : global::System.IDisposable {
     } 
   }
 
+  /// The event that caused this callback to be called.
+  /// This could be the receipt of 3xx response, or 4xx/5xx response
+  /// received for the INVITE sent to subsequent targets, or empty
+  /// (e.type == PJSIP_EVENT_UNKNOWN) if this callback is called from
+  /// within Call::processRedirect() context.
   public SipEvent e {
     set {
       pjsua2PINVOKE.OnCallRedirectedParam_e_set(swigCPtr, SipEvent.getCPtr(value));

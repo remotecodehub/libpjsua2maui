@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCallTransferStatus()
+/// callback.
 public class OnCallTransferStatusParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class OnCallTransferStatusParam : global::System.IDisposable {
     }
   }
 
+  /// Status progress of the transfer request.
   public pjsip_status_code statusCode {
     set {
       pjsua2PINVOKE.OnCallTransferStatusParam_statusCode_set(swigCPtr, (int)value);
@@ -67,6 +70,7 @@ public class OnCallTransferStatusParam : global::System.IDisposable {
     } 
   }
 
+  /// Status progress reason.
   public string reason {
     set {
       pjsua2PINVOKE.OnCallTransferStatusParam_reason_set(swigCPtr, value);
@@ -79,6 +83,8 @@ public class OnCallTransferStatusParam : global::System.IDisposable {
     } 
   }
 
+  /// If true, no further notification will be reported. The statusCode
+  /// specified in this callback is the final status.
   public bool finalNotify {
     set {
       pjsua2PINVOKE.OnCallTransferStatusParam_finalNotify_set(swigCPtr, value);
@@ -89,6 +95,9 @@ public class OnCallTransferStatusParam : global::System.IDisposable {
     } 
   }
 
+  /// Initially will be set to true, application can set this to false
+  /// if it no longer wants to receive further notification (for example,
+  /// after it hangs up the call).
   public bool cont {
     set {
       pjsua2PINVOKE.OnCallTransferStatusParam_cont_set(swigCPtr, value);

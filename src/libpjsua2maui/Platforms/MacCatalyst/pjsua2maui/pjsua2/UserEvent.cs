@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes user event.
 public class UserEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class UserEvent : global::System.IDisposable {
     }
   }
 
+  ///  User data 1.
   public System.IntPtr user1 {
     set {
       pjsua2PINVOKE.UserEvent_user1_set(swigCPtr, value);
@@ -68,6 +70,7 @@ public class UserEvent : global::System.IDisposable {
   
   }
 
+  ///  User data 2.
   public System.IntPtr user2 {
     set {
       pjsua2PINVOKE.UserEvent_user2_set(swigCPtr, value);
@@ -79,6 +82,7 @@ public class UserEvent : global::System.IDisposable {
   
   }
 
+  ///  User data 3.
   public System.IntPtr user3 {
     set {
       pjsua2PINVOKE.UserEvent_user3_set(swigCPtr, value);
@@ -90,6 +94,7 @@ public class UserEvent : global::System.IDisposable {
   
   }
 
+  ///  User data 4.
   public System.IntPtr user4 {
     set {
       pjsua2PINVOKE.UserEvent_user4_set(swigCPtr, value);

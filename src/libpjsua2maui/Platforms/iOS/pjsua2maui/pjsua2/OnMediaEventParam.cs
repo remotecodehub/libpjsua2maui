@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameter of Endpoint::onCallMediaEvent() callback.
 public class OnMediaEventParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnMediaEventParam : global::System.IDisposable {
     }
   }
 
+  /// The media event.
   public MediaEvent ev {
     set {
       pjsua2PINVOKE.OnMediaEventParam_ev_set(swigCPtr, MediaEvent.getCPtr(value));

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Call::sendDtmf()
 
 public class CallSendDtmfParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,8 @@ public class CallSendDtmfParam : global::System.IDisposable {
     }
   }
 
+  /// The method used to send DTMF.
+  /// Default: PJSUA_DTMF_METHOD_RFC2833
   public pjsua_dtmf_method method {
     set {
       pjsua2PINVOKE.CallSendDtmfParam_method_set(swigCPtr, (int)value);
@@ -67,6 +70,8 @@ public class CallSendDtmfParam : global::System.IDisposable {
     } 
   }
 
+  /// The signal duration used for the DTMF.
+  /// Default: PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT
   public uint duration {
     set {
       pjsua2PINVOKE.CallSendDtmfParam_duration_set(swigCPtr, value);
@@ -77,6 +82,7 @@ public class CallSendDtmfParam : global::System.IDisposable {
     } 
   }
 
+  /// The DTMF digits to be sent.
   public string digits {
     set {
       pjsua2PINVOKE.CallSendDtmfParam_digits_set(swigCPtr, value);
@@ -89,6 +95,7 @@ public class CallSendDtmfParam : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor initialize with default value.
   public CallSendDtmfParam() : this(pjsua2PINVOKE.new_CallSendDtmfParam(), true) {
   }
 

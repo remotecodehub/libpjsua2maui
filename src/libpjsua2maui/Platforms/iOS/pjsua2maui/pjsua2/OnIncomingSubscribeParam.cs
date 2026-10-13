@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for onIncomingSubscribe() callback.
 public class OnIncomingSubscribeParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,9 @@ public class OnIncomingSubscribeParam : global::System.IDisposable {
     }
   }
 
+  /// Server presence subscription instance. If application delays
+  /// the acceptance of the request, it will need to specify this object
+  /// when calling Account::presNotify().
   public System.IntPtr srvPres {
     set {
       pjsua2PINVOKE.OnIncomingSubscribeParam_srvPres_set(swigCPtr, value);
@@ -68,6 +72,7 @@ public class OnIncomingSubscribeParam : global::System.IDisposable {
   
   }
 
+  ///  Sender URI.
   public string fromUri {
     set {
       pjsua2PINVOKE.OnIncomingSubscribeParam_fromUri_set(swigCPtr, value);
@@ -80,6 +85,7 @@ public class OnIncomingSubscribeParam : global::System.IDisposable {
     } 
   }
 
+  /// The incoming message.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnIncomingSubscribeParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));
@@ -91,6 +97,9 @@ public class OnIncomingSubscribeParam : global::System.IDisposable {
     } 
   }
 
+  /// The status code to respond to the request. The default value is 200.
+  /// Application may set this to other final status code to accept or
+  /// reject the request.
   public pjsip_status_code code {
     set {
       pjsua2PINVOKE.OnIncomingSubscribeParam_code_set(swigCPtr, (int)value);
@@ -101,6 +110,7 @@ public class OnIncomingSubscribeParam : global::System.IDisposable {
     } 
   }
 
+  /// The reason phrase to respond to the request.
   public string reason {
     set {
       pjsua2PINVOKE.OnIncomingSubscribeParam_reason_set(swigCPtr, value);
@@ -113,6 +123,7 @@ public class OnIncomingSubscribeParam : global::System.IDisposable {
     } 
   }
 
+  /// Additional data to be sent with the response, if any.
   public SipTxOption txOption {
     set {
       pjsua2PINVOKE.OnIncomingSubscribeParam_txOption_set(swigCPtr, SipTxOption.getCPtr(value));

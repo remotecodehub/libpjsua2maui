@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes an video media's stop transmit/disconnect operation
+/// info.
 
 public class VideoMediaDisconnectInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class VideoMediaDisconnectInfo : global::System.IDisposable {
     }
   }
 
+  ///  The source media port id.
   public uint mediaId {
     set {
       pjsua2PINVOKE.VideoMediaDisconnectInfo_mediaId_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class VideoMediaDisconnectInfo : global::System.IDisposable {
     } 
   }
 
+  ///  The destination media port id.
   public uint targetMediaId {
     set {
       pjsua2PINVOKE.VideoMediaDisconnectInfo_targetMediaId_set(swigCPtr, value);

@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes buddy info, which can be retrieved by via
+/// Buddy::getInfo().
 public class BuddyInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class BuddyInfo : global::System.IDisposable {
     }
   }
 
+  /// The full URI of the buddy, as specified in the configuration.
   public string uri {
     set {
       pjsua2PINVOKE.BuddyInfo_uri_set(swigCPtr, value);
@@ -69,6 +72,8 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// Buddy's Contact, only available when presence subscription has
+  /// been established to the buddy.
   public string contact {
     set {
       pjsua2PINVOKE.BuddyInfo_contact_set(swigCPtr, value);
@@ -81,6 +86,8 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// The account ID associated with this buddy. If not associated
+  /// with any account, the value will be PJSUA_INVALID_ID.
   public int accId {
     set {
       pjsua2PINVOKE.BuddyInfo_accId_set(swigCPtr, value);
@@ -91,6 +98,8 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// Flag to indicate that we should monitor the presence information for
+  /// this buddy (normally yes, unless explicitly disabled).
   public bool presMonitorEnabled {
     set {
       pjsua2PINVOKE.BuddyInfo_presMonitorEnabled_set(swigCPtr, value);
@@ -101,6 +110,12 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// If *presMonitorEnabled* is true, this specifies the last state of
+  /// the presence subscription. If presence subscription session is currently
+  /// active, the value will be PJSIP_EVSUB_STATE_ACTIVE. If presence
+  /// subscription request has been rejected, the value will be
+  /// PJSIP_EVSUB_STATE_TERMINATED, and the termination reason will be
+  /// specified in *subTermReason*.
   public pjsip_evsub_state subState {
     set {
       pjsua2PINVOKE.BuddyInfo_subState_set(swigCPtr, (int)value);
@@ -111,6 +126,7 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// String representation of subscription state.
   public string subStateName {
     set {
       pjsua2PINVOKE.BuddyInfo_subStateName_set(swigCPtr, value);
@@ -123,6 +139,11 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// Specifies the last presence subscription termination code. This would
+  /// return the last status of the SUBSCRIBE request. If the subscription
+  /// is terminated with NOTIFY by the server, this value will be set to
+  /// 200, and subscription termination reason will be given in the
+  /// *subTermReason* field.
   public pjsip_status_code subTermCode {
     set {
       pjsua2PINVOKE.BuddyInfo_subTermCode_set(swigCPtr, (int)value);
@@ -133,6 +154,8 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// Specifies the last presence subscription termination reason. If
+  /// presence subscription is currently active, the value will be empty.
   public string subTermReason {
     set {
       pjsua2PINVOKE.BuddyInfo_subTermReason_set(swigCPtr, value);
@@ -145,6 +168,7 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// Presence status.
   public PresenceStatus presStatus {
     set {
       pjsua2PINVOKE.BuddyInfo_presStatus_set(swigCPtr, PresenceStatus.getCPtr(value));
@@ -156,6 +180,7 @@ public class BuddyInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public BuddyInfo() : this(pjsua2PINVOKE.new_BuddyInfo(), true) {
   }
 

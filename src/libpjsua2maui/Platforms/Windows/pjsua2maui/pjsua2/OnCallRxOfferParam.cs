@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Call::onCallRxOffer() callback.
 
 public class OnCallRxOfferParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class OnCallRxOfferParam : global::System.IDisposable {
     }
   }
 
+  /// The new offer received.
   public SdpSession offer {
     set {
       pjsua2PINVOKE.OnCallRxOfferParam_offer_set(swigCPtr, SdpSession.getCPtr(value));
@@ -68,6 +70,9 @@ public class OnCallRxOfferParam : global::System.IDisposable {
     } 
   }
 
+  /// Status code to be returned for answering the offer. On input,
+  /// it contains status code PJSIP_SC_OK (200). Currently, valid values are only
+  /// PJSIP_SC_OK (200) and PJSIP_SC_NOT_ACCEPTABLE_HERE (488).
   public pjsip_status_code statusCode {
     set {
       pjsua2PINVOKE.OnCallRxOfferParam_statusCode_set(swigCPtr, (int)value);
@@ -78,6 +83,8 @@ public class OnCallRxOfferParam : global::System.IDisposable {
     } 
   }
 
+  /// The current call setting, application can update this setting for
+  /// answering the offer.
   public CallSetting opt {
     set {
       pjsua2PINVOKE.OnCallRxOfferParam_opt_set(swigCPtr, CallSetting.getCPtr(value));

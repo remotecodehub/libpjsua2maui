@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// The event body.
 public class SipEventBody : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class SipEventBody : global::System.IDisposable {
     }
   }
 
+  /// Timer event.
   public TimerEvent timer {
     set {
       pjsua2PINVOKE.SipEventBody_timer_set(swigCPtr, TimerEvent.getCPtr(value));
@@ -68,6 +70,7 @@ public class SipEventBody : global::System.IDisposable {
     } 
   }
 
+  /// Transaction state has changed event.
   public TsxStateEvent tsxState {
     set {
       pjsua2PINVOKE.SipEventBody_tsxState_set(swigCPtr, TsxStateEvent.getCPtr(value));
@@ -79,6 +82,7 @@ public class SipEventBody : global::System.IDisposable {
     } 
   }
 
+  /// Message transmission event.
   public TxMsgEvent txMsg {
     set {
       pjsua2PINVOKE.SipEventBody_txMsg_set(swigCPtr, TxMsgEvent.getCPtr(value));
@@ -90,6 +94,7 @@ public class SipEventBody : global::System.IDisposable {
     } 
   }
 
+  /// Transmission error event.
   public TxErrorEvent txError {
     set {
       pjsua2PINVOKE.SipEventBody_txError_set(swigCPtr, TxErrorEvent.getCPtr(value));
@@ -101,6 +106,7 @@ public class SipEventBody : global::System.IDisposable {
     } 
   }
 
+  /// Message arrival event.
   public RxMsgEvent rxMsg {
     set {
       pjsua2PINVOKE.SipEventBody_rxMsg_set(swigCPtr, RxMsgEvent.getCPtr(value));
@@ -112,6 +118,7 @@ public class SipEventBody : global::System.IDisposable {
     } 
   }
 
+  /// User event.
   public UserEvent user {
     set {
       pjsua2PINVOKE.SipEventBody_user_set(swigCPtr, UserEvent.getCPtr(value));

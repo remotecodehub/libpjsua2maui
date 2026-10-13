@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Media stream info.
 
 public class StreamInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class StreamInfo : global::System.IDisposable {
     }
   }
 
+  /// Media type of this stream.
   public pjmedia_type type {
     set {
       pjsua2PINVOKE.StreamInfo_type_set(swigCPtr, (int)value);
@@ -67,6 +69,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Transport protocol (RTP/AVP, etc.)
   public pjmedia_tp_proto proto {
     set {
       pjsua2PINVOKE.StreamInfo_proto_set(swigCPtr, (int)value);
@@ -77,6 +80,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Media direction.
   public pjmedia_dir dir {
     set {
       pjsua2PINVOKE.StreamInfo_dir_set(swigCPtr, (int)value);
@@ -87,6 +91,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Remote RTP address
   public string remoteRtpAddress {
     set {
       pjsua2PINVOKE.StreamInfo_remoteRtpAddress_set(swigCPtr, value);
@@ -99,6 +104,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Optional remote RTCP address
   public string remoteRtcpAddress {
     set {
       pjsua2PINVOKE.StreamInfo_remoteRtcpAddress_set(swigCPtr, value);
@@ -111,6 +117,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Outgoing codec payload type.
   public uint txPt {
     set {
       pjsua2PINVOKE.StreamInfo_txPt_set(swigCPtr, value);
@@ -121,6 +128,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Incoming codec payload type.
   public uint rxPt {
     set {
       pjsua2PINVOKE.StreamInfo_rxPt_set(swigCPtr, value);
@@ -131,6 +139,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Outgoing pt for audio telephone-events.
   public int audTxEventPt {
     set {
       pjsua2PINVOKE.StreamInfo_audTxEventPt_set(swigCPtr, value);
@@ -141,6 +150,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Incoming pt for audio telephone-events.
   public int audRxEventPt {
     set {
       pjsua2PINVOKE.StreamInfo_audRxEventPt_set(swigCPtr, value);
@@ -151,6 +161,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Codec name.
   public string codecName {
     set {
       pjsua2PINVOKE.StreamInfo_codecName_set(swigCPtr, value);
@@ -163,6 +174,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Codec clock rate.
   public uint codecClockRate {
     set {
       pjsua2PINVOKE.StreamInfo_codecClockRate_set(swigCPtr, value);
@@ -173,6 +185,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Optional audio codec param.
   public CodecParam audCodecParam {
     set {
       pjsua2PINVOKE.StreamInfo_audCodecParam_set(swigCPtr, CodecParam.getCPtr(value));
@@ -184,6 +197,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Optional video codec param.
   public VidCodecParam vidCodecParam {
     set {
       pjsua2PINVOKE.StreamInfo_vidCodecParam_set(swigCPtr, VidCodecParam.getCPtr(value));
@@ -195,6 +209,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Jitter buffer init delay in msec.
   public int jbInit {
     set {
       pjsua2PINVOKE.StreamInfo_jbInit_set(swigCPtr, value);
@@ -205,6 +220,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Jitter buffer minimum prefetch delay in msec.
   public int jbMinPre {
     set {
       pjsua2PINVOKE.StreamInfo_jbMinPre_set(swigCPtr, value);
@@ -215,6 +231,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Jitter buffer maximum prefetch delay in msec.
   public int jbMaxPre {
     set {
       pjsua2PINVOKE.StreamInfo_jbMaxPre_set(swigCPtr, value);
@@ -225,6 +242,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Jitter buffer max delay in msec.
   public int jbMax {
     set {
       pjsua2PINVOKE.StreamInfo_jbMax_set(swigCPtr, value);
@@ -235,6 +253,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Jitter buffer discard algorithm.
   public pjmedia_jb_discard_algo jbDiscardAlgo {
     set {
       pjsua2PINVOKE.StreamInfo_jbDiscardAlgo_set(swigCPtr, (int)value);
@@ -245,6 +264,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Disable automatic sending of RTCP SDES and BYE.
   public bool rtcpSdesByeDisabled {
     set {
       pjsua2PINVOKE.StreamInfo_rtcpSdesByeDisabled_set(swigCPtr, value);
@@ -255,6 +275,7 @@ public class StreamInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public StreamInfo() : this(pjsua2PINVOKE.new_StreamInfo(), true) {
   }
 

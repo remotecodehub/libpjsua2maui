@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Socket option type.
 
 public class SockOpt : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class SockOpt : global::System.IDisposable {
     }
   }
 
+  /// The level at which the option is defined.
   public int level {
     set {
       pjsua2PINVOKE.SockOpt_level_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class SockOpt : global::System.IDisposable {
     } 
   }
 
+  /// Option name.
   public int optName {
     set {
       pjsua2PINVOKE.SockOpt_optName_set(swigCPtr, value);
@@ -77,12 +80,16 @@ public class SockOpt : global::System.IDisposable {
     } 
   }
 
+  ///  Default constructor.
   public SockOpt() : this(pjsua2PINVOKE.new_SockOpt__SWIG_0(), true) {
   }
 
+  ///  Construct a socket option with the specified parameters.
   public SockOpt(int level, int optName, int optVal) : this(pjsua2PINVOKE.new_SockOpt__SWIG_1(level, optName, optVal), true) {
   }
 
+  /// Set option value of type integer.
+  /// <param name="opt_val">           Option value.</param>
   public void setOptValInt(int opt_val) {
     pjsua2PINVOKE.SockOpt_setOptValInt(swigCPtr, opt_val);
   }

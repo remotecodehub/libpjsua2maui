@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes an video media's update operation info.
 
 public class VideoMediaUpdateInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class VideoMediaUpdateInfo : global::System.IDisposable {
     }
   }
 
+  ///  The media port id.
   public uint mediaId {
     set {
       pjsua2PINVOKE.VideoMediaUpdateInfo_mediaId_set(swigCPtr, value);

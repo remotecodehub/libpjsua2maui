@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This class is used to store the received parsed SIP MESSAGE request and
+/// its transaction for use in sendResponse().
 public class DeferredResponse : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,13 +59,18 @@ public class DeferredResponse : global::System.IDisposable {
     }
   }
 
+  /// Constructor that clones the rx_data and keeps a non-owning pointer
+  /// to the transaction.
+  /// <param name="param">        The instant message parameters from the callback.</param>
   public DeferredResponse(OnInstantMessageParam param) : this(pjsua2PINVOKE.new_DeferredResponse__SWIG_0(OnInstantMessageParam.getCPtr(param)), true) {
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Constructs an empty object. Must be assigned to before use.
   public DeferredResponse() : this(pjsua2PINVOKE.new_DeferredResponse__SWIG_1(), true) {
   }
 
+  /// Copies the deferred response object by cloning the rx_data.
   public DeferredResponse(DeferredResponse deferredResponse) : this(pjsua2PINVOKE.new_DeferredResponse__SWIG_2(DeferredResponse.getCPtr(deferredResponse)), true) {
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }

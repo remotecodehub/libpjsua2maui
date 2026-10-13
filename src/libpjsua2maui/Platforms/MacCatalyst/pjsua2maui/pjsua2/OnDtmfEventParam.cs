@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onDtmfEvent()
+/// callback.
 public class OnDtmfEventParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class OnDtmfEventParam : global::System.IDisposable {
     }
   }
 
+  /// DTMF sending method.
   public pjsua_dtmf_method method {
     set {
       pjsua2PINVOKE.OnDtmfEventParam_method_set(swigCPtr, (int)value);
@@ -67,6 +70,11 @@ public class OnDtmfEventParam : global::System.IDisposable {
     } 
   }
 
+  /// The timestamp identifying the begin of the event. Timestamp units are
+  /// expressed in milliseconds.
+  /// Note that this value should only be used to compare multiple events
+  /// received via the same method relatively to each other, as the time-base
+  /// is randomized.
   public uint timestamp {
     set {
       pjsua2PINVOKE.OnDtmfEventParam_timestamp_set(swigCPtr, value);
@@ -77,6 +85,7 @@ public class OnDtmfEventParam : global::System.IDisposable {
     } 
   }
 
+  /// DTMF ASCII digit.
   public string digit {
     set {
       pjsua2PINVOKE.OnDtmfEventParam_digit_set(swigCPtr, value);
@@ -89,6 +98,14 @@ public class OnDtmfEventParam : global::System.IDisposable {
     } 
   }
 
+  /// DTMF signal duration in milliseconds. Interpretation of the duration
+  /// depends on the flag PJMEDIA_STREAM_DTMF_IS_END.
+  /// depends on the method.
+  /// If the method is PJSUA_DTMF_METHOD_SIP_INFO, this contains the total
+  /// duration of the DTMF signal or PJSUA_UNKNOWN_DTMF_DURATION if no signal
+  /// duration was indicated.
+  /// If the method is PJSUA_DTMF_METHOD_RFC2833, this contains the total
+  /// duration of the DTMF signal received up to this point in time.
   public uint duration {
     set {
       pjsua2PINVOKE.OnDtmfEventParam_duration_set(swigCPtr, value);
@@ -99,6 +116,14 @@ public class OnDtmfEventParam : global::System.IDisposable {
     } 
   }
 
+  /// Flags indicating additional information about the DTMF event.
+  /// If PJMEDIA_STREAM_DTMF_IS_UPDATE is set, the event was already
+  /// indicated earlier. The new indication contains an updated event
+  /// duration.
+  /// If PJMEDIA_STREAM_DTMF_IS_END is set, the event has ended and this
+  /// indication contains the final event duration. Note that end
+  /// indications might get lost. Hence it is not guaranteed to receive
+  /// an event with PJMEDIA_STREAM_DTMF_IS_END for every event.
   public uint flags {
     set {
       pjsua2PINVOKE.OnDtmfEventParam_flags_set(swigCPtr, value);

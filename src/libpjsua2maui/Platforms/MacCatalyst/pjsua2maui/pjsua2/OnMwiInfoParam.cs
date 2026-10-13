@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameters for onMwiInfo() account callback.
 public class OnMwiInfoParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnMwiInfoParam : global::System.IDisposable {
     }
   }
 
+  /// MWI subscription state.
   public pjsip_evsub_state state {
     set {
       pjsua2PINVOKE.OnMwiInfoParam_state_set(swigCPtr, (int)value);
@@ -67,6 +69,7 @@ public class OnMwiInfoParam : global::System.IDisposable {
     } 
   }
 
+  /// The whole message buffer.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnMwiInfoParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));

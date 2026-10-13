@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onStreamPreCreate()
+/// callback.
 public class OnStreamPreCreateParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class OnStreamPreCreateParam : global::System.IDisposable {
     }
   }
 
+  /// Stream index in the media session, read-only.
   public uint streamIdx {
     set {
       pjsua2PINVOKE.OnStreamPreCreateParam_streamIdx_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class OnStreamPreCreateParam : global::System.IDisposable {
     } 
   }
 
+  /// Parameters that the stream will be created from.
   public StreamInfo streamInfo {
     set {
       pjsua2PINVOKE.OnStreamPreCreateParam_streamInfo_set(swigCPtr, StreamInfo.getCPtr(value));

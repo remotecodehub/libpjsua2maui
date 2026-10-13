@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Call::onCreateMediaTransportSrtp()
+/// callback.
 
 public class OnCreateMediaTransportSrtpParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,8 @@ public class OnCreateMediaTransportSrtpParam : global::System.IDisposable {
     }
   }
 
+  /// The media index in the SDP for which the SRTP media transport
+  /// will be used.
   public uint mediaIdx {
     set {
       pjsua2PINVOKE.OnCreateMediaTransportSrtpParam_mediaIdx_set(swigCPtr, value);
@@ -67,6 +71,10 @@ public class OnCreateMediaTransportSrtpParam : global::System.IDisposable {
     } 
   }
 
+  /// Specify whether secure media transport should be used. Application
+  /// can modify this only for initial INVITE.
+  /// Valid values are PJMEDIA_SRTP_DISABLED, PJMEDIA_SRTP_OPTIONAL, and
+  /// PJMEDIA_SRTP_MANDATORY.
   public pjmedia_srtp_use srtpUse {
     set {
       pjsua2PINVOKE.OnCreateMediaTransportSrtpParam_srtpUse_set(swigCPtr, (int)value);
@@ -77,6 +85,8 @@ public class OnCreateMediaTransportSrtpParam : global::System.IDisposable {
     } 
   }
 
+  /// Application can modify this to specify the cryptos and keys
+  /// which are going to be used.
   public SrtpCryptoVector cryptos {
     set {
       pjsua2PINVOKE.OnCreateMediaTransportSrtpParam_cryptos_set(swigCPtr, SrtpCryptoVector.getCPtr(value));

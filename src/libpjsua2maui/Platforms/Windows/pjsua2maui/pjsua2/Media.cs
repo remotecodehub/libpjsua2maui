@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Media.
 
 public class Media : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,8 @@ public class Media : global::System.IDisposable {
     }
   }
 
+  /// Get type of the media.
+  /// <returns>The media type.</returns>
   public pjmedia_type getType() {
     pjmedia_type ret = (pjmedia_type)pjsua2PINVOKE.Media_getType(swigCPtr);
     return ret;

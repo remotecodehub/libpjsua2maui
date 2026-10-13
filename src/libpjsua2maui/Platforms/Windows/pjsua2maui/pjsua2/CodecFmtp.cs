@@ -9,6 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Structure of codec specific parameters which contains name=value pairs.
+/// The codec specific parameters are to be used with SDP according to
+/// the standards (e.g: RFC 3555) in SDP 'a=fmtp' attribute.
 
 public class CodecFmtp : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +60,7 @@ public class CodecFmtp : global::System.IDisposable {
     }
   }
 
+  ///  name
   public string name {
     set {
       pjsua2PINVOKE.CodecFmtp_name_set(swigCPtr, value);
@@ -69,6 +73,7 @@ public class CodecFmtp : global::System.IDisposable {
     } 
   }
 
+  ///  value
   public string val {
     set {
       pjsua2PINVOKE.CodecFmtp_val_set(swigCPtr, value);

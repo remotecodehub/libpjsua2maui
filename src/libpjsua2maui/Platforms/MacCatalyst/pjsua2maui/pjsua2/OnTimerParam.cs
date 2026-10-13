@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameter of Endpoint::onTimer() callback.
 public class OnTimerParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,8 @@ public class OnTimerParam : global::System.IDisposable {
     }
   }
 
+  /// Arbitrary user data that was passed to Endpoint::utilTimerSchedule()
+  /// function.
   public System.IntPtr userData {
     set {
       pjsua2PINVOKE.OnTimerParam_userData_set(swigCPtr, value);
@@ -68,6 +71,7 @@ public class OnTimerParam : global::System.IDisposable {
   
   }
 
+  /// The interval of this timer, in miliseconds.
   public uint msecDelay {
     set {
       pjsua2PINVOKE.OnTimerParam_msecDelay_set(swigCPtr, value);

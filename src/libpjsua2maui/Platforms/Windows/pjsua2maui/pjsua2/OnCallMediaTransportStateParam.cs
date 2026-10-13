@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for Call::onCallMediaTransportState()
+/// callback.
 
 public class OnCallMediaTransportStateParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class OnCallMediaTransportStateParam : global::System.IDisposable {
     }
   }
 
+  /// The media index.
   public uint medIdx {
     set {
       pjsua2PINVOKE.OnCallMediaTransportStateParam_medIdx_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class OnCallMediaTransportStateParam : global::System.IDisposable {
     } 
   }
 
+  /// The media transport state
   public pjsua_med_tp_st state {
     set {
       pjsua2PINVOKE.OnCallMediaTransportStateParam_state_set(swigCPtr, (int)value);
@@ -77,6 +81,7 @@ public class OnCallMediaTransportStateParam : global::System.IDisposable {
     } 
   }
 
+  /// The last error code related to the media transport state.
   public int status {
     set {
       pjsua2PINVOKE.OnCallMediaTransportStateParam_status_set(swigCPtr, value);
@@ -87,6 +92,7 @@ public class OnCallMediaTransportStateParam : global::System.IDisposable {
     } 
   }
 
+  /// Optional SIP error code.
   public int sipErrorCode {
     set {
       pjsua2PINVOKE.OnCallMediaTransportStateParam_sipErrorCode_set(swigCPtr, value);

@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure describes SDP session description. It corresponds to the
+/// pjmedia_sdp_session structure.
 
 public class SdpSession : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,7 @@ public class SdpSession : global::System.IDisposable {
     }
   }
 
+  /// The whole SDP as a string.
   public string wholeSdp {
     set {
       pjsua2PINVOKE.SdpSession_wholeSdp_set(swigCPtr, value);
@@ -69,6 +72,8 @@ public class SdpSession : global::System.IDisposable {
     } 
   }
 
+  /// Pointer to its original pjmedia_sdp_session. Only valid when the struct
+  /// is converted from PJSIP's pjmedia_sdp_session.
   public System.IntPtr pjSdpSession {
     set {
       pjsua2PINVOKE.SdpSession_pjSdpSession_set(swigCPtr, value);

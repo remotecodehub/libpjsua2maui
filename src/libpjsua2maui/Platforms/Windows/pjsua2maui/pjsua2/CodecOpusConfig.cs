@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Opus codec parameters setting;
 
 public class CodecOpusConfig : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class CodecOpusConfig : global::System.IDisposable {
     }
   }
 
+  ///  Sample rate in Hz.
   public uint sample_rate {
     set {
       pjsua2PINVOKE.CodecOpusConfig_sample_rate_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class CodecOpusConfig : global::System.IDisposable {
     } 
   }
 
+  ///  Number of channels.
   public uint channel_cnt {
     set {
       pjsua2PINVOKE.CodecOpusConfig_channel_cnt_set(swigCPtr, value);
@@ -77,6 +80,7 @@ public class CodecOpusConfig : global::System.IDisposable {
     } 
   }
 
+  ///  Frame time in msec.
   public uint frm_ptime {
     set {
       pjsua2PINVOKE.CodecOpusConfig_frm_ptime_set(swigCPtr, value);
@@ -87,6 +91,7 @@ public class CodecOpusConfig : global::System.IDisposable {
     } 
   }
 
+  ///  Frame time denumerator.
   public uint frm_ptime_denum {
     set {
       pjsua2PINVOKE.CodecOpusConfig_frm_ptime_denum_set(swigCPtr, value);
@@ -97,6 +102,7 @@ public class CodecOpusConfig : global::System.IDisposable {
     } 
   }
 
+  ///  Encoder bit rate in bps.
   public uint bit_rate {
     set {
       pjsua2PINVOKE.CodecOpusConfig_bit_rate_set(swigCPtr, value);
@@ -107,6 +113,7 @@ public class CodecOpusConfig : global::System.IDisposable {
     } 
   }
 
+  ///  Encoder's expected packet loss pct.
   public uint packet_loss {
     set {
       pjsua2PINVOKE.CodecOpusConfig_packet_loss_set(swigCPtr, value);
@@ -117,6 +124,7 @@ public class CodecOpusConfig : global::System.IDisposable {
     } 
   }
 
+  ///  Encoder complexity, 0-10(10 is highest)
   public uint complexity {
     set {
       pjsua2PINVOKE.CodecOpusConfig_complexity_set(swigCPtr, value);
@@ -127,6 +135,7 @@ public class CodecOpusConfig : global::System.IDisposable {
     } 
   }
 
+  ///  Constant bit rate?
   public bool cbr {
     set {
       pjsua2PINVOKE.CodecOpusConfig_cbr_set(swigCPtr, value);

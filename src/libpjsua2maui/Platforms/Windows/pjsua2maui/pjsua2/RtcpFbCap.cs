@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// RTCP Feedback capability.
 
 public class RtcpFbCap : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,10 @@ public class RtcpFbCap : global::System.IDisposable {
     }
   }
 
+  /// Specify the codecs to which the capability is applicable. Codec ID is
+  /// using the same format as in pjmedia_codec_mgr_find_codecs_by_id() and
+  /// pjmedia_vid_codec_mgr_find_codecs_by_id(), e.g: "L16/8000/1", "PCMU",
+  /// "H264". This can also be an asterisk ("*") to represent all codecs.
   public string codecId {
     set {
       pjsua2PINVOKE.RtcpFbCap_codecId_set(swigCPtr, value);
@@ -69,6 +74,7 @@ public class RtcpFbCap : global::System.IDisposable {
     } 
   }
 
+  /// Specify the RTCP Feedback type.
   public pjmedia_rtcp_fb_type type {
     set {
       pjsua2PINVOKE.RtcpFbCap_type_set(swigCPtr, (int)value);
@@ -79,6 +85,7 @@ public class RtcpFbCap : global::System.IDisposable {
     } 
   }
 
+  /// Specify the type name if RTCP Feedback type is PJMEDIA_RTCP_FB_OTHER.
   public string typeName {
     set {
       pjsua2PINVOKE.RtcpFbCap_typeName_set(swigCPtr, value);
@@ -91,6 +98,7 @@ public class RtcpFbCap : global::System.IDisposable {
     } 
   }
 
+  /// Specify the RTCP Feedback parameters.
   public string param {
     set {
       pjsua2PINVOKE.RtcpFbCap_param_set(swigCPtr, value);
@@ -103,6 +111,7 @@ public class RtcpFbCap : global::System.IDisposable {
     } 
   }
 
+  /// Constructor.
   public RtcpFbCap() : this(pjsua2PINVOKE.new_RtcpFbCap(), true) {
   }
 

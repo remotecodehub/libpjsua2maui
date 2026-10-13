@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// RTCP SDES structure.
 public class RtcpSdes : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class RtcpSdes : global::System.IDisposable {
     }
   }
 
+  ///  RTCP SDES type CNAME.
   public string cname {
     set {
       pjsua2PINVOKE.RtcpSdes_cname_set(swigCPtr, value);
@@ -69,6 +71,7 @@ public class RtcpSdes : global::System.IDisposable {
     } 
   }
 
+  ///  RTCP SDES type NAME.
   public string name {
     set {
       pjsua2PINVOKE.RtcpSdes_name_set(swigCPtr, value);
@@ -81,6 +84,7 @@ public class RtcpSdes : global::System.IDisposable {
     } 
   }
 
+  ///  RTCP SDES type EMAIL.
   public string email {
     set {
       pjsua2PINVOKE.RtcpSdes_email_set(swigCPtr, value);
@@ -93,6 +97,7 @@ public class RtcpSdes : global::System.IDisposable {
     } 
   }
 
+  ///  RTCP SDES type PHONE.
   public string phone {
     set {
       pjsua2PINVOKE.RtcpSdes_phone_set(swigCPtr, value);
@@ -105,6 +110,7 @@ public class RtcpSdes : global::System.IDisposable {
     } 
   }
 
+  ///  RTCP SDES type LOC.
   public string loc {
     set {
       pjsua2PINVOKE.RtcpSdes_loc_set(swigCPtr, value);
@@ -117,6 +123,7 @@ public class RtcpSdes : global::System.IDisposable {
     } 
   }
 
+  ///  RTCP SDES type TOOL.
   public string tool {
     set {
       pjsua2PINVOKE.RtcpSdes_tool_set(swigCPtr, value);
@@ -129,6 +136,7 @@ public class RtcpSdes : global::System.IDisposable {
     } 
   }
 
+  ///  RTCP SDES type NOTE.
   public string note {
     set {
       pjsua2PINVOKE.RtcpSdes_note_set(swigCPtr, value);

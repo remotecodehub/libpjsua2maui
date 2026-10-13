@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Parameter of Endpoint::onSelectAccount() callback.
 
 public class OnSelectAccountParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class OnSelectAccountParam : global::System.IDisposable {
     }
   }
 
+  /// The incoming request.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnSelectAccountParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));
@@ -68,6 +70,10 @@ public class OnSelectAccountParam : global::System.IDisposable {
     } 
   }
 
+  /// The account index to be used to handle the request.
+  /// Upon entry, this will be filled by the account index
+  /// chosen by the library. Application may change it to
+  /// another value to use another account.
   public int accountIndex {
     set {
       pjsua2PINVOKE.OnSelectAccountParam_accountIndex_set(swigCPtr, value);

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Video media operation parameter.
 
 public class VideoMediaOpParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class VideoMediaOpParam : global::System.IDisposable {
     }
   }
 
+  /// The information for adding video media operation.
   public VideoMediaAddInfo addInfo {
     set {
       pjsua2PINVOKE.VideoMediaOpParam_addInfo_set(swigCPtr, VideoMediaAddInfo.getCPtr(value));
@@ -68,6 +70,7 @@ public class VideoMediaOpParam : global::System.IDisposable {
     } 
   }
 
+  /// The information for removing video media operation.
   public VideoMediaRemoveInfo removeInfo {
     set {
       pjsua2PINVOKE.VideoMediaOpParam_removeInfo_set(swigCPtr, VideoMediaRemoveInfo.getCPtr(value));
@@ -79,6 +82,7 @@ public class VideoMediaOpParam : global::System.IDisposable {
     } 
   }
 
+  /// The information for start transmitting/connecting video media operation.
   public VideoMediaConnectInfo connectInfo {
     set {
       pjsua2PINVOKE.VideoMediaOpParam_connectInfo_set(swigCPtr, VideoMediaConnectInfo.getCPtr(value));
@@ -90,6 +94,8 @@ public class VideoMediaOpParam : global::System.IDisposable {
     } 
   }
 
+  /// The information for stop transmitting/disconnecting video media
+  /// operation.
   public VideoMediaDisconnectInfo disconnectInfo {
     set {
       pjsua2PINVOKE.VideoMediaOpParam_disconnectInfo_set(swigCPtr, VideoMediaDisconnectInfo.getCPtr(value));
@@ -101,6 +107,7 @@ public class VideoMediaOpParam : global::System.IDisposable {
     } 
   }
 
+  /// The information for updating video media operation.
   public VideoMediaUpdateInfo updateInfo {
     set {
       pjsua2PINVOKE.VideoMediaOpParam_updateInfo_set(swigCPtr, VideoMediaUpdateInfo.getCPtr(value));

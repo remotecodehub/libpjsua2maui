@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Representation of media coordinate.
 
 public class MediaCoordinate : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class MediaCoordinate : global::System.IDisposable {
     }
   }
 
+  ///  X position of the coordinate
   public int x {
     set {
       pjsua2PINVOKE.MediaCoordinate_x_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class MediaCoordinate : global::System.IDisposable {
     } 
   }
 
+  ///  Y position of the coordinate
   public int y {
     set {
       pjsua2PINVOKE.MediaCoordinate_y_set(swigCPtr, value);

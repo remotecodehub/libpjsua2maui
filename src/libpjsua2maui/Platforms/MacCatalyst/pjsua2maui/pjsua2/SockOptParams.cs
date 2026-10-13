@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Socket option parameters, to be specified in TransportConfig.
 public class SockOptParams : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,6 +48,7 @@ public class SockOptParams : PersistentObject {
     }
   }
 
+  /// Array of socket options.
   public SockOptVector sockOpts {
     set {
       pjsua2PINVOKE.SockOptParams_sockOpts_set(swigCPtr, SockOptVector.getCPtr(value));
@@ -58,14 +60,19 @@ public class SockOptParams : PersistentObject {
     } 
   }
 
+  ///  Default constructor initialises with default values
   public SockOptParams() : this(pjsua2PINVOKE.new_SockOptParams(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.SockOptParams_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.SockOptParams_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

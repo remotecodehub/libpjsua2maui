@@ -10,6 +10,12 @@
 
 namespace libpjsua2.maui {
 
+/// Detailed codec attributes used in configuring an audio codec and in querying
+/// the capability of audio codec factories.
+/// Please note that codec parameter also contains SDP specific setting,
+/// setting::decFmtp and setting::encFmtp, which may need to be set
+/// appropriately based on the effective setting.
+/// See each codec documentation for more detail.
 public class CodecParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +63,7 @@ public class CodecParam : global::System.IDisposable {
     }
   }
 
+  ///  info
   public CodecParamInfo info {
     set {
       pjsua2PINVOKE.CodecParam_info_set(swigCPtr, CodecParamInfo.getCPtr(value));
@@ -68,6 +75,7 @@ public class CodecParam : global::System.IDisposable {
     } 
   }
 
+  ///  setting
   public CodecParamSetting setting {
     set {
       pjsua2PINVOKE.CodecParam_setting_set(swigCPtr, CodecParamSetting.getCPtr(value));

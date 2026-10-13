@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Audio device information structure.
 public class AudioDevInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class AudioDevInfo : global::System.IDisposable {
     }
   }
 
+  /// The device ID
   public SWIGTYPE_p_pjmedia_aud_dev_index id {
     set {
       pjsua2PINVOKE.AudioDevInfo_id_set(swigCPtr, SWIGTYPE_p_pjmedia_aud_dev_index.getCPtr(value));
@@ -69,6 +71,7 @@ public class AudioDevInfo : global::System.IDisposable {
     } 
   }
 
+  /// The device name
   public string name {
     set {
       pjsua2PINVOKE.AudioDevInfo_name_set(swigCPtr, value);
@@ -81,6 +84,9 @@ public class AudioDevInfo : global::System.IDisposable {
     } 
   }
 
+  /// Maximum number of input channels supported by this device. If the
+  /// value is zero, the device does not support input operation (i.e.
+  /// it is a playback only device).
   public uint inputCount {
     set {
       pjsua2PINVOKE.AudioDevInfo_inputCount_set(swigCPtr, value);
@@ -91,6 +97,9 @@ public class AudioDevInfo : global::System.IDisposable {
     } 
   }
 
+  /// Maximum number of output channels supported by this device. If the
+  /// value is zero, the device does not support output operation (i.e.
+  /// it is an input only device).
   public uint outputCount {
     set {
       pjsua2PINVOKE.AudioDevInfo_outputCount_set(swigCPtr, value);
@@ -101,6 +110,7 @@ public class AudioDevInfo : global::System.IDisposable {
     } 
   }
 
+  /// Default sampling rate.
   public uint defaultSamplesPerSec {
     set {
       pjsua2PINVOKE.AudioDevInfo_defaultSamplesPerSec_set(swigCPtr, value);
@@ -111,6 +121,7 @@ public class AudioDevInfo : global::System.IDisposable {
     } 
   }
 
+  /// The underlying driver name
   public string driver {
     set {
       pjsua2PINVOKE.AudioDevInfo_driver_set(swigCPtr, value);
@@ -123,6 +134,7 @@ public class AudioDevInfo : global::System.IDisposable {
     } 
   }
 
+  /// Device capabilities, as bitmask combination of pjmedia_aud_dev_cap.
   public uint caps {
     set {
       pjsua2PINVOKE.AudioDevInfo_caps_set(swigCPtr, value);
@@ -133,6 +145,9 @@ public class AudioDevInfo : global::System.IDisposable {
     } 
   }
 
+  /// Supported audio device routes, as bitmask combination of
+  /// pjmedia_aud_dev_route. The value may be zero if the device
+  /// does not support audio routing.
   public uint routes {
     set {
       pjsua2PINVOKE.AudioDevInfo_routes_set(swigCPtr, value);
@@ -143,6 +158,7 @@ public class AudioDevInfo : global::System.IDisposable {
     } 
   }
 
+  /// Array of supported extended audio formats
   public MediaFormatAudioVector extFmt {
     set {
       pjsua2PINVOKE.AudioDevInfo_extFmt_set(swigCPtr, MediaFormatAudioVector.getCPtr(value));

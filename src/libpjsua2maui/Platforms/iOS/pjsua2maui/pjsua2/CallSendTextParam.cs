@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::sendText()
 public class CallSendTextParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,9 @@ public class CallSendTextParam : global::System.IDisposable {
     }
   }
 
+  /// Specify the text media stream index. This can be set to -1 to denote
+  /// the first text stream in the call.
+  /// Default: -1 (first text stream)
   public int medIdx {
     set {
       pjsua2PINVOKE.CallSendTextParam_medIdx_set(swigCPtr, value);
@@ -67,6 +71,7 @@ public class CallSendTextParam : global::System.IDisposable {
     } 
   }
 
+  /// The text data to be sent.
   public string text {
     set {
       pjsua2PINVOKE.CallSendTextParam_text_set(swigCPtr, value);
@@ -79,6 +84,7 @@ public class CallSendTextParam : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor initializes with default value.
   public CallSendTextParam() : this(pjsua2PINVOKE.new_CallSendTextParam(), true) {
   }
 

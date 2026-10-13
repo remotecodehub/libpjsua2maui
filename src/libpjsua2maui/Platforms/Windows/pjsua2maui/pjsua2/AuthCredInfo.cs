@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Credential information. Credential contains information to authenticate
+/// against a service.
 
 public class AuthCredInfo : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -47,6 +49,7 @@ public class AuthCredInfo : PersistentObject {
     }
   }
 
+  /// The authentication scheme (e.g. "digest").
   public string scheme {
     set {
       pjsua2PINVOKE.AuthCredInfo_scheme_set(swigCPtr, value);
@@ -59,6 +62,8 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  /// Realm on which this credential is to be used. Use "*" to make
+  /// a credential that can be used to authenticate against any challenges.
   public string realm {
     set {
       pjsua2PINVOKE.AuthCredInfo_realm_set(swigCPtr, value);
@@ -71,6 +76,7 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  /// Authentication user name.
   public string username {
     set {
       pjsua2PINVOKE.AuthCredInfo_username_set(swigCPtr, value);
@@ -83,6 +89,8 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  /// Type of data that is contained in the "data" field. Use 0 if the data
+  /// contains plain text password.
   public int dataType {
     set {
       pjsua2PINVOKE.AuthCredInfo_dataType_set(swigCPtr, value);
@@ -93,6 +101,7 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  /// The data, which can be a plain text password or a hashed digest.
   public string data {
     set {
       pjsua2PINVOKE.AuthCredInfo_data_set(swigCPtr, value);
@@ -105,6 +114,7 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  /// Digest algorithm type.
   public pjsip_auth_algorithm_type algoType {
     set {
       pjsua2PINVOKE.AuthCredInfo_algoType_set(swigCPtr, (int)value);
@@ -115,6 +125,7 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  ///  Permanent subscriber key.
   public string akaK {
     set {
       pjsua2PINVOKE.AuthCredInfo_akaK_set(swigCPtr, value);
@@ -127,6 +138,7 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  ///  Operator variant key.
   public string akaOp {
     set {
       pjsua2PINVOKE.AuthCredInfo_akaOp_set(swigCPtr, value);
@@ -139,6 +151,7 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  ///  Authentication Management Field
   public string akaAmf {
     set {
       pjsua2PINVOKE.AuthCredInfo_akaAmf_set(swigCPtr, value);
@@ -151,18 +164,24 @@ public class AuthCredInfo : PersistentObject {
     } 
   }
 
+  ///  Default constructor
   public AuthCredInfo() : this(pjsua2PINVOKE.new_AuthCredInfo__SWIG_0(), true) {
   }
 
+  ///  Construct a credential with the specified parameters
   public AuthCredInfo(string scheme, string realm, string user_name, int data_type, string data) : this(pjsua2PINVOKE.new_AuthCredInfo__SWIG_1(scheme, realm, user_name, data_type, data), true) {
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.AuthCredInfo_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.AuthCredInfo_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

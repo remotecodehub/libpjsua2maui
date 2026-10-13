@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes an audio device error event.
 public class AudDevErrorEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class AudDevErrorEvent : global::System.IDisposable {
     }
   }
 
+  ///  The direction.
   public pjmedia_dir dir {
     set {
       pjsua2PINVOKE.AudDevErrorEvent_dir_set(swigCPtr, (int)value);
@@ -67,6 +69,7 @@ public class AudDevErrorEvent : global::System.IDisposable {
     } 
   }
 
+  ///  The audio device ID.
   public int id {
     set {
       pjsua2PINVOKE.AudDevErrorEvent_id_set(swigCPtr, value);
@@ -77,6 +80,7 @@ public class AudDevErrorEvent : global::System.IDisposable {
     } 
   }
 
+  ///  The status code.
   public int status {
     set {
       pjsua2PINVOKE.AudDevErrorEvent_status_set(swigCPtr, value);

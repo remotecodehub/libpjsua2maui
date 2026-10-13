@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes an audio media's stop transmit/disconnect operation
+/// info.
 public class AudioMediaDisconnectInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,9 @@ public class AudioMediaDisconnectInfo : global::System.IDisposable {
     }
   }
 
+  /// The source media port id.
+  ///                                               For multiple port operation,
+  ///                                               this will be set to - 1.
   public uint mediaId {
     set {
       pjsua2PINVOKE.AudioMediaDisconnectInfo_mediaId_set(swigCPtr, value);
@@ -67,6 +72,9 @@ public class AudioMediaDisconnectInfo : global::System.IDisposable {
     } 
   }
 
+  /// The destination media port id.
+  ///                                               For multiple port operation,
+  ///                                               this will be set to - 1.
   public uint targetMediaId {
     set {
       pjsua2PINVOKE.AudioMediaDisconnectInfo_targetMediaId_set(swigCPtr, value);

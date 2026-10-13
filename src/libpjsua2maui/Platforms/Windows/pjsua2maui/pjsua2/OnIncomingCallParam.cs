@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains parameters for onIncomingCall() account callback.
 
 public class OnIncomingCallParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class OnIncomingCallParam : global::System.IDisposable {
     }
   }
 
+  /// The library call ID allocated for the new call.
   public int callId {
     set {
       pjsua2PINVOKE.OnIncomingCallParam_callId_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class OnIncomingCallParam : global::System.IDisposable {
     } 
   }
 
+  /// The incoming INVITE request.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnIncomingCallParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));

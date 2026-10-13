@@ -9,6 +9,50 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// A container node is a placeholder for storing other data elements, which
+/// could be boolean, number, string, array of strings, or another container.
+/// Each data in the container is basically a name/value pair, with a type
+/// internally associated with it so that written data can be read in the
+/// correct type. Data is read and written serially, hence the order of
+/// reading must be the same as the order of writing.
+/// Application can read data from it by using the various read methods, and
+/// write data to it using the various write methods. Alternatively, it
+/// may be more convenient to use the provided macros below to read and write
+/// the data, because these macros set the name automatically:
+///      - NODE_READ_BOOL(node,item)
+///      - NODE_READ_UNSIGNED(node,item)
+///      - NODE_READ_INT(node,item)
+///      - NODE_READ_FLOAT(node,item)
+///      - NODE_READ_NUM_T(node,type,item)
+///      - NODE_READ_STRING(node,item)
+///      - NODE_READ_STRINGV(node,item)
+///      - NODE_READ_OBJ(node,item)
+///      - NODE_WRITE_BOOL(node,item)
+///      - NODE_WRITE_UNSIGNED(node,item)
+///      - NODE_WRITE_INT(node,item)
+///      - NODE_WRITE_FLOAT(node,item)
+///      - NODE_WRITE_NUM_T(node,type,item)
+///      - NODE_WRITE_STRING(node,item)
+///      - NODE_WRITE_STRINGV(node,item)
+///      - NODE_WRITE_OBJ(node,item)
+/// Implementation notes:
+/// The ContainerNode class is subclass-able, but not in the usual C++ way.
+/// With the usual C++ inheritance, some methods will be made pure virtual
+/// and must be implemented by the actual class. However, doing so will
+/// require dynamic instantiation of the ContainerNode class, which means
+/// we will need to pass around the class as pointer, for example as the
+/// return value of readContainer() and writeNewContainer() methods. Then
+/// we will need to establish who needs or how to delete these objects, or
+/// use shared pointer mechanism, each of which is considered too inconvenient
+/// or complicated for the purpose.
+/// So hence we use C style "inheritance", where the methods are declared in
+/// container_node_op and the data in container_node_internal_data structures.
+/// An implementation of ContainerNode class will need to set up these members
+/// with values that makes sense to itself. The methods in container_node_op
+/// contains the pointer to the actual implementation of the operation, which
+/// would be specific according to the format of the document. The methods in
+/// this ContainerNode class are just thin wrappers which call the
+/// implementation in the container_node_op structure.
 
 public class ContainerNode : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,142 +101,251 @@ public class ContainerNode : global::System.IDisposable {
     }
   }
 
+  /// Determine if there is unread element. If yes, then app can use one of
+  /// the readXxx() functions to read it.
   public bool hasUnread() {
     bool ret = pjsua2PINVOKE.ContainerNode_hasUnread(swigCPtr);
     return ret;
   }
 
+  /// Get the name of the next unread element.
   public string unreadName() {
     string ret = pjsua2PINVOKE.ContainerNode_unreadName(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read an integer value from the document and return the value.
+  /// This will throw Error if the current element is not a number.
+  /// The read position will be advanced to the next element.
+  /// <param name="name">      If specified, then the function will check if the
+  ///                      name of the next element matches the specified
+  ///                      name and throw Error if it doesn't match.</param> 
+  /// <returns>The value.</returns>
   public int readInt(string name) {
     int ret = pjsua2PINVOKE.ContainerNode_readInt__SWIG_0(swigCPtr, name);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read an integer value from the document and return the value.
+  /// This will throw Error if the current element is not a number.
+  /// The read position will be advanced to the next element.
+  /// <returns>The value.</returns>
   public int readInt() {
     int ret = pjsua2PINVOKE.ContainerNode_readInt__SWIG_1(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a number value from the document and return the value.
+  /// This will throw Error if the current element is not a number.
+  /// The read position will be advanced to the next element.
+  /// <param name="name">      If specified, then the function will check if the
+  ///                      name of the next element matches the specified
+  ///                      name and throw Error if it doesn't match.</param> 
+  /// <returns>The value.</returns>
   public float readNumber(string name) {
     float ret = pjsua2PINVOKE.ContainerNode_readNumber__SWIG_0(swigCPtr, name);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a number value from the document and return the value.
+  /// This will throw Error if the current element is not a number.
+  /// The read position will be advanced to the next element.
+  /// <returns>The value.</returns>
   public float readNumber() {
     float ret = pjsua2PINVOKE.ContainerNode_readNumber__SWIG_1(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a boolean value from the container and return the value.
+  /// This will throw Error if the current element is not a boolean.
+  /// The read position will be advanced to the next element.
+  /// <param name="name">      If specified, then the function will check if the
+  ///                      name of the next element matches the specified
+  ///                      name and throw Error if it doesn't match.</param> 
+  /// <returns>The value.</returns>
   public bool readBool(string name) {
     bool ret = pjsua2PINVOKE.ContainerNode_readBool__SWIG_0(swigCPtr, name);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a boolean value from the container and return the value.
+  /// This will throw Error if the current element is not a boolean.
+  /// The read position will be advanced to the next element.
+  /// <returns>The value.</returns>
   public bool readBool() {
     bool ret = pjsua2PINVOKE.ContainerNode_readBool__SWIG_1(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a string value from the container and return the value.
+  /// This will throw Error if the current element is not a string.
+  /// The read position will be advanced to the next element.
+  /// <param name="name">      If specified, then the function will check if the
+  ///                      name of the next element matches the specified
+  ///                      name and throw Error if it doesn't match.</param> 
+  /// <returns>The value.</returns>
   public string readString(string name) {
     string ret = pjsua2PINVOKE.ContainerNode_readString__SWIG_0(swigCPtr, name);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a string value from the container and return the value.
+  /// This will throw Error if the current element is not a string.
+  /// The read position will be advanced to the next element.
+  /// <returns>The value.</returns>
   public string readString() {
     string ret = pjsua2PINVOKE.ContainerNode_readString__SWIG_1(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a string array from the container. This will throw Error
+  /// if the current element is not a string array. The read position
+  /// will be advanced to the next element.
+  /// <param name="name">      If specified, then the function will check if the
+  ///                      name of the next element matches the specified
+  ///                      name and throw Error if it doesn't match.</param> 
+  /// <returns>The value.</returns>
   public StringVector readStringVector(string name) {
     StringVector ret = new StringVector(pjsua2PINVOKE.ContainerNode_readStringVector__SWIG_0(swigCPtr, name), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a string array from the container. This will throw Error
+  /// if the current element is not a string array. The read position
+  /// will be advanced to the next element.
+  /// <returns>The value.</returns>
   public StringVector readStringVector() {
     StringVector ret = new StringVector(pjsua2PINVOKE.ContainerNode_readStringVector__SWIG_1(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read the specified object from the container. This is equal to
+  /// calling PersistentObject.readObject(ContainerNode);
+  /// <param name="obj">       The object to read.</param>
   public void readObject(PersistentObject obj) {
     pjsua2PINVOKE.ContainerNode_readObject(swigCPtr, PersistentObject.getCPtr(obj));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Read a container from the container. This will throw Error if the
+  /// current element is not a container. The read position will be advanced
+  /// to the next element.
+  /// <param name="name">      If specified, then the function will check if the
+  ///                      name of the next element matches the specified
+  ///                      name and throw Error if it doesn't match.</param> 
+  /// <returns>Container object.</returns>
   public ContainerNode readContainer(string name) {
     ContainerNode ret = new ContainerNode(pjsua2PINVOKE.ContainerNode_readContainer__SWIG_0(swigCPtr, name), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read a container from the container. This will throw Error if the
+  /// current element is not a container. The read position will be advanced
+  /// to the next element.
+  /// <returns>Container object.</returns>
   public ContainerNode readContainer() {
     ContainerNode ret = new ContainerNode(pjsua2PINVOKE.ContainerNode_readContainer__SWIG_1(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read array container from the container. This will throw Error if the
+  /// current element is not an array. The read position will be advanced
+  /// to the next element.
+  /// <param name="name">      If specified, then the function will check if the
+  ///                      name of the next element matches the specified
+  ///                      name and throw Error if it doesn't match.</param> 
+  /// <returns>Container object.</returns>
   public ContainerNode readArray(string name) {
     ContainerNode ret = new ContainerNode(pjsua2PINVOKE.ContainerNode_readArray__SWIG_0(swigCPtr, name), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Read array container from the container. This will throw Error if the
+  /// current element is not an array. The read position will be advanced
+  /// to the next element.
+  /// <returns>Container object.</returns>
   public ContainerNode readArray() {
     ContainerNode ret = new ContainerNode(pjsua2PINVOKE.ContainerNode_readArray__SWIG_1(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Write a number value to the container.
+  /// <param name="name">      The name for the value in the container.</param> 
+  /// <param name="num">       The value to be written.</param>
   public void writeNumber(string name, float num) {
     pjsua2PINVOKE.ContainerNode_writeNumber(swigCPtr, name, num);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write a number value to the container.
+  /// <param name="name">      The name for the value in the container.</param> 
+  /// <param name="num">       The value to be written.</param>
   public void writeInt(string name, int num) {
     pjsua2PINVOKE.ContainerNode_writeInt(swigCPtr, name, num);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write a boolean value to the container.
+  /// <param name="name">      The name for the value in the container.</param> 
+  /// <param name="value">     The value to be written.</param>
   public void writeBool(string name, bool value) {
     pjsua2PINVOKE.ContainerNode_writeBool(swigCPtr, name, value);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write a string value to the container.
+  /// <param name="name">      The name for the value in the container.</param> 
+  /// <param name="value">     The value to be written.</param>
   public void writeString(string name, string value) {
     pjsua2PINVOKE.ContainerNode_writeString(swigCPtr, name, value);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write string vector to the container.
+  /// <param name="name">      The name for the value in the container.</param> 
+  /// <param name="arr">       The vector to be written.</param>
   public void writeStringVector(string name, StringVector arr) {
     pjsua2PINVOKE.ContainerNode_writeStringVector(swigCPtr, name, StringVector.getCPtr(arr));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write an object to the container. This is equal to calling
+  /// PersistentObject.writeObject(ContainerNode);
+  /// <param name="obj">       The object to be written</param>
   public void writeObject(PersistentObject obj) {
     pjsua2PINVOKE.ContainerNode_writeObject(swigCPtr, PersistentObject.getCPtr(obj));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create and write an empty Object node that can be used as parent
+  /// for subsequent write operations.
+  /// <param name="name">      The name for the new container in the container.</param> 
+  /// <returns>A sub-container.</returns>
   public ContainerNode writeNewContainer(string name) {
     ContainerNode ret = new ContainerNode(pjsua2PINVOKE.ContainerNode_writeNewContainer(swigCPtr, name), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Create and write an empty array node that can be used as parent
+  /// for subsequent write operations.
+  /// <param name="name">      The name for the array.</param> 
+  /// <returns>A sub-container.</returns>
   public ContainerNode writeNewArray(string name) {
     ContainerNode ret = new ContainerNode(pjsua2PINVOKE.ContainerNode_writeNewArray(swigCPtr, name), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

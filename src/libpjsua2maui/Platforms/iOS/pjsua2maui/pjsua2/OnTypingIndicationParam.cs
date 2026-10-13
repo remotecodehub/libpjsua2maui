@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameters for onTypingIndication() account callback.
 public class OnTypingIndicationParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnTypingIndicationParam : global::System.IDisposable {
     }
   }
 
+  /// Sender/From URI.
   public string fromUri {
     set {
       pjsua2PINVOKE.OnTypingIndicationParam_fromUri_set(swigCPtr, value);
@@ -69,6 +71,7 @@ public class OnTypingIndicationParam : global::System.IDisposable {
     } 
   }
 
+  /// To URI.
   public string toUri {
     set {
       pjsua2PINVOKE.OnTypingIndicationParam_toUri_set(swigCPtr, value);
@@ -81,6 +84,7 @@ public class OnTypingIndicationParam : global::System.IDisposable {
     } 
   }
 
+  /// The Contact URI.
   public string contactUri {
     set {
       pjsua2PINVOKE.OnTypingIndicationParam_contactUri_set(swigCPtr, value);
@@ -93,6 +97,7 @@ public class OnTypingIndicationParam : global::System.IDisposable {
     } 
   }
 
+  /// Boolean to indicate if sender is typing.
   public bool isTyping {
     set {
       pjsua2PINVOKE.OnTypingIndicationParam_isTyping_set(swigCPtr, value);
@@ -103,6 +108,7 @@ public class OnTypingIndicationParam : global::System.IDisposable {
     } 
   }
 
+  /// The whole message buffer.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnTypingIndicationParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));

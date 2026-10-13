@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// This structure contains all the information needed to completely describe
+/// a media.
 
 public class MediaFormat : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +59,10 @@ public class MediaFormat : global::System.IDisposable {
     }
   }
 
+  /// The format id that specifies the audio sample or video pixel format.
+  /// Some well known formats ids are declared in pjmedia_format_id
+  /// enumeration.
+  /// <seealso cref="pjmedia_format_id"/>
   public uint id {
     set {
       pjsua2PINVOKE.MediaFormat_id_set(swigCPtr, value);
@@ -67,6 +73,7 @@ public class MediaFormat : global::System.IDisposable {
     } 
   }
 
+  /// The top-most type of the media, as an information.
   public pjmedia_type type {
     set {
       pjsua2PINVOKE.MediaFormat_type_set(swigCPtr, (int)value);
@@ -77,6 +84,7 @@ public class MediaFormat : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public MediaFormat() : this(pjsua2PINVOKE.new_MediaFormat(), true) {
   }
 

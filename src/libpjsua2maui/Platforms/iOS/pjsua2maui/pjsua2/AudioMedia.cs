@@ -10,6 +10,19 @@
 
 namespace libpjsua2.maui {
 
+/// Audio Media. This is a lite wrapper class for audio conference bridge port,
+/// i.e: this class only maintains one data member, conference slot ID, and
+/// the methods are simply proxies for conference bridge operations.
+/// Application can create a derived class and use registerMediaPort2()/
+/// unregisterMediaPort() to register/unregister a media port to/from the
+/// conference bridge.
+/// The library will not keep a list of AudioMedia instances, so any
+/// AudioMedia (descendant) instances instantiated by application must be
+/// maintained and destroyed by the application itself.
+/// Note that any PJSUA2 APIs that return AudioMedia instance(s) such as
+/// Endpoint::mediaEnumPorts2() or Call::getAudioMedia() will just return
+/// generated copy. All AudioMedia methods should work normally on this
+/// generated copy instance.
 public class AudioMedia : Media {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,66 +60,133 @@ public class AudioMedia : Media {
     }
   }
 
+  /// Get information about the specified conference port.
   public ConfPortInfo getPortInfo() {
     ConfPortInfo ret = new ConfPortInfo(pjsua2PINVOKE.AudioMedia_getPortInfo(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get port Id.
   public int getPortId() {
     int ret = pjsua2PINVOKE.AudioMedia_getPortId(swigCPtr);
     return ret;
   }
 
+  /// Get information from specific port id.
   public static ConfPortInfo getPortInfoFromId(int port_id) {
     ConfPortInfo ret = new ConfPortInfo(pjsua2PINVOKE.AudioMedia_getPortInfoFromId(port_id), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Establish unidirectional media flow to sink. This media port
+  /// will act as a source, and it may transmit to multiple destinations/sink.
+  /// And if multiple sources are transmitting to the same sink, the media
+  /// will be mixed together. Source and sink may refer to the same Media,
+  /// effectively looping the media.
+  /// If bidirectional media flow is desired, application needs to call
+  /// this method twice, with the second one called from the opposite source
+  /// media.
+  /// This operation executes asynchronously, use the callback set from
+  /// Endpoint::onAudioMediaOpCompleted() to receive notification upon
+  /// completion.
+  ///
+  /// <param name="sink">              The destination Media.</param>
   public void startTransmit(AudioMedia sink) {
     pjsua2PINVOKE.AudioMedia_startTransmit(swigCPtr, AudioMedia.getCPtr(sink));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Establish unidirectional media flow to sink. This media port
+  /// will act as a source, and it may transmit to multiple destinations/sink.
+  /// And if multiple sources are transmitting to the same sink, the media
+  /// will be mixed together. Source and sink may refer to the same Media,
+  /// effectively looping the media.
+  /// Signal level from this source to the sink can be adjusted by making
+  /// it louder or quieter via the parameter param. The level adjustment
+  /// will apply to a specific connection only (i.e. only for signal
+  /// from this source to the sink), as compared to
+  /// adjustTxLevel()/adjustRxLevel() which applies to all signals from/to
+  /// this media port. The signal adjustment
+  /// will be cumulative, in this following order:
+  /// signal from this source will be adjusted with the level specified
+  /// in adjustTxLevel(), then with the level specified via this API,
+  /// and finally with the level specified to the sink's adjustRxLevel().
+  /// If bidirectional media flow is desired, application needs to call
+  /// this method twice, with the second one called from the opposite source
+  /// media.
+  /// This operation executes asynchronously, use the callback set from
+  /// Endpoint::onAudioMediaOpCompleted() to receive notification upon
+  /// completion.
+  /// <param name="sink">              The destination Media.</param> 
+  /// <param name="param">             The parameter.</param>
   public void startTransmit2(AudioMedia sink, AudioMediaTransmitParam param) {
     pjsua2PINVOKE.AudioMedia_startTransmit2(swigCPtr, AudioMedia.getCPtr(sink), AudioMediaTransmitParam.getCPtr(param));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  ///  Stop media flow to destination/sink port.
+  /// This operation executes asynchronously, use the callback set from
+  /// Endpoint::onAudioMediaOpCompleted() to receive notification upon
+  /// completion.
+  /// <param name="sink">              The destination media.</param>
   public void stopTransmit(AudioMedia sink) {
     pjsua2PINVOKE.AudioMedia_stopTransmit(swigCPtr, AudioMedia.getCPtr(sink));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Adjust the signal level to be transmitted from the bridge to this
+  /// media port by making it louder or quieter.
+  /// <param name="level">             Signal level adjustment. Value 1.0 means no
+  ///                              level adjustment, while value 0 means to mute
+  ///                              the port.</param>
   public void adjustRxLevel(float level) {
     pjsua2PINVOKE.AudioMedia_adjustRxLevel(swigCPtr, level);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Adjust the signal level to be received from this media port (to
+  /// the bridge) by making it louder or quieter.
+  /// <param name="level">             Signal level adjustment. Value 1.0 means no
+  ///                              level adjustment, while value 0 means to mute
+  ///                              the port.</param>
   public void adjustTxLevel(float level) {
     pjsua2PINVOKE.AudioMedia_adjustTxLevel(swigCPtr, level);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Get the last received signal level.
+  /// <returns>Signal level in percent.</returns>
   public uint getRxLevel() {
     uint ret = pjsua2PINVOKE.AudioMedia_getRxLevel(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Get the last transmitted signal level.
+  /// <returns>Signal level in percent.</returns>
   public uint getTxLevel() {
     uint ret = pjsua2PINVOKE.AudioMedia_getTxLevel(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Warning: deprecated and will be removed in future release.
+  /// Typecast from base class Media. This is useful for application written
+  /// in language that does not support downcasting such as Python.
+  /// <param name="media">             The object to be downcasted</param> 
+  /// <returns>The object as AudioMedia instance</returns>
   public static AudioMedia typecastFromMedia(Media media) {
     global::System.IntPtr cPtr = pjsua2PINVOKE.AudioMedia_typecastFromMedia(Media.getCPtr(media));
     AudioMedia ret = (cPtr == global::System.IntPtr.Zero) ? null : new AudioMedia(cPtr, false);
     return ret;
   }
 
+  /// Default Constructor.
+  /// Normally application will not create AudioMedia object directly,
+  /// but it instantiates an AudioMedia derived class. This is set as public
+  /// because some STL vector implementations require it.
   public AudioMedia() : this(pjsua2PINVOKE.new_AudioMedia(), true) {
   }
 

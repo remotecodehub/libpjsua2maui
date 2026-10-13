@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes transmission error event.
 public class TxErrorEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class TxErrorEvent : global::System.IDisposable {
     }
   }
 
+  ///  The transmit data.
   public SipTxData tdata {
     set {
       pjsua2PINVOKE.TxErrorEvent_tdata_set(swigCPtr, SipTxData.getCPtr(value));
@@ -68,6 +70,7 @@ public class TxErrorEvent : global::System.IDisposable {
     } 
   }
 
+  ///  The transaction.
   public SipTransaction tsx {
     set {
       pjsua2PINVOKE.TxErrorEvent_tsx_set(swigCPtr, SipTransaction.getCPtr(value));

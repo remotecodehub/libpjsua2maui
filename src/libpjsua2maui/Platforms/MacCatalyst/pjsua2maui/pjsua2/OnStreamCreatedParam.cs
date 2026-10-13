@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onStreamCreated()
+/// callback.
 public class OnStreamCreatedParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class OnStreamCreatedParam : global::System.IDisposable {
     }
   }
 
+  /// Audio media stream, read-only.
   public System.IntPtr stream {
     set {
       pjsua2PINVOKE.OnStreamCreatedParam_stream_set(swigCPtr, value);
@@ -68,6 +71,7 @@ public class OnStreamCreatedParam : global::System.IDisposable {
   
   }
 
+  /// Stream index in the audio media session, read-only.
   public uint streamIdx {
     set {
       pjsua2PINVOKE.OnStreamCreatedParam_streamIdx_set(swigCPtr, value);
@@ -78,6 +82,11 @@ public class OnStreamCreatedParam : global::System.IDisposable {
     } 
   }
 
+  /// Specify if PJSUA2 should take ownership of the port returned in
+  /// the pPort parameter below. If set to true,
+  /// pjmedia_port_destroy() will be called on the port when it is
+  /// no longer needed.
+  /// Default: false
   public bool destroyPort {
     set {
       pjsua2PINVOKE.OnStreamCreatedParam_destroyPort_set(swigCPtr, value);
@@ -88,6 +97,9 @@ public class OnStreamCreatedParam : global::System.IDisposable {
     } 
   }
 
+  /// On input, it specifies the audio media port of the stream. Application
+  /// may modify this pointer to point to different media port to be
+  /// registered to the conference bridge.
   public System.IntPtr pPort {
     set {
       pjsua2PINVOKE.OnStreamCreatedParam_pPort_set(swigCPtr, value);

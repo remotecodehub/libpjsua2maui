@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCallRxReinvite() callback.
 public class OnCallRxReinviteParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnCallRxReinviteParam : global::System.IDisposable {
     }
   }
 
+  /// The new offer received.
   public SdpSession offer {
     set {
       pjsua2PINVOKE.OnCallRxReinviteParam_offer_set(swigCPtr, SdpSession.getCPtr(value));
@@ -68,6 +70,7 @@ public class OnCallRxReinviteParam : global::System.IDisposable {
     } 
   }
 
+  /// The incoming re-INVITE.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnCallRxReinviteParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));
@@ -79,6 +82,8 @@ public class OnCallRxReinviteParam : global::System.IDisposable {
     } 
   }
 
+  /// On input, it is false. Set to true if app wants to manually answer
+  /// the re-INVITE.
   public bool isAsync {
     set {
       pjsua2PINVOKE.OnCallRxReinviteParam_isAsync_set(swigCPtr, value);
@@ -89,6 +94,9 @@ public class OnCallRxReinviteParam : global::System.IDisposable {
     } 
   }
 
+  /// Status code to be returned for answering the offer. On input,
+  /// it contains status code PJSIP_SC_OK (200). Currently, valid values are only
+  /// PJSIP_SC_OK (200) and PJSIP_SC_NOT_ACCEPTABLE_HERE (488).
   public pjsip_status_code statusCode {
     set {
       pjsua2PINVOKE.OnCallRxReinviteParam_statusCode_set(swigCPtr, (int)value);
@@ -99,6 +107,8 @@ public class OnCallRxReinviteParam : global::System.IDisposable {
     } 
   }
 
+  /// The current call setting, application can update this setting for
+  /// answering the offer.
   public CallSetting opt {
     set {
       pjsua2PINVOKE.OnCallRxReinviteParam_opt_set(swigCPtr, CallSetting.getCPtr(value));

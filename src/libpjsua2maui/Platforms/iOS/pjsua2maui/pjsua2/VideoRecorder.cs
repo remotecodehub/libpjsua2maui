@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Video AVI Recorder.
 public class VideoRecorder : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,47 +58,114 @@ public class VideoRecorder : global::System.IDisposable {
     }
   }
 
+  /// Constructor.
   public VideoRecorder() : this(pjsua2PINVOKE.new_VideoRecorder(), true) {
     SwigDirectorConnect();
   }
 
+  /// Create an avi recorder and automatically add a audio/video port
+  /// the audio/video conference bridge. User can connect the audio/video port
+  /// from a source port to store the uncompressed video and 16 bit PCM audio.
+  /// The recorder currently supports YUY2/I420/RGB24 video format and
+  /// PCM audio format.
+  /// Note: Uncompressed video can lead to significant file size growth.
+  /// <param name="max_size">      Maximum file size.</param> 
+  /// <param name="vid_fmt">       The video format. If this is not set (NULL), the
+  ///                                 format will be set to:
+  ///                                 - format:PJMEDIA_FORMAT_I420
+  ///                                 - size:320x240
+  ///                                 - fps:15</param> 
+  /// <param name="aud_fmt">       The audio format. If this is not set (NULL), the
+  ///                                 format will be set to:
+  ///                                 - format:PJMEDIA_FORMAT_PCM
+  ///                                 - bits_per_sample:16
+  ///                                 - clock rate/chan count/ptime:the conf bridge settings</param> 
+  /// <param name="options">       Optional options.</param>
   public void createVideoRecorder(string file_name, int max_size, MediaFormatVideo vid_fmt, MediaFormatAudio aud_fmt, uint options) {
     pjsua2PINVOKE.VideoRecorder_createVideoRecorder__SWIG_0(swigCPtr, file_name, max_size, MediaFormatVideo.getCPtr(vid_fmt), MediaFormatAudio.getCPtr(aud_fmt), options);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create an avi recorder and automatically add a audio/video port
+  /// the audio/video conference bridge. User can connect the audio/video port
+  /// from a source port to store the uncompressed video and 16 bit PCM audio.
+  /// The recorder currently supports YUY2/I420/RGB24 video format and
+  /// PCM audio format.
+  /// Note: Uncompressed video can lead to significant file size growth.
+  /// <param name="max_size">      Maximum file size.</param> 
+  /// <param name="vid_fmt">       The video format. If this is not set (NULL), the
+  ///                                 format will be set to:
+  ///                                 - format:PJMEDIA_FORMAT_I420
+  ///                                 - size:320x240
+  ///                                 - fps:15</param> 
+  /// <param name="aud_fmt">       The audio format. If this is not set (NULL), the
+  ///                                 format will be set to:
+  ///                                 - format:PJMEDIA_FORMAT_PCM
+  ///                                 - bits_per_sample:16
+  ///                                 - clock rate/chan count/ptime:the conf bridge settings</param>
   public void createVideoRecorder(string file_name, int max_size, MediaFormatVideo vid_fmt, MediaFormatAudio aud_fmt) {
     pjsua2PINVOKE.VideoRecorder_createVideoRecorder__SWIG_1(swigCPtr, file_name, max_size, MediaFormatVideo.getCPtr(vid_fmt), MediaFormatAudio.getCPtr(aud_fmt));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create an avi recorder and automatically add a audio/video port
+  /// the audio/video conference bridge. User can connect the audio/video port
+  /// from a source port to store the uncompressed video and 16 bit PCM audio.
+  /// The recorder currently supports YUY2/I420/RGB24 video format and
+  /// PCM audio format.
+  /// Note: Uncompressed video can lead to significant file size growth.
+  /// <param name="max_size">      Maximum file size.</param> 
+  /// <param name="vid_fmt">       The video format. If this is not set (NULL), the
+  ///                                 format will be set to:
+  ///                                 - format:PJMEDIA_FORMAT_I420
+  ///                                 - size:320x240
+  ///                                 - fps:15</param>
   public void createVideoRecorder(string file_name, int max_size, MediaFormatVideo vid_fmt) {
     pjsua2PINVOKE.VideoRecorder_createVideoRecorder__SWIG_2(swigCPtr, file_name, max_size, MediaFormatVideo.getCPtr(vid_fmt));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create an avi recorder and automatically add a audio/video port
+  /// the audio/video conference bridge. User can connect the audio/video port
+  /// from a source port to store the uncompressed video and 16 bit PCM audio.
+  /// The recorder currently supports YUY2/I420/RGB24 video format and
+  /// PCM audio format.
+  /// Note: Uncompressed video can lead to significant file size growth.
+  /// <param name="max_size">      Maximum file size.</param>
   public void createVideoRecorder(string file_name, int max_size) {
     pjsua2PINVOKE.VideoRecorder_createVideoRecorder__SWIG_3(swigCPtr, file_name, max_size);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Create an avi recorder and automatically add a audio/video port
+  /// the audio/video conference bridge. User can connect the audio/video port
+  /// from a source port to store the uncompressed video and 16 bit PCM audio.
+  /// The recorder currently supports YUY2/I420/RGB24 video format and
+  /// PCM audio format.
+  /// Note: Uncompressed video can lead to significant file size growth.
   public void createVideoRecorder(string file_name) {
     pjsua2PINVOKE.VideoRecorder_createVideoRecorder__SWIG_4(swigCPtr, file_name);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Enumerate video media port.
+  /// <returns>The list of audio media port.</returns>
   public VideoMedia getVideoMedia() {
     VideoMedia ret = new VideoMedia(pjsua2PINVOKE.VideoRecorder_getVideoMedia(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Enumerate audio media port.
+  /// <returns>The list of video media port.</returns>
   public AudioMedia getAudioMedia() {
     AudioMedia ret = new AudioMedia(pjsua2PINVOKE.VideoRecorder_getAudioMedia(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Register a callback to be called when the file size has reached the
+  /// max size.
   public virtual void onMaxSize() {
     if (SwigDerivedClassHasMethod("onMaxSize", swigMethodTypes0)) pjsua2PINVOKE.VideoRecorder_onMaxSizeSwigExplicitVideoRecorder(swigCPtr); else pjsua2PINVOKE.VideoRecorder_onMaxSize(swigCPtr);
   }

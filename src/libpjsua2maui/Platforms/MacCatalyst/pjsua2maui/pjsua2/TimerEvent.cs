@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes timer event.
 public class TimerEvent : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class TimerEvent : global::System.IDisposable {
     }
   }
 
+  ///  The timer entry.
   public System.IntPtr entry {
     set {
       pjsua2PINVOKE.TimerEvent_entry_set(swigCPtr, value);

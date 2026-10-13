@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure describes statistics state.
 public class MathStat : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class MathStat : global::System.IDisposable {
     }
   }
 
+  ///  number of samples
   public int n {
     set {
       pjsua2PINVOKE.MathStat_n_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class MathStat : global::System.IDisposable {
     } 
   }
 
+  ///  maximum value
   public int max {
     set {
       pjsua2PINVOKE.MathStat_max_set(swigCPtr, value);
@@ -77,6 +80,7 @@ public class MathStat : global::System.IDisposable {
     } 
   }
 
+  ///  minimum value
   public int min {
     set {
       pjsua2PINVOKE.MathStat_min_set(swigCPtr, value);
@@ -87,6 +91,7 @@ public class MathStat : global::System.IDisposable {
     } 
   }
 
+  ///  last value
   public int last {
     set {
       pjsua2PINVOKE.MathStat_last_set(swigCPtr, value);
@@ -97,6 +102,7 @@ public class MathStat : global::System.IDisposable {
     } 
   }
 
+  ///  mean
   public int mean {
     set {
       pjsua2PINVOKE.MathStat_mean_set(swigCPtr, value);
@@ -107,6 +113,7 @@ public class MathStat : global::System.IDisposable {
     } 
   }
 
+  /// Default constructor
   public MathStat() : this(pjsua2PINVOKE.new_MathStat(), true) {
   }
 

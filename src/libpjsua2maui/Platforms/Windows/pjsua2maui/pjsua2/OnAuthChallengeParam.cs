@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Parameters for Account::onAuthChallenge() callback.
 
 public class OnAuthChallengeParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -57,6 +58,7 @@ public class OnAuthChallengeParam : global::System.IDisposable {
     }
   }
 
+  ///  Account ID associated with the challenged request.
   public int accId {
     set {
       pjsua2PINVOKE.OnAuthChallengeParam_accId_set(swigCPtr, value);
@@ -67,6 +69,7 @@ public class OnAuthChallengeParam : global::System.IDisposable {
     } 
   }
 
+  ///  Call ID, or PJSUA_INVALID_ID for non-call requests.
   public int callId {
     set {
       pjsua2PINVOKE.OnAuthChallengeParam_callId_set(swigCPtr, value);
@@ -77,6 +80,7 @@ public class OnAuthChallengeParam : global::System.IDisposable {
     } 
   }
 
+  ///  The 401/407 response containing the challenge.
   public SipRxData rdata {
     set {
       pjsua2PINVOKE.OnAuthChallengeParam_rdata_set(swigCPtr, SipRxData.getCPtr(value));
@@ -88,6 +92,7 @@ public class OnAuthChallengeParam : global::System.IDisposable {
     } 
   }
 
+  ///  The authentication challenge. Call respond() or abandon().
   public AuthChallenge challenge {
     get {
       global::System.IntPtr cPtr = pjsua2PINVOKE.OnAuthChallengeParam_challenge_get(swigCPtr);

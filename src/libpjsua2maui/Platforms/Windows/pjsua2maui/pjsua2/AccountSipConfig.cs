@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Various SIP settings for the account. This will be specified in
+/// AccountConfig.
 
 public class AccountSipConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -47,6 +49,11 @@ public class AccountSipConfig : PersistentObject {
     }
   }
 
+  /// Array of credentials. If registration is desired, normally there should
+  /// be at least one credential specified, to successfully authenticate
+  /// against the service provider. More credentials can be specified, for
+  /// example when the requests are expected to be challenged by the
+  /// proxies in the route set.
   public AuthCredInfoVector authCreds {
     set {
       pjsua2PINVOKE.AccountSipConfig_authCreds_set(swigCPtr, AuthCredInfoVector.getCPtr(value));
@@ -58,6 +65,8 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Array of proxy servers to visit for outgoing requests. Each of the
+  /// entry is translated into one Route URI.
   public StringVector proxies {
     set {
       pjsua2PINVOKE.AccountSipConfig_proxies_set(swigCPtr, StringVector.getCPtr(value));
@@ -69,6 +78,9 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Optional URI to be put as Contact for this account. It is recommended
+  /// that this field is left empty, so that the value will be calculated
+  /// automatically based on the transport address.
   public string contactForced {
     set {
       pjsua2PINVOKE.AccountSipConfig_contactForced_set(swigCPtr, value);
@@ -81,6 +93,13 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Additional parameters that will be appended in the Contact header
+  /// for this account. This will affect the Contact header in all SIP
+  /// messages sent on behalf of this account, including but not limited to
+  /// REGISTER, INVITE, and SUBCRIBE requests or responses.
+  /// The parameters should be preceeded by semicolon, and all strings must
+  /// be properly escaped. Example:
+  ///   ";my-param=X;another-param=Hi%20there"
   public string contactParams {
     set {
       pjsua2PINVOKE.AccountSipConfig_contactParams_set(swigCPtr, value);
@@ -93,6 +112,13 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Additional URI parameters that will be appended in the Contact URI
+  /// for this account. This will affect the Contact URI in all SIP
+  /// messages sent on behalf of this account, including but not limited to
+  /// REGISTER, INVITE, and SUBCRIBE requests or responses.
+  /// The parameters should be preceeded by semicolon, and all strings must
+  /// be properly escaped. Example:
+  ///   ";my-param=X;another-param=Hi%20there"
   public string contactUriParams {
     set {
       pjsua2PINVOKE.AccountSipConfig_contactUriParams_set(swigCPtr, value);
@@ -105,6 +131,9 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// If this flag is set, the authentication client framework will
+  /// send an empty Authorization header in each initial request.
+  /// Default is no.
   public bool authInitialEmpty {
     set {
       pjsua2PINVOKE.AccountSipConfig_authInitialEmpty_set(swigCPtr, value);
@@ -115,6 +144,8 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Specify the algorithm to use when empty Authorization header
+  /// is to be sent for each initial request (see above)
   public string authInitialAlgorithm {
     set {
       pjsua2PINVOKE.AccountSipConfig_authInitialAlgorithm_set(swigCPtr, value);
@@ -127,6 +158,13 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Optionally bind this account to specific transport. This normally is
+  /// not a good idea, as account should be able to send requests using
+  /// any available transports according to the destination. But some
+  /// application may want to have explicit control over the transport to
+  /// use, so in that case it can set this field.
+  /// Default: -1 (PJSUA_INVALID_ID)
+  /// <seealso cref="Account.setTransport"/>
   public int transportId {
     set {
       pjsua2PINVOKE.AccountSipConfig_transportId_set(swigCPtr, value);
@@ -137,6 +175,10 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether IPv6 should be used for SIP signalling.
+  /// Default: PJSUA_IPV6_ENABLED_NO_PREFERENCE
+  /// (IP version used will be based on the address resolution
+  /// returned by OS/resolver)
   public pjsua_ipv6_use ipv6Use {
     set {
       pjsua2PINVOKE.AccountSipConfig_ipv6Use_set(swigCPtr, (int)value);
@@ -147,6 +189,13 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Use a shared authorization session within this account.
+  /// This will use the accounts credentials on outgoing requests,
+  /// so that less 401/407 Responses will be returned.
+  /// Needs PJSIP_AUTH_AUTO_SEND_NEXT and PJSIP_AUTH_HEADER_CACHING
+  /// enabled to work properly, and also will grow usage of the used pool for
+  /// the cached headers.
+  /// Default is disabled/false.
   public bool useSharedAuth {
     set {
       pjsua2PINVOKE.AccountSipConfig_useSharedAuth_set(swigCPtr, value);
@@ -157,6 +206,12 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Configure automatic SIP-MESSAGE processing behavior for this account.
+  /// When set to true, incoming SIP MESSAGE requests will be responded to
+  /// immediately with a 200 OK response (legacy behavior). When set to false,
+  /// incoming SIP MESSAGE requests will create UAS transactions allowing for
+  /// deferred responses, cf. Account::sendResponse() and DeferredResponse.
+  /// Default: true (automatic response for backward compatibility)
   public bool autoRespondSipMessage {
     set {
       pjsua2PINVOKE.AccountSipConfig_autoRespondSipMessage_set(swigCPtr, value);
@@ -167,11 +222,15 @@ public class AccountSipConfig : PersistentObject {
     } 
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.AccountSipConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.AccountSipConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

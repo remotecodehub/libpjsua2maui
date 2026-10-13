@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// This structure descibes information about a particular media port that
+/// has been registered into the conference bridge.
 public class VidConfPortInfo : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +59,7 @@ public class VidConfPortInfo : global::System.IDisposable {
     }
   }
 
+  /// Conference port number.
   public int portId {
     set {
       pjsua2PINVOKE.VidConfPortInfo_portId_set(swigCPtr, value);
@@ -67,6 +70,7 @@ public class VidConfPortInfo : global::System.IDisposable {
     } 
   }
 
+  /// Port name.
   public string name {
     set {
       pjsua2PINVOKE.VidConfPortInfo_name_set(swigCPtr, value);
@@ -79,6 +83,7 @@ public class VidConfPortInfo : global::System.IDisposable {
     } 
   }
 
+  /// Media audio format information
   public MediaFormatVideo format {
     set {
       pjsua2PINVOKE.VidConfPortInfo_format_set(swigCPtr, MediaFormatVideo.getCPtr(value));
@@ -90,6 +95,8 @@ public class VidConfPortInfo : global::System.IDisposable {
     } 
   }
 
+  /// Array of listeners (in other words, ports where this port is
+  /// transmitting to).
   public IntVector listeners {
     set {
       pjsua2PINVOKE.VidConfPortInfo_listeners_set(swigCPtr, IntVector.getCPtr(value));
@@ -101,6 +108,8 @@ public class VidConfPortInfo : global::System.IDisposable {
     } 
   }
 
+  /// Array of listeners (in other words, ports where this port is
+  /// listening to).
   public IntVector transmitters {
     set {
       pjsua2PINVOKE.VidConfPortInfo_transmitters_set(swigCPtr, IntVector.getCPtr(value));

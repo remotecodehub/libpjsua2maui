@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace libpjsua2.maui {
+/// Account media config (applicable for audio, video, and text). This will be
+/// specified in AccountConfig.
 
 public class AccountMediaConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
@@ -47,6 +49,12 @@ public class AccountMediaConfig : PersistentObject {
     }
   }
 
+  /// Media transport (RTP) configuration.
+  /// For *port* and *portRange* settings, RTCP port is selected as
+  /// RTP port+1.
+  /// Example: *port=5000*, *portRange=4*
+  /// - Available ports: 5000, 5002, 5004 (Media/RTP transport)
+  ///                    5001, 5003, 5005 (Media/RTCP transport)
   public TransportConfig transportConfig {
     set {
       pjsua2PINVOKE.AccountMediaConfig_transportConfig_set(swigCPtr, TransportConfig.getCPtr(value));
@@ -58,6 +66,10 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// If remote sends SDP answer containing more than one format or codec in
+  /// the media line, send re-INVITE or UPDATE with just one codec to lock
+  /// which codec to use.
+  /// Default: True (Yes).
   public bool lockCodecEnabled {
     set {
       pjsua2PINVOKE.AccountMediaConfig_lockCodecEnabled_set(swigCPtr, value);
@@ -68,6 +80,10 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether stream keep-alive and NAT hole punching with
+  /// non-codec-VAD mechanism (see PJMEDIA_STREAM_ENABLE_KA) is enabled
+  /// for this account.
+  /// Default: False
   public bool streamKaEnabled {
     set {
       pjsua2PINVOKE.AccountMediaConfig_streamKaEnabled_set(swigCPtr, value);
@@ -78,6 +94,10 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether secure media transport should be used for this account.
+  /// Valid values are PJMEDIA_SRTP_DISABLED, PJMEDIA_SRTP_OPTIONAL, and
+  /// PJMEDIA_SRTP_MANDATORY.
+  /// Default: PJSUA_DEFAULT_USE_SRTP
   public pjmedia_srtp_use srtpUse {
     set {
       pjsua2PINVOKE.AccountMediaConfig_srtpUse_set(swigCPtr, (int)value);
@@ -88,6 +108,13 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether SRTP requires secure signaling to be used. This option
+  /// is only used when *use_srtp* option above is non-zero.
+  /// Valid values are:
+  ///  0: SRTP does not require secure signaling
+  ///  1: SRTP requires secure transport such as TLS
+  ///  2: SRTP requires secure end-to-end transport (SIPS)
+  /// Default: PJSUA_DEFAULT_SRTP_SECURE_SIGNALING
   public int srtpSecureSignaling {
     set {
       pjsua2PINVOKE.AccountMediaConfig_srtpSecureSignaling_set(swigCPtr, value);
@@ -98,6 +125,7 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Specify SRTP settings, like cryptos and keying methods.
   public SrtpOpt srtpOpt {
     set {
       pjsua2PINVOKE.AccountMediaConfig_srtpOpt_set(swigCPtr, SrtpOpt.getCPtr(value));
@@ -109,6 +137,10 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether IPv6 should be used on media.
+  /// Default: PJSUA_IPV6_ENABLED_PREFER_IPV4
+  /// (Dual stack media, capable to use IPv4/IPv6.
+  /// Outgoing offer will prefer to use IPv4)
   public pjsua_ipv6_use ipv6Use {
     set {
       pjsua2PINVOKE.AccountMediaConfig_ipv6Use_set(swigCPtr, (int)value);
@@ -119,6 +151,8 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Enable RTP and RTCP multiplexing.
+  /// Default: false
   public bool rtcpMuxEnabled {
     set {
       pjsua2PINVOKE.AccountMediaConfig_rtcpMuxEnabled_set(swigCPtr, value);
@@ -129,6 +163,7 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// RTCP Feedback settings.
   public RtcpFbConfig rtcpFbConfig {
     set {
       pjsua2PINVOKE.AccountMediaConfig_rtcpFbConfig_set(swigCPtr, RtcpFbConfig.getCPtr(value));
@@ -140,6 +175,8 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Enable RTCP Extended Report (RTCP XR).
+  /// Default: PJMEDIA_STREAM_ENABLE_XR
   public bool rtcpXrEnabled {
     set {
       pjsua2PINVOKE.AccountMediaConfig_rtcpXrEnabled_set(swigCPtr, value);
@@ -150,6 +187,10 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Use loopback media transport. This may be useful if application
+  /// doesn't want PJSUA2 to create real media transports/sockets, such as
+  /// when using third party media.
+  /// Default: false
   public bool useLoopMedTp {
     set {
       pjsua2PINVOKE.AccountMediaConfig_useLoopMedTp_set(swigCPtr, value);
@@ -160,6 +201,10 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Enable local loopback when useLoopMedTp is set to TRUE.
+  /// If enabled, packets sent to the transport will be sent back to
+  /// the streams attached to the transport.
+  /// Default: false
   public bool enableLoopback {
     set {
       pjsua2PINVOKE.AccountMediaConfig_enableLoopback_set(swigCPtr, value);
@@ -170,14 +215,19 @@ public class AccountMediaConfig : PersistentObject {
     } 
   }
 
+  /// Default constructor
   public AccountMediaConfig() : this(pjsua2PINVOKE.new_AccountMediaConfig(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.AccountMediaConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.AccountMediaConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameter for switching device with PJMEDIA_VID_DEV_CAP_SWITCH capability.
 public class VideoSwitchParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,8 @@ public class VideoSwitchParam : global::System.IDisposable {
     }
   }
 
+  /// Target device ID to switch to. Once the switching is successful, the
+  /// video stream will use this device and the old device will be closed.
   public int target_id {
     set {
       pjsua2PINVOKE.VideoSwitchParam_target_id_set(swigCPtr, value);

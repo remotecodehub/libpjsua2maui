@@ -10,6 +10,20 @@
 
 namespace libpjsua2.maui {
 
+/// Buddy. This is a lite wrapper class for PJSUA-LIB buddy, i.e: this class
+/// only maintains one data member, PJSUA-LIB buddy ID, and the methods are
+/// simply proxies for PJSUA-LIB buddy operations.
+/// Application can use create() to register a buddy to PJSUA-LIB, and
+/// the destructor of the original instance (i.e: the instance that calls
+/// create()) will unregister and delete the buddy from PJSUA-LIB. Application
+/// must delete all Buddy instances belong to an account before shutting down
+/// the account (via Account::shutdown()).
+/// The library will not keep a list of Buddy instances, so any Buddy (or
+/// descendant) instances instantiated by application must be maintained
+/// and destroyed by the application itself. Any PJSUA2 APIs that return Buddy
+/// instance(s) such as Account::enumBuddies2() or Account::findBuddy2() will
+/// just return generated copy. All Buddy methods should work normally on this
+/// generated copy instance.
 public class Buddy : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,74 +71,145 @@ public class Buddy : global::System.IDisposable {
     }
   }
 
+  /// Constructor.
   public Buddy() : this(pjsua2PINVOKE.new_Buddy(), true) {
     SwigDirectorConnect();
   }
 
+  /// Create buddy and register the buddy to PJSUA-LIB.
+  /// Note that application should maintain the Buddy original instance, i.e:
+  /// the instance that calls this create() method as it is only the original
+  /// instance destructor that will delete the underlying Buddy in PJSUA-LIB.
+  /// IMPORTANT: Application must make sure that the Account instance remains
+  /// valid for the entire lifetime of the Buddy object.
+  /// <param name="acc">               The account for this buddy.</param> 
+  /// <param name="cfg">               The buddy config.</param>
   public void create(Account acc, BuddyConfig cfg) {
     pjsua2PINVOKE.Buddy_create(swigCPtr, Account.getCPtr(acc), BuddyConfig.getCPtr(cfg));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Check if this buddy is valid.
+  /// <returns>True if it is.</returns>
   public bool isValid() {
     bool ret = pjsua2PINVOKE.Buddy_isValid(swigCPtr);
     return ret;
   }
 
+  /// Get PJSUA-LIB buddy ID or index associated with this buddy.
+  /// <returns>Integer greater than or equal to zero.</returns>
   public int getId() {
     int ret = pjsua2PINVOKE.Buddy_getId(swigCPtr);
     return ret;
   }
 
+  /// Get detailed buddy info.
+  /// <returns>Buddy info.</returns>
   public BuddyInfo getInfo() {
     BuddyInfo ret = new BuddyInfo(pjsua2PINVOKE.Buddy_getInfo(swigCPtr), true);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Enable/disable buddy's presence monitoring. Once buddy's presence is
+  /// subscribed, application will be informed about buddy's presence status
+  /// changed via *onBuddyState()* callback.
+  /// <param name="subscribe">         Specify true to activate presence
+  ///                              subscription.</param>
   public void subscribePresence(bool subscribe) {
     pjsua2PINVOKE.Buddy_subscribePresence(swigCPtr, subscribe);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Update the presence information for the buddy. Although the library
+  /// periodically refreshes the presence subscription for all buddies,
+  /// some application may want to refresh the buddy's presence subscription
+  /// immediately, and in this case it can use this function to accomplish
+  /// this.
+  /// Note that the buddy's presence subscription will only be initiated
+  /// if presence monitoring is enabled for the buddy. See
+  /// subscribePresence() for more info. Also if presence subscription for
+  /// the buddy is already active, this function will not do anything.
+  /// Once the presence subscription is activated successfully for the buddy,
+  /// application will be notified about the buddy's presence status in the
+  /// *onBuddyState()* callback.
   public void updatePresence() {
     pjsua2PINVOKE.Buddy_updatePresence(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Enable/disable buddy's dialog event monitoring. Once buddy's dialog event
+  /// is subscribed, application will be informed about buddy's dialog info
+  /// status change via *onBuddyDlgEventState()* callback.
+  /// Note that only one subscription (presence or dialog event) can be active
+  /// at any time.
+  /// <param name="subscribe">     Specify non-zero to activate dialog event subscription
+  ///                          to the specified buddy.</param> 
+  /// <returns>PJ_SUCCESS on success, or the appropriate error code.</returns>
   public void subscribeDlgEvent(bool subscribe) {
     pjsua2PINVOKE.Buddy_subscribeDlgEvent(swigCPtr, subscribe);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Update the dialog event information for the buddy. Although the library
+  /// periodically refreshes the dialog event subscription for all buddies, some
+  /// application may want to refresh the buddy's dialog event subscription
+  /// immediately, and in this case it can use this function to accomplish
+  /// this.
+  /// Note that the buddy's dialog event subscription will only be initiated
+  /// if dialog event monitoring is enabled for the buddy. See
+  /// subscribeDlgEvent() for more info. Also if dialog event
+  /// subscription for the buddy is already active, this function will not do
+  /// anything.
+  /// Once the dialog event subscription is activated successfully for the buddy,
+  /// application will be notified about the buddy's dialog info status in the
+  /// onBuddyDlgEventState() callback.
   public void updateDlgEvent() {
     pjsua2PINVOKE.Buddy_updateDlgEvent(swigCPtr);
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send instant messaging outside dialog, using this buddy's specified
+  /// account for route set and authentication.
+  /// <param name="prm">       Sending instant message parameter.</param>
   public void sendInstantMessage(SendInstantMessageParam prm) {
     pjsua2PINVOKE.Buddy_sendInstantMessage(swigCPtr, SendInstantMessageParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Send typing indication outside dialog.
+  /// <param name="prm">       Sending instant message parameter.</param>
   public void sendTypingIndication(SendTypingIndicationParam prm) {
     pjsua2PINVOKE.Buddy_sendTypingIndication(swigCPtr, SendTypingIndicationParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when the buddy state has changed.
+  /// Application may then query the buddy info to get the details.
   public virtual void onBuddyState() {
     if (SwigDerivedClassHasMethod("onBuddyState", swigMethodTypes0)) pjsua2PINVOKE.Buddy_onBuddyStateSwigExplicitBuddy(swigCPtr); else pjsua2PINVOKE.Buddy_onBuddyState(swigCPtr);
   }
 
+  /// Notify application when the buddy dialog state has changed.
+  /// Application may then query the buddy into to get the details.
   public virtual void onBuddyDlgEventState() {
     if (SwigDerivedClassHasMethod("onBuddyDlgEventState", swigMethodTypes1)) pjsua2PINVOKE.Buddy_onBuddyDlgEventStateSwigExplicitBuddy(swigCPtr); else pjsua2PINVOKE.Buddy_onBuddyDlgEventState(swigCPtr);
   }
 
+  /// Notify application when the state of client subscription session
+  /// associated with a buddy has changed. Application may use this
+  /// callback to retrieve more detailed information about the state
+  /// changed event.
+  /// <param name="prm">       Callback parameter.</param>
   public virtual void onBuddyEvSubState(OnBuddyEvSubStateParam prm) {
     if (SwigDerivedClassHasMethod("onBuddyEvSubState", swigMethodTypes2)) pjsua2PINVOKE.Buddy_onBuddyEvSubStateSwigExplicitBuddy(swigCPtr, OnBuddyEvSubStateParam.getCPtr(prm)); else pjsua2PINVOKE.Buddy_onBuddyEvSubState(swigCPtr, OnBuddyEvSubStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Notify application when the state of client subscription session
+  /// associated with a buddy dialog state has changed. Application
+  /// may use this callback to retrieve more detailed information about the
+  /// state changed event.
   public virtual void onBuddyEvSubDlgEventState(OnBuddyEvSubStateParam prm) {
     if (SwigDerivedClassHasMethod("onBuddyEvSubDlgEventState", swigMethodTypes3)) pjsua2PINVOKE.Buddy_onBuddyEvSubDlgEventStateSwigExplicitBuddy(swigCPtr, OnBuddyEvSubStateParam.getCPtr(prm)); else pjsua2PINVOKE.Buddy_onBuddyEvSubDlgEventState(swigCPtr, OnBuddyEvSubStateParam.getCPtr(prm));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

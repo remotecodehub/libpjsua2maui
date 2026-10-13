@@ -10,6 +10,8 @@
 
 namespace libpjsua2.maui {
 
+/// Account's NAT (Network Address Translation) settings. This will be
+/// specified in AccountConfig.
 public class AccountNatConfig : PersistentObject {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
 
@@ -47,6 +49,8 @@ public class AccountNatConfig : PersistentObject {
     }
   }
 
+  /// Control the use of STUN for the SIP signaling.
+  /// Default: PJSUA_STUN_USE_DEFAULT
   public pjsua_stun_use sipStunUse {
     set {
       pjsua2PINVOKE.AccountNatConfig_sipStunUse_set(swigCPtr, (int)value);
@@ -57,6 +61,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Control the use of STUN for the media transports.
+  /// Default: PJSUA_STUN_USE_DEFAULT
   public pjsua_stun_use mediaStunUse {
     set {
       pjsua2PINVOKE.AccountNatConfig_mediaStunUse_set(swigCPtr, (int)value);
@@ -67,6 +73,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Control the use of UPnP for the SIP signaling.
+  /// Default: PJSUA_UPNP_USE_DEFAULT
   public pjsua_upnp_use sipUpnpUse {
     set {
       pjsua2PINVOKE.AccountNatConfig_sipUpnpUse_set(swigCPtr, (int)value);
@@ -77,6 +85,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Control the use of UPnP for the media transports.
+  /// Default: PJSUA_UPNP_USE_DEFAULT
   public pjsua_upnp_use mediaUpnpUse {
     set {
       pjsua2PINVOKE.AccountNatConfig_mediaUpnpUse_set(swigCPtr, (int)value);
@@ -87,6 +97,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify NAT64 options.
+  /// Default: PJSUA_NAT64_DISABLED
   public pjsua_nat64_opt nat64Opt {
     set {
       pjsua2PINVOKE.AccountNatConfig_nat64Opt_set(swigCPtr, (int)value);
@@ -97,6 +109,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Enable ICE for the media transport.
+  /// Default: False
   public bool iceEnabled {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceEnabled_set(swigCPtr, value);
@@ -107,6 +121,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Set trickle ICE mode for ICE media transport.
+  /// Default: PJ_ICE_SESS_TRICKLE_DISABLED
   public pj_ice_sess_trickle iceTrickle {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceTrickle_set(swigCPtr, (int)value);
@@ -117,6 +133,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Set the maximum number of ICE host candidates.
+  /// Default: -1 (maximum not set)
   public int iceMaxHostCands {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceMaxHostCands_set(swigCPtr, value);
@@ -127,6 +145,10 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Optional configuration to manually specify host candidates.
+  /// Each candidate will use the same port as the automatic/base host
+  /// candidate. The number of entries in this array must be equal or less
+  /// than *iceMaxHostCands*.
   public StringVector iceManualHost {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceManualHost_set(swigCPtr, StringVector.getCPtr(value));
@@ -138,6 +160,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether to use aggressive nomination.
+  /// Default: True
   public bool iceAggressiveNomination {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceAggressiveNomination_set(swigCPtr, value);
@@ -148,6 +172,10 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// For controlling agent if it uses regular nomination, specify the delay
+  /// to perform nominated check (connectivity check with USE-CANDIDATE
+  /// attribute) after all components have a valid pair.
+  /// Default value is PJ_ICE_NOMINATED_CHECK_DELAY.
   public uint iceNominatedCheckDelayMsec {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceNominatedCheckDelayMsec_set(swigCPtr, value);
@@ -158,6 +186,15 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// For a controlled agent, specify how long it wants to wait (in
+  /// milliseconds) for the controlling agent to complete sending
+  /// connectivity check with nominated flag set to true for all components
+  /// after the controlled agent has found that all connectivity checks in
+  /// its checklist have been completed and there is at least one successful
+  /// (but not nominated) check for every component.
+  /// Default value for this option is
+  /// ICE_CONTROLLED_AGENT_WAIT_NOMINATION_TIMEOUT. Specify -1 to disable
+  /// this timer.
   public int iceWaitNominationTimeoutMsec {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceWaitNominationTimeoutMsec_set(swigCPtr, value);
@@ -168,6 +205,10 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify whether to check the source address of the incoming messages.
+  /// The source address will be compared to the remote candidate which has
+  /// a completed connectivity check or received a connectivity check.
+  /// Default value is PJ_ICE_SESS_CHECK_SRC_ADDR.
   public uint iceCheckSrcAddr {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceCheckSrcAddr_set(swigCPtr, value);
@@ -178,6 +219,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Disable RTCP component.
+  /// Default: False
   public bool iceNoRtcp {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceNoRtcp_set(swigCPtr, value);
@@ -188,6 +231,11 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Always send re-INVITE/UPDATE after ICE negotiation regardless of whether
+  /// the default ICE transport address is changed or not. When this is set
+  /// to False, re-INVITE/UPDATE will be sent only when the default ICE
+  /// transport address is changed.
+  /// Default: yes
   public bool iceAlwaysUpdate {
     set {
       pjsua2PINVOKE.AccountNatConfig_iceAlwaysUpdate_set(swigCPtr, value);
@@ -198,6 +246,7 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Enable TURN candidate in ICE.
   public bool turnEnabled {
     set {
       pjsua2PINVOKE.AccountNatConfig_turnEnabled_set(swigCPtr, value);
@@ -208,6 +257,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify TURN domain name or host name, in in "DOMAIN:PORT" or
+  /// "HOST:PORT" format.
   public string turnServer {
     set {
       pjsua2PINVOKE.AccountNatConfig_turnServer_set(swigCPtr, value);
@@ -220,6 +271,9 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify the connection type to be used to the TURN server. Valid
+  /// values are PJ_TURN_TP_UDP or PJ_TURN_TP_TCP.
+  /// Default: PJ_TURN_TP_UDP
   public pj_turn_tp_type turnConnType {
     set {
       pjsua2PINVOKE.AccountNatConfig_turnConnType_set(swigCPtr, (int)value);
@@ -230,6 +284,7 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify the username to authenticate with the TURN server.
   public string turnUserName {
     set {
       pjsua2PINVOKE.AccountNatConfig_turnUserName_set(swigCPtr, value);
@@ -242,6 +297,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify the type of password. Currently this must be zero to
+  /// indicate plain-text password will be used in the password.
   public int turnPasswordType {
     set {
       pjsua2PINVOKE.AccountNatConfig_turnPasswordType_set(swigCPtr, value);
@@ -252,6 +309,7 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify the password to authenticate with the TURN server.
   public string turnPassword {
     set {
       pjsua2PINVOKE.AccountNatConfig_turnPassword_set(swigCPtr, value);
@@ -264,6 +322,21 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// This option is used to update the transport address and the Contact
+  /// header of REGISTER request. When this option is  enabled, the library
+  /// will keep track of the public IP address from the response of REGISTER
+  /// request. Once it detects that the address has changed, it will
+  /// unregister current Contact, update the Contact with transport address
+  /// learned from Via header, and register a new Contact to the registrar.
+  /// This will also update the public name of UDP transport if STUN is
+  /// configured.
+  /// Possible values:
+  /// * 0 (disabled).
+  /// * 1 (enabled). Update except if both Contact and server's IP address
+  /// are public but response contains private IP.
+  /// * 2 (enabled). Update without exception.
+  /// See also contactRewriteMethod field.
+  /// Default: 1
   public int contactRewriteUse {
     set {
       pjsua2PINVOKE.AccountNatConfig_contactRewriteUse_set(swigCPtr, value);
@@ -274,6 +347,12 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify how Contact update will be done with the registration, if
+  /// *contactRewriteEnabled* is enabled. The value is bitmask combination of
+  /// *pjsua_contact_rewrite_method*. See also pjsua_contact_rewrite_method.
+  /// Value PJSUA_CONTACT_REWRITE_UNREGISTER(1) is the legacy behavior.
+  /// Default value: PJSUA_CONTACT_REWRITE_METHOD
+  ///   (PJSUA_CONTACT_REWRITE_NO_UNREG | PJSUA_CONTACT_REWRITE_ALWAYS_UPDATE)
   public int contactRewriteMethod {
     set {
       pjsua2PINVOKE.AccountNatConfig_contactRewriteMethod_set(swigCPtr, value);
@@ -284,6 +363,14 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify if source TCP port should be used as the initial Contact
+  /// address if TCP/TLS transport is used. Note that this feature will
+  /// be automatically turned off when nameserver is configured because
+  /// it may yield different destination address due to DNS SRV resolution.
+  /// Also some platforms are unable to report the local address of the
+  /// TCP socket when it is still connecting. In these cases, this
+  /// feature will also be turned off.
+  /// Default: 1 (PJ_TRUE / yes).
   public int contactUseSrcPort {
     set {
       pjsua2PINVOKE.AccountNatConfig_contactUseSrcPort_set(swigCPtr, value);
@@ -294,6 +381,11 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// This option is used to overwrite the "sent-by" field of the Via header
+  /// for outgoing messages with the same interface address as the one in
+  /// the REGISTER request, as long as the request uses the same transport
+  /// instance as the previous REGISTER request.
+  /// Default: 1 (PJ_TRUE / yes)
   public int viaRewriteUse {
     set {
       pjsua2PINVOKE.AccountNatConfig_viaRewriteUse_set(swigCPtr, value);
@@ -304,6 +396,13 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// This option controls whether the IP address in SDP should be replaced
+  /// with the IP address found in Via header of the REGISTER response, ONLY
+  /// when STUN and ICE are not used. If the value is FALSE (the original
+  /// behavior), then the local IP address will be used. If TRUE, and when
+  /// STUN and ICE are disabled, then the IP address found in registration
+  /// response will be used.
+  /// Default: PJ_FALSE (no)
   public int sdpNatRewriteUse {
     set {
       pjsua2PINVOKE.AccountNatConfig_sdpNatRewriteUse_set(swigCPtr, value);
@@ -314,6 +413,15 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Control the use of SIP outbound feature. SIP outbound is described in
+  /// RFC 5626 to enable proxies or registrar to send inbound requests back
+  /// to UA using the same connection initiated by the UA for its
+  /// registration. This feature is highly useful in NAT-ed deployemtns,
+  /// hence it is enabled by default.
+  /// Note: currently SIP outbound can only be used with TCP and TLS
+  /// transports. If UDP is used for the registration, the SIP outbound
+  /// feature will be silently ignored for the account.
+  /// Default: 1 (PJ_TRUE / yes)
   public int sipOutboundUse {
     set {
       pjsua2PINVOKE.AccountNatConfig_sipOutboundUse_set(swigCPtr, value);
@@ -324,6 +432,12 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify SIP outbound (RFC 5626) instance ID to be used by this
+  /// account. If empty, an instance ID will be generated based on
+  /// the hostname of this agent. If application specifies this parameter, the
+  /// value will look like "&lt;urn:uuid:00000000-0000-1000-8000-AABBCCDDEEFF&gt;"
+  /// without the double-quotes.
+  /// Default: empty
   public string sipOutboundInstanceId {
     set {
       pjsua2PINVOKE.AccountNatConfig_sipOutboundInstanceId_set(swigCPtr, value);
@@ -336,6 +450,10 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify SIP outbound (RFC 5626) registration ID. The default value
+  /// is empty, which would cause the library to automatically generate
+  /// a suitable value.
+  /// Default: empty
   public string sipOutboundRegId {
     set {
       pjsua2PINVOKE.AccountNatConfig_sipOutboundRegId_set(swigCPtr, value);
@@ -348,6 +466,11 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Set the interval for periodic keep-alive transmission for this account.
+  /// If this value is zero, keep-alive will be disabled for this account.
+  /// The keep-alive transmission will be sent to the registrar's address,
+  /// after successful registration.
+  /// Default: 15 (seconds)
   public uint udpKaIntervalSec {
     set {
       pjsua2PINVOKE.AccountNatConfig_udpKaIntervalSec_set(swigCPtr, value);
@@ -358,6 +481,8 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Specify the data to be transmitted as keep-alive packets.
+  /// Default: CR-LF
   public string udpKaData {
     set {
       pjsua2PINVOKE.AccountNatConfig_udpKaData_set(swigCPtr, value);
@@ -370,14 +495,19 @@ public class AccountNatConfig : PersistentObject {
     } 
   }
 
+  /// Default constructor
   public AccountNatConfig() : this(pjsua2PINVOKE.new_AccountNatConfig(), true) {
   }
 
+  /// Read this object from a container node.
+  /// <param name="node">              Container to read values from.</param>
   public override void readObject(ContainerNode node) {
     pjsua2PINVOKE.AccountNatConfig_readObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
   }
 
+  /// Write this object to a container node.
+  /// <param name="node">              Container to write values to.</param>
   public override void writeObject(ContainerNode node) {
     pjsua2PINVOKE.AccountNatConfig_writeObject(swigCPtr, ContainerNode.getCPtr(node));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();

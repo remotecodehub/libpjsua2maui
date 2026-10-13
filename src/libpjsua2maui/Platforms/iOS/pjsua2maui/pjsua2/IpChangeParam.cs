@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// Parameter of Endpoint::handleIpChange().
 public class IpChangeParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,8 @@ public class IpChangeParam : global::System.IDisposable {
     }
   }
 
+  /// If set to PJ_TRUE, this will restart the transport listener.
+  /// Default : PJ_TRUE
   public bool restartListener {
     set {
       pjsua2PINVOKE.IpChangeParam_restartListener_set(swigCPtr, value);
@@ -67,6 +70,9 @@ public class IpChangeParam : global::System.IDisposable {
     } 
   }
 
+  /// If *restartListener* is set to PJ_TRUE, some delay might be needed
+  /// for the listener to be restarted. Use this to set the delay.
+  /// Default : PJSUA_TRANSPORT_RESTART_DELAY_TIME
   public uint restartLisDelay {
     set {
       pjsua2PINVOKE.IpChangeParam_restartLisDelay_set(swigCPtr, value);
@@ -77,6 +83,10 @@ public class IpChangeParam : global::System.IDisposable {
     } 
   }
 
+  /// If set to PJ_TRUE, this will forcefully shutdown all transports.
+  /// Note that this will shutdown TCP/TLS transports only, UDP transport
+  /// should be restarted via restart_listener.
+  /// Default : PJ_TRUE
   public bool shutdownTransport {
     set {
       pjsua2PINVOKE.IpChangeParam_shutdownTransport_set(swigCPtr, value);
@@ -87,6 +97,7 @@ public class IpChangeParam : global::System.IDisposable {
     } 
   }
 
+  /// Constructor.
   public IpChangeParam() : this(pjsua2PINVOKE.new_IpChangeParam(), true) {
   }
 

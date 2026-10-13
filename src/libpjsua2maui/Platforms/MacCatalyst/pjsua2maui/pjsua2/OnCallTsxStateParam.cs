@@ -10,6 +10,7 @@
 
 namespace libpjsua2.maui {
 
+/// This structure contains parameters for Call::onCallTsxState() callback.
 public class OnCallTsxStateParam : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -57,6 +58,7 @@ public class OnCallTsxStateParam : global::System.IDisposable {
     }
   }
 
+  /// Transaction event that caused the state change.
   public SipEvent e {
     set {
       pjsua2PINVOKE.OnCallTsxStateParam_e_set(swigCPtr, SipEvent.getCPtr(value));

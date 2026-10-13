@@ -10,6 +10,23 @@
 
 namespace libpjsua2.maui {
 
+/// Represents a pending authentication challenge.
+/// Call respond() to resend with authentication, or abandon() to give up.
+/// If neither is called before the callback returns, the library handles
+/// authentication automatically using configured credentials (sync path).
+/// For async use, call defer() during the callback to obtain a heap-allocated
+/// AuthChallenge that can be used later. The caller owns the returned object.
+/// Each AuthChallenge is single-use: once consumed by respond(), abandon(),
+/// or defer(), further calls return PJ_EINVALIDOP (defer() throws Error).
+/// Thread safety: on a deferred object, respond() and abandon() must be called
+/// from a pjlib-registered thread. The non-deferred object must only be used
+/// during the onAuthChallenge() callback.
+/// GC note (Python/Java): The destructor calls pjsip APIs which require a
+/// pjlib-registered thread. Since garbage collectors may run destructor/
+/// Release() on an unregistered finalizer thread, you MUST explicitly call
+/// respond(), abandon(), or delete/Release() on the deferred object from a
+/// pjlib-registered thread. Do NOT let the GC collect it implicitly.
+/// See https://docs.pjsip.org/en/latest/pjsua2/general_concept.html#problems-with-garbage-collection
 public class AuthChallenge : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
@@ -60,6 +77,14 @@ public class AuthChallenge : global::System.IDisposable {
   public AuthChallenge() : this(pjsua2PINVOKE.new_AuthChallenge(), true) {
   }
 
+  /// Defer the challenge for asynchronous handling. Creates a new
+  /// heap-allocated AuthChallenge that can be used after the callback
+  /// returns. The caller owns the returned object and must eventually
+  /// call respond() or abandon() on it (or simply delete it, which
+  /// auto-abandons).
+  /// Must be called during the onAuthChallenge() callback. After this
+  /// call, the original AuthChallenge becomes invalid.
+  /// <returns>New heap-allocated AuthChallenge (caller owns).</returns>
   public AuthChallenge defer() {
     global::System.IntPtr cPtr = pjsua2PINVOKE.AuthChallenge_defer(swigCPtr);
     AuthChallenge ret = (cPtr == global::System.IntPtr.Zero) ? null : new AuthChallenge(cPtr, true);
@@ -67,22 +92,44 @@ public class AuthChallenge : global::System.IDisposable {
     return ret;
   }
 
+  /// Respond to the authentication challenge by building and sending
+  /// an authenticated request. Uses credentials currently configured
+  /// on the auth session.
+  /// <returns>PJ_SUCCESS on success, or PJ_EINVALIDOP if already
+  ///                      consumed by a prior respond()/abandon()/defer() call.</returns>
   public int respond() {
     int ret = pjsua2PINVOKE.AuthChallenge_respond__SWIG_0(swigCPtr);
     return ret;
   }
 
+  /// Respond with provided credentials. Sets them on the account-level
+  /// shared auth session before building the authenticated request.
+  /// Note that this permanently replaces the account's credentials,
+  /// affecting all subsequent authentication for the account.
+  /// <param name="creds">     Credentials to set on the auth session.</param> 
+  /// <returns>PJ_SUCCESS on success.</returns>
   public int respond(AuthCredInfoVector creds) {
     int ret = pjsua2PINVOKE.AuthChallenge_respond__SWIG_1(swigCPtr, AuthCredInfoVector.getCPtr(creds));
     if (pjsua2PINVOKE.SWIGPendingException.Pending) throw pjsua2PINVOKE.SWIGPendingException.Retrieve();
     return ret;
   }
 
+  /// Abandon the authentication challenge. The pending request will
+  /// not be resent.
+  /// <returns>PJ_SUCCESS on success, or PJ_EINVALIDOP if already
+  ///                      consumed by a prior respond()/abandon()/defer() call.</returns>
   public int abandon() {
     int ret = pjsua2PINVOKE.AuthChallenge_abandon(swigCPtr);
     return ret;
   }
 
+  /// Check whether this challenge object is still valid (not yet
+  /// consumed by respond() or abandon(), and the associated account
+  /// is still active).
+  /// Note: this is an advisory check without synchronization.
+  /// The result may be stale if another thread concurrently
+  /// deletes the account.
+  /// <returns>true if valid.</returns>
   public bool isValid() {
     bool ret = pjsua2PINVOKE.AuthChallenge_isValid(swigCPtr);
     return ret;

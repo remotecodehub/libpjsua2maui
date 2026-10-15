@@ -101,11 +101,11 @@ also MacCatalyst (arm64, x86_64) and Windows (x64, ARM64) as well.
 		<None Include="Platforms/Android/org/pjsip/*.java" Pack="true" PackagePath="contentFiles/any/android/org/pjsip/" />
 
 		<!-- Sources C# -->
-		<None Include="**/*.cs" Pack="true" PackagePath="src/%(RecursiveDir)" />
+		<None Include="**/*.cs" Pack="true" PackagePath="src" />
 		
 		<!-- Sources CPP -->
-		<None Include="**/*.cpp" Pack="true" PackagePath="src/%(RecursiveDir)" />
-		<None Include="**/*.h" Pack="true" PackagePath="src/%(RecursiveDir)" />
+		<None Include="**/*.cpp" Pack="true" PackagePath="src" />
+		<None Include="**/*.h" Pack="true" PackagePath="src" />
 
 		<!-- Licenças de Terceiros -->
 		<None Include="../third_party/bcg729/LICENSE.txt" Pack="true" PackagePath="third_party_notice/bcg729/" />

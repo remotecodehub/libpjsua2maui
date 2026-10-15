@@ -48,7 +48,7 @@ The builds of native libraries targets iOS devices (arm64), iOS simulators (arm6
 android devices (arm64-v8a, armeabi-v7a) and android simulators (x86, x86_64),
 also MacCatalyst (arm64, x86_64) and Windows (x64, ARM64) as well.
 		</Description>
-		<PackageReleaseNotes>- 🧩 Improvement: Add .cs files to src directory in final package 
+		<PackageReleaseNotes>- 🧩 Improvement: Add .cs, .cpp and .h source files to src directory in final package
 		</PackageReleaseNotes>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>

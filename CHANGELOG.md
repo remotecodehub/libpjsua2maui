@@ -2,7 +2,7 @@
 
 ## Version 2.17.0.5
 
-    - 🧩 Improvement: Add .cs files to src directory in final package 
+    - 🧩 Improvement: Add .cs, .cpp and .h source files to src directory in final package 
 
 ## Version 2.17.0.4
 

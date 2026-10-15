@@ -938,7 +938,7 @@ jobs:
           cp -f ${{ github.workspace }}/res/pj/ios/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
           mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
           cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
-          cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
+          cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjproject
           export SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
           export IPHONESDK="${{ matrix.platform}}${SDKVERSION}.sdk" 
           export DEVPATH="$(xcode-select -p)/Platforms/${{ matrix.platform }}.platform/Developer"
@@ -1593,9 +1593,9 @@ jobs:
 
           echo "starting make mac"
 
-          make -j$(sysctl -n hw.logicalcpu) > ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log || exit 1
+          make -j$(sysctl -n hw.logicalcpu) > ../logs/pjsip-swig-${{ matrix.arch }}.log || exit 1
           
-          echo 'Done make mac' >> ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log
+          echo 'Done make mac' >> ../logs/pjsip-swig-${{ matrix.arch }}.log
            
           mkdir -p "${{ env.BUILT_SDK_PATH }}/lib"
           mkdir -p "${{ env.BUILT_SDK_PATH }}/cs" 
@@ -2208,7 +2208,7 @@ jobs:
           }
 
           Write-Host "SWIG 4.5.1 installed and verified successfully."
-                
+
       - name: Validate SWIG
         shell: pwsh
         run: |

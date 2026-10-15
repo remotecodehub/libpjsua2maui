@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Version 2.17.0.5
+
+    - 🧩 Improvement: Add .cs, .cpp and .h source files to src directory in final package 
+
 ## Version 2.17.0.4
 
     - 🧩 Improvement: Produce xml documentation in C# SWIG bindings 

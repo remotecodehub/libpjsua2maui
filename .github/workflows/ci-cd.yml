@@ -18,7 +18,7 @@ env:
   OPENH264_PATH: ${{ github.workspace }}/lib/openh264
   OPENSSL_PATH: ${{ github.workspace }}/lib/openssl
   OPUS_PATH: ${{ github.workspace }}/lib/opus
-  PJSIP_PATH: ${{ github.workspace }}/lib/pjsip
+  PJSIP_PATH: ${{ github.workspace }}/lib/pjproject
   MIN_IOS_VERSION: 15.0
   DOTNET_NOLOGO: true                     # Disable the .NET logo
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Disable the .NET first time experience
@@ -41,6 +41,7 @@ env:
   SWIG_VERSION: 4.5.1
 jobs:
   bcg729-android:
+    name: bcg729 - android
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -81,313 +82,6 @@ jobs:
           name: bcg729-android
           path: ./bcg729-output 
           overwrite: true
-      
-  openh264-android:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-  
-      - name: Cache H264 Built SDK
-        id: cache-libs
-        uses: actions/cache@v6
-        with:
-          path: ${{ github.workspace }}/libopenh264-output
-          key: h264-${{ env.OPENH264_VERSION }}-android
-    
-      - name: Create Output Directory
-        run: mkdir -p ${{ github.workspace }}/libopenh264-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-
-      - name: Set Permissions for Output Directory
-        run: chmod -R 777 ${{ github.workspace }}/libopenh264-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-
-      - name: Build Docker Image
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          docker build -t openh264-builder ${{ github.workspace }}/res/docker/openh264
-
-      - name: Run Docker Container 
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: | 
-          docker run --name openh264-build openh264-builder
-          
-      - name: Extract Artifacts from Container
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: | 
-          docker cp openh264-build:/root/outputs/libs ${{ github.workspace }}/libopenh264-output
-           
-      - name: Upload OpenH264 Artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: openh264-android
-          path: ${{ github.workspace }}/libopenh264-output
-          overwrite: true
-   
-  openssl-android:
-    runs-on: ubuntu-latest
-    
-    steps:
-        
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Cache SSL Built SDK
-        id: cache-libs
-        uses: actions/cache@v6
-        with:
-          path: ${{ github.workspace }}/openssl-output
-          key: ssl-${{ env.OPENSSL_VERSION }}-android
-    
-      - name: Create Output Directory
-        run: mkdir -p ${{ github.workspace }}/openssl-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-
-      - name: Set Permissions for Output Directory
-        run: chmod -R 777 ${{ github.workspace }}/openssl-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-
-      - name: Build Docker Image
-        run: |
-          docker build -t openssl-builder ${{ github.workspace }}/res/docker/openssl
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        
-      - name: Run Docker Container and Extract Artifacts
-        run: |  
-          docker run --name openssl-build openssl-builder
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-      
-      - name: Extract Artifacts from Container
-        run: |  
-          docker cp openssl-build:/root/outputs/libs ${{ github.workspace }}/openssl-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-          
-
-      - name: Upload openssl Artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: openssl-android
-          path: ./openssl-output
-          overwrite: true
-
-  opus-android:
-    runs-on: ubuntu-latest   
-    steps:  
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        
-      - name: Cache opus Built SDK
-        id: cache-libs
-        uses: actions/cache@v6
-        with:
-          path:  ${{ github.workspace }}/opus-output
-          key: opus-${{ env.OPUS_VERSION }}-android
-
-      - name: Clone Opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ${{ github.workspace }}/lib
-          cd ${{ github.workspace }}/lib          
-          git clone --branch v1.4 https://github.com/xiph/opus.git opus
-
-      - name: Create Output Directory
-        run: mkdir -p ${{ github.workspace }}/opus-output
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-
-      - name: Build Docker Image
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          docker build -t opus-builder ${{ github.workspace }}/res/docker/opus
-          
-      - name: Run Docker Container
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: docker run --name opus-build opus-builder
-        
-      - name: Extract Artifacts from Container
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: | 
-          docker cp opus-build:/root/outputs/ ${{ github.workspace }}/opus-output
-
-      - name: Upload opus Artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: opus-android
-          path: ${{ github.workspace }}/opus-output 
-          overwrite: true
-        
-  pjsip-android:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
-      fail-fast: false
-    needs: [bcg729-android, openh264-android, openssl-android, opus-android]
-    name: pjsip - android
-    permissions:
-      contents: write
-
-    steps: 
-    - uses: actions/checkout@v7 
-  
-    - name: Cache opus Built SDK
-      id: cache-libs
-      uses: actions/cache@v6
-      with:
-        path: ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}
-        key: pjsip-${{ env.PJSIP_VERSION }}-android-${{ matrix.arch }}
-
-    - name: Clone PJSIP
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p ${{ github.workspace }}/lib
-        cd ${{ github.workspace }}/lib
-        git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git pjsip
-     
-    - uses: actions/setup-java@v4
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        check-latest: true
-      
-    - name: Setup Android SDK e NDK
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      uses: android-actions/setup-android@v3
-      with:
-        cmdline-tools-version: 11076708
-        # Removemos o pacote 'tools' e adicionamos o NDK diretamente aqui
-        packages: 'platforms;android-28 platform-tools build-tools;34.0.0 ndk;28.0.12433566'
-    
-    - name: Setup ENV
-      run: |
-        echo "ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/28.0.12433566" >> $GITHUB_ENV
-    - name: Debug NDK
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        ls -R ${{ env.ANDROID_NDK_ROOT }}
-      env: 
-        ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-
-    - name: Prepare Environment
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      run: |
-        cd ${{ github.workspace }}
-        sudo mkdir -p /home/runner/libpjsua2 
-        
-        DEPS="unzip git curl bzip2 binutils make autoconf openssl \
-          libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 libstdc++6 \
-          libpthread-stubs0-dev \
-          libc6-dev"
-        sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
-        
-        curl -L "https://github.com/swig/swig/archive/refs/tags/v${SWIG_VERSION}.tar.gz" \
-          -o /tmp/swig.tar.gz
-        tar -xzf /tmp/swig.tar.gz -C /tmp
-        cd "/tmp/swig-${SWIG_VERSION}"
-        ./autogen.sh
-        ./configure --prefix=/usr/local
-        make -j"$(nproc)"
-        sudo make install
-        hash -r
-        swig -version
-        
-    - uses: actions/download-artifact@v8
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      with:
-        name: openssl-android
-        path: ${{ github.workspace }}/output/openssl
-      
-    - uses: actions/download-artifact@v8
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      with:
-        name: openh264-android
-        path: ${{ github.workspace }}/output/openh264/
-        
-    - uses: actions/download-artifact@v8
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      with:
-        name: opus-android
-        path: ${{ github.workspace }}/output/opus/
-        
-    - uses: actions/download-artifact@v8
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      with:
-        name: bcg729-android
-        path: ${{ github.workspace }}/output/bcg729/
-       
-    - name: Create config_site.h
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      run: |
-        echo "Creating config site file for Android ..."
-        echo "#define PJ_CONFIG_ANDROID                 1"                       > ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_HAS_G7221_CODEC           1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_AUDIO_DEV_HAS_ANDROID_JNI 0"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_AUDIO_DEV_HAS_OPENSL      1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJSIP_AUTH_AUTO_SEND_NEXT         0"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Changing PJSIP_MAX_PKT_LEN to 6000"
-        echo "#define PJSIP_MAX_PKT_LEN                 6000"                    >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Enabling BCG729 in config_site"
-        echo "#define PJMEDIA_HAS_BCG729                1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Enabling h264 and Video support in config_site"
-        echo "#define PJMEDIA_HAS_VIDEO                 1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_HAS_OPENH264_CODEC        1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Enabling Opus in config_site"
-        echo "#define PJMEDIA_HAS_OPUS_CODEC            1"                       >> ${{ env.CONFIG_SITE_PATH }} 
-        echo "Enabling SSL in config_site"
-        echo "#define PJ_HAS_SSL_SOCK                   1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJ_SSL_SOCK_IMP                   PJ_SSL_SOCK_IMP_OPENSSL" >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#include <pj/config_site_sample.h>"                                >> ${{ env.CONFIG_SITE_PATH }}
-        cp -v ${{ github.workspace }}/res/pj/pjsua2maui/Makefile ${{ env.PJSIP_PATH }}/pjsip-apps/src/swig/csharp/pjsua2maui
-
-    - name: Build
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      id: build-pj
-      run: |
-        cd ${{ env.PJSIP_PATH }}
-        mkdir -p ${{ env.PJSIP_TMP_PATH }} 
-        cp -r * ${{ env.PJSIP_TMP_PATH }}
-        cd  ${{ env.PJSIP_TMP_PATH }}
-        echo "Configuring for ${{ matrix.arch }}"
-        APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} TARGET_ABI=${{ matrix.arch }} ./configure-android --use-ndk-cflags --with-ssl=${{ env.OPENSSL_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-openh264=${{ env.OPENH264_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-opus=${{ env.OPUS_BUILD_OUT_PATH }}/${{ matrix.arch }} --with-bcg729=${{ env.BCG729_BUILD_OUT_PATH }}/libs/${{ matrix.arch}}
-        echo "Make dep"
-        make dep
-        echo ""
-        echo "make"
-        make
-        cd ${{ env.PJSUA_BASE_DIR }}/csharp/pjsua2maui
-        make
-
-        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib
-        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
-        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
-        shopt -s globstar && cp ${{ github.workspace }}/output/**/libs/${{ matrix.arch }}/**/*.so ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib
-        cp -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*.so ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib/ 
-        cp -v ${{ env.PJSUA_BASE_DIR }}/csharp/pjsua2maui/pjsua2maui/Platforms/Android/org/pjsip/*.java ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
-        cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }}/*.cs ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
-         
-    - name: Upload pjsip artifacts
-      uses: actions/upload-artifact@v7
-      with:
-        name: pjsip-${{ env.PJSIP_VERSION }}-android-${{ matrix.arch }}
-        path: ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}
- 
-    env:
-      OPENSSL_LIB_PATH: ${{ github.workspace }}/output/openssl/libs/
-      OPENh264_LIB_PATH: ${{ github.workspace }}/output/openh264/libs/
-      OPUS_LIB_PATH: ${{ github.workspace }}/output/opus/libs/
-      BCG729_LIB_PATH: ${{ github.workspace }}/output/bcg729/libs/
-      PJSIP_TMP_PATH: /tmp/pjsip
-      CONFIG_SITE_PATH: ${{ github.workspace }}/lib/pjsip/pjlib/include/pj/config_site.h
-      PJSUA_GENERATED_CSHARP_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/Platforms/Android/pjsua2 
-      PJSUA_GENERATED_SO_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/Platforms/Android/lib
-      PJSUA_BASE_DIR: /tmp/pjsip/pjsip-apps/src/swig
-      TARGET_ANDROID_API: 28
-      OPENSSL_BUILD_OUT_PATH: ${{ github.workspace }}/output/openssl
-      OPENH264_BUILD_OUT_PATH: ${{ github.workspace}}/output/openh264
-      OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/output/opus/outputs
-      BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/output/bcg729
 
   bcg729-ios:
     strategy:
@@ -405,8 +99,8 @@ jobs:
           - arch: arm64
             platform: ios
             os_platform: iPhoneOS
-    runs-on: macos-15
-    name: bcg729-ios 
+    runs-on: macos-26
+    name: bcg729 - ios (${{ matrix.arch }}) 
     permissions:
       contents: write
     steps:       
@@ -490,6 +184,237 @@ jobs:
         path: ${{ github.workspace }}/${{ matrix.os_platform }}${{ env.MIN_IOS_VERSION }}-${{ matrix.arch }}.sdk
         overwrite: true
    
+       
+  bcg729-mac:
+    runs-on: macos-26
+    name: bcg729 - mac (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+          - platform: MacOSX
+          - lib_name: bcg729
+          - sdk: macosx
+    steps:  
+      - name: Cache BCG729 Built SDK
+        id: cache-libs
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+
+      - name: Clone BCG729
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          git clone --branch $BCG729_VERSION https://github.com/BelledonneCommunications/bcg729.git 
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install autoconf automake cmake libtool llvm nasm 
+        shell: sh
+
+      - name: Build BCG729 for MacCatalyst
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: bcg729
+        shell: sh
+        run: |
+          echo "-- Building BCG729 for iOS"
+          echo "-- Building arch ${{ matrix.arch }}"
+          xcode_dev_path=$(xcode-select -print-path)
+          os_platform="MacOSX"
+          sdk_path="${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk"
+          mkdir -p ../logs
+          mkdir -p ../../install
+
+          cmake .                                                               \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5                                  \
+            -DCMAKE_BUILD_TYPE=Release                                          \
+            -DCMAKE_SYSTEM_NAME=Darwin                                          \
+            -DCMAKE_C_COMPILER=$(which clang)                                   \
+            -DCMAKE_MAKE_PROGRAM:PATH=$(which make)                             \
+            -DCMAKE_SKIP_INSTALL_RPATH=ON                                       \
+            -DCMAKE_C_FLAGS="-target ${{ matrix.arch }}-apple-ios15.0-macabi"   \
+            -DBUILD_SHARED_LIBS=OFF                                             \
+            -DENABLE_SHARED=OFF                                                 \
+            -DENABLE_STATIC=ON                                                  \
+            -DCMAKE_INSTALL_PREFIX=${{ env.BUILT_SDK_PATH }}                    \
+            -DCMAKE_OSX_SYSROOT="$sdk_path"                                     \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}                        \
+            > ../logs/${{ matrix.lib_name }}-config-${{ matrix.arch }}.log 
+
+          make -j$(sysctl -n hw.logicalcpu) \
+            > ../logs/${{ matrix.lib_name }}-build-${{ matrix.arch }}.log 
+
+          make install \
+            > ../logs/${{ matrix.lib_name }}-install-${{ matrix.arch }}.log
+        env: 
+          BUILT_SDK_PATH:  ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: failure()
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk-logs
+          path: |
+            logs/*.log        
+
+      - uses: actions/upload-artifact@v7
+        name: Upload BCG ${{ matrix.arch }} artifact 
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: |
+            ${{ env.BUILT_SDK_PATH }}/**/*
+            logs/*.log
+        env:
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+   
+  bcg729-win:
+    name: bcg729 - win (${{ matrix.arch }})
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+  
+      - name: Cache BCG729 Built SDK
+        id: cache-libs
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/deps/bcg729
+          key: bcg729-${{ env.BCG729_VERSION }}-win-${{ matrix.arch }}
+    
+      - name: Setup MSVC
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Verify Compiler
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+            echo Visual Studio environment loaded for ${{ matrix.arch }}
+            where cl
+            where msbuild
+
+      - name: Clone BCG729
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            git clone --branch "${env:BCG729_VERSION}" --depth 1 https://github.com/BelledonneCommunications/bcg729.git bcg729
+            
+      - name: Remove Legacy MSVC Headers (ARM64 Only)
+        if: matrix.arch == 'ARM64' && steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        working-directory: bcg729
+        run: |
+          if (Test-Path "include/MSVC") {
+            Remove-Item -Path "include/MSVC" -Recurse -Force
+            Write-Host "Removed old MSVC implementation in order to use the new available from Win SDK 10.0.26100.0" -ForegroundColor Green
+          }
+
+      - name: Build bcg729
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        working-directory: bcg729
+        run: |
+          cmake -S . ^
+                -B build ^
+                -G "Visual Studio 17 2022" ^
+                -A ${{ matrix.arch }} ^
+                -DBUILD_SHARED_LIBS=OFF ^
+                -DCMAKE_SYSTEM_VERSION="10.0.26100.0" ^
+                -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
+                -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729\
+
+          cmake --build build --config Release --target INSTALL          
+
+      - name: Normalize artifacts
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            $target = "${env:INSTALL_DIR}\bcg729\${{ matrix.arch }}"
+
+            New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
+            New-Item -ItemType Directory -Force -Path "$target\include\bcg729" | Out-Null
+
+            Get-ChildItem bcg729/build -Recurse -Filter *.lib |
+            Copy-Item -Destination "$target\lib" -Force
+
+            Get-ChildItem bcg729/include -Recurse -Filter *.h |
+            Copy-Item -Destination "$target\include\bcg729" -Force
+
+      - name: List generated files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+            Get-ChildItem "${env:INSTALL_DIR}\bcg729" -Recurse
+ 
+      - name: Upload BCG729 artifacts 
+        uses: actions/upload-artifact@v7
+        with:
+          name: bcg729-win-${{ matrix.arch }}
+          path: deps/bcg729/**/*
+        
+  openh264-android:
+    runs-on: ubuntu-latest
+    name: openh264 - android
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+  
+      - name: Cache H264 Built SDK
+        id: cache-libs
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/libopenh264-output
+          key: h264-${{ env.OPENH264_VERSION }}-android
+    
+      - name: Create Output Directory
+        run: mkdir -p ${{ github.workspace }}/libopenh264-output
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Set Permissions for Output Directory
+        run: chmod -R 777 ${{ github.workspace }}/libopenh264-output
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Build Docker Image
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          docker build -t openh264-builder ${{ github.workspace }}/res/docker/openh264
+
+      - name: Run Docker Container 
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: | 
+          docker run --name openh264-build openh264-builder
+          
+      - name: Extract Artifacts from Container
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: | 
+          docker cp openh264-build:/root/outputs/libs ${{ github.workspace }}/libopenh264-output
+           
+      - name: Upload OpenH264 Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: openh264-android
+          path: ${{ github.workspace }}/libopenh264-output
+          overwrite: true
+
   openh264-ios:
     strategy:
       fail-fast: false
@@ -505,8 +430,8 @@ jobs:
           - arch: x86_64
             resolved_arch: x86_64
             platform: iPhoneSimulator
-    runs-on: macos-15
-    name: openh264-ios
+    runs-on: macos-26
+    name: openh264 - ios (${{ matrix.arch }})
     permissions:
       contents: write
     steps:
@@ -608,6 +533,271 @@ jobs:
         name: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
         path: ${{ github.workspace }}/h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
         overwrite: true
+ 
+  openh264-mac:
+    runs-on: macos-26
+    name: openh264 - mac (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+          - platform: MacOSX
+          - lib_name: h264
+          - sdk: macosx
+    steps:
+      - name: Cache H264 Built SDK
+        id: cache-libs
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: ${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+      
+      - name: Clone OpenH264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          git clone --branch v2.3.0 https://github.com/cisco/openh264.git
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install autoconf automake cmake libtool llvm nasm 
+        shell: sh
+
+      - name: Build OpenH264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        id: build
+        working-directory: openh264
+        run: |
+          mkdir -p ../logs
+          target_triple="${{ matrix.arch }}-apple-ios${{ env.MIN_MACOSX_VERSION }}-macabi"
+          version_min="-target ${target_triple}"        
+          
+          export OS="darwin"
+          sdk_path=$(xcrun --sdk ${{ matrix.sdk }} --show-sdk-path)
+          developer_path=$(xcode-select -p)
+
+          h264_makefile="Makefile"
+          h264_makefile_bak="Makefile.bak" 
+          h264_prefix="${{ env.BUILT_SDK_PATH }}"
+          
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            export ARCH="arm64"
+            # SOCI=No disables production of dylib
+            EXTRA_MAKE_ARGS="USE_ASM=Yes SOCI=No"
+          else
+            export ARCH="x86_64"
+            # USE_ASM=No disables files include and search from x86/ folder
+            # SOCI=No disables production of dylib
+            EXTRA_MAKE_ARGS="USE_ASM=No SOCI=No"
+          fi
+          
+          echo "Building OpenH264 for ${{ matrix.arch }} (${{ matrix.platform }}, OS=$OS, SDK=${{ matrix.sdk }}, Target=$target_triple)"
+
+          cp "${h264_makefile}" "${h264_makefile_bak}"
+          sed -i.deleteme "s|^PREFIX=.*|PREFIX=${h264_prefix}|" "${h264_makefile}"
+          rm -f ${h264_makefile}.deleteme
+          
+          export CFLAGS="-arch ${{ matrix.arch }} ${version_min} -isysroot ${sdk_path}"
+          export LDFLAGS="-arch ${{ matrix.arch }} ${version_min} -isysroot ${sdk_path}"
+          export SYSROOT="${sdk_path}"
+
+          # Compilação aplicando as flags mapeadas
+          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No libopenh264.a > ../logs/${{ matrix.lib_name }}-config-${{ matrix.arch }}.log 2>&1 || exit 1
+
+          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No install-static install-headers > ../logs/${{ matrix.lib_name }}-install-${{ matrix.arch }}.log 2>&1 || exit 1
+
+          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No clean > ../logs/${{ matrix.lib_name }}-clean-${{ matrix.arch }}.log 2>&1 || exit 1
+
+          mv "${h264_makefile_bak}" "${h264_makefile}"
+
+        shell: bash
+        env:
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: failure()
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          path: |
+            logs/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+            
+      - uses: actions/upload-artifact@v7
+        with:
+          name: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: |
+            ${{ env.BUILT_SDK_PATH }}/**/*
+            logs/*.log
+        env: 
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+  openh264-win:
+    name: openh264 - win (${{ matrix.arch }})
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7 
+
+      - name: Cache H264 Built SDK
+        id: cache-libs
+        uses: actions/cache@v6
+        with:
+          path: install/openh264/
+          key: h264-${{ env.OPENH264_VERSION }}-win-${{ matrix.arch }}
+    
+      - name: Setup MSVC
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          # Se for ARM64, usa o cross-compiler (roda em x64, gera ARM64)
+          # Se for x64, usa o compilador nativo x64
+          arch: ${{ matrix.arch == 'ARM64' && 'x64_arm64' || 'x64' }}
+
+      - name: Setup NASM
+        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'x64'
+        uses: ilammy/setup-nasm@v1
+
+      - name: Create directories
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
+          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
+
+      - name: Clone OpenH264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          git clone `
+            --branch "${env:OPENH264_VERSION}" `
+            --depth 1 `
+            https://github.com/cisco/openh264.git `
+            openh264
+
+      - name: Build OpenH264
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: cmd
+        working-directory: openh264
+        run: |
+          :: Define as variáveis corretas com base na arquitetura da matrix
+          if "${{ matrix.arch }}"=="ARM64" (
+              set "ARCH_FLAG=arm64"
+              set "ASM_FLAG=USE_ASM=No"
+          ) else (
+              set "ARCH_FLAG=x86_64"
+              set "ASM_FLAG="
+          )
+
+          :: Executa o build usando NMake/Make do ambiente MSVC
+          make OS=msvc ARCH=%ARCH_FLAG% BUILDTYPE=Release ENABLE64BIT=Yes DEBUGSYMBOLS=False %ASM_FLAG%
+
+          if %ERRORLEVEL% neq 0 (
+              exit /b %ERRORLEVEL%
+          )
+
+      - name: Prepare artifact structure
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $target = "install/openh264/${{ matrix.arch }}"
+
+          New-Item -ItemType Directory -Force -Path "$target\bin" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$target\include\wels" | Out-Null
+
+      - name: Collect static libraries
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $target = "install/openh264/${{ matrix.arch }}/lib"
+
+          Get-ChildItem openh264 -Recurse -Filter *.lib |
+            Copy-Item -Destination $target -Force
+
+      - name: Collect headers
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $target = "install/openh264/${{ matrix.arch }}/include/wels"
+
+          Get-ChildItem openh264/codec/api/wels -Filter *.h |
+            Copy-Item -Destination $target -Force
+
+      - name: List generated files
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Get-ChildItem "install/openh264" -Recurse
+
+      - name: Upload OpenH264 artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: openh264-win-${{ matrix.arch }}
+          path: |
+            install/openh264/${{ matrix.arch }}/**/*
+
+         
+  openssl-android:
+    runs-on: ubuntu-latest
+    name: openssl - android
+    steps:
+        
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Cache SSL Built SDK
+        id: cache-libs
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/openssl-output
+          key: ssl-${{ env.OPENSSL_VERSION }}-android
+    
+      - name: Create Output Directory
+        run: mkdir -p ${{ github.workspace }}/openssl-output
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Set Permissions for Output Directory
+        run: chmod -R 777 ${{ github.workspace }}/openssl-output
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Build Docker Image
+        run: |
+          docker build -t openssl-builder ${{ github.workspace }}/res/docker/openssl
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        
+      - name: Run Docker Container and Extract Artifacts
+        run: |  
+          docker run --name openssl-build openssl-builder
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+      
+      - name: Extract Artifacts from Container
+        run: |  
+          docker cp openssl-build:/root/outputs/libs ${{ github.workspace }}/openssl-output
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+          
+
+      - name: Upload openssl Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: openssl-android
+          path: ./openssl-output
+          overwrite: true
 
   openssl-ios:
     strategy:
@@ -630,8 +820,8 @@ jobs:
             sdk: iphonesimulator
             platform: iPhoneSimulator
             target: ios-sim-cross-arm64
-    runs-on: macos-15
-    name: openssl-ios 
+    runs-on: macos-26
+    name: openssl - ios (${{ matrix.arch }})
     permissions:
       contents: write
     steps:
@@ -743,488 +933,9 @@ jobs:
         path: ${{ env.OPENSSL_PATH }}/bin/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
         overwrite: true 
 
-  opus-ios:
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86_64, arm64, arm64s]
-        include:
-          - arch: arm64
-            resolved_arch: arm64
-            platform: iPhoneOS
-          - arch: arm64s
-            resolved_arch: arm64
-            platform: iPhoneSimulator
-          - arch: x86_64
-            resolved_arch: x86_64
-            platform: iPhoneSimulator
-    runs-on: macos-15
-    name: opus-ios 
-    permissions:
-      contents: write
-    steps:
-     
-    - name: Cache opus Built SDK
-      id: cache-libs
-      uses: actions/cache@v6
-      with:
-        path: ${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
-        key: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
-
-    - name: Clone Opus
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p ${{ github.workspace }}/lib
-        cd ${{ github.workspace }}/lib
-        git clone --branch v1.4 https://github.com/xiph/opus.git opus
-
-    - name: Setup Xcode 26.3
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '26.3'
- 
-    - name: Install deps
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      run: |
-        brew install nasm autoconf automake libtool 
-      shell: sh
-         
-    - name: Build opus
-      id: build
-      if: steps.cache-libs.outputs.cache-hit != 'true'
-      run: |
-        opus_version="1.4"
-        opus_opt_cflags="-O3 -ffast-math -flto -g"
-        opus_opt_ldflags="-flto"
-        DEVELOPER=$(xcode-select -print-path)
-        SDKVERSION=$(xcrun -sdk ${{ matrix.arch == 'arm64' && 'iphoneos' || 'iphonesimulator' }} --show-sdk-version)
-        PLATFORM=${{ matrix.platform }}
-        TARGETDIR="${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk"
-
-        mkdir -p "${TARGETDIR}/include"
-        mkdir -p "${TARGETDIR}/lib"
-
-        echo "artifact=${TARGETDIR}" >> "$GITHUB_OUTPUT"
-        echo "-- Building Opus for ${{ matrix.arch }} on ${PLATFORM}"
-
-        cd "${{ env.OPUS_PATH }}"
-
-        ./autogen.sh
- 
-        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
-          HOST="x86_64-apple-darwin" 
-          opus_opt_cflags="-O3 -ffast-math -flto -g -Wno-cast-align"
-        else
-          HOST="arm-apple-darwin" 
-          opus_opt_cflags="-O3 -ffast-math -flto -g"
-        fi
-        version_min=$([[ "${{ matrix.arch }}" == "arm64" ]] && echo "-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}" || echo "-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}")
-        ARCH="${{ matrix.resolved_arch }}"
-        
-        ./configure \
-          --enable-float-approx \
-          --disable-shared \
-          --enable-static \
-          --with-pic \
-          --disable-extra-programs \
-          --disable-doc \
-          --host=${HOST} \
-          --prefix="${TARGETDIR}" \
-          LDFLAGS="${opus_opt_ldflags} -fPIE ${version_min} -L${TARGETDIR}/lib" \
-          CFLAGS="${opus_opt_cflags} -arch ${ARCH} -fPIE ${version_min} -I${TARGETDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk"
-
-        make -j${{ env.BUILD_THREADS }}
-        make install 
-      shell: sh
-      env:
-        CONFIG_DISABLE_BITCODE: true
-        DEVELOPER: $(xcode-select -print-path)
-        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
-        BUILD_THREADS: $(sysctl -n hw.ncpu)
-
-    - name: Patch Opus .pc for arm64s
-      if: matrix.arch == 'arm64s' && steps.cache-libs.outputs.cache-hit != 'true'
-      run: |
-        opus_build_dir=$(find "${{ github.workspace }}/opus/build/" -type d -name "iPhoneSimulator*-arm64.sdk" | head -n 1)
-        pc_file=$(find "$opus_build_dir/lib/pkgconfig" -name 'opus.pc' | head -n 1)
-
-        if [ -f "$pc_file" ]; then
-          install_prefix="${{ github.workspace }}/libs/opus"
-          sed -i'' -e "s|^prefix=.*|prefix=${install_prefix}|" "$pc_file"
-          sed -i'' -e "s|^exec_prefix=.*|exec_prefix=${install_prefix}|" "$pc_file"
-          sed -i'' -e "s|^libdir=.*|libdir=${install_prefix}/lib|" "$pc_file"
-          sed -i'' -e "s|^includedir=.*|includedir=${install_prefix}/include|" "$pc_file"
-          sed -i'' -e "s|^Cflags=.*|Cflags=-I${install_prefix}/include/opus|" "$pc_file"
-          echo "Patched Opus pkg-config file for PJSIP:"
-          cat "$pc_file"
-        else
-          echo "Opus .pc file not found in $opus_build_dir"
-          exit 1
-        fi
-      shell: bash
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v7
-      with:
-        name: opus-${{ matrix.arch }}
-        path: ${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
-        overwrite: true
-
-  pjsip-ios:
-    strategy:
-      matrix:
-        arch: [x86_64, arm64, arm64s]
-        include:
-        - arch: arm64
-          resolved_arch: arm64
-          sdk: iphoneos
-          platform: iPhoneOS
-        - arch: arm64s
-          resolved_arch: arm64
-          sdk: iphonesimulator
-          platform: iPhoneSimulator
-        - arch: x86_64
-          resolved_arch: x86_64
-          sdk: iphonesimulator
-          platform: iPhoneSimulator
-      fail-fast: false
-    runs-on: macos-15
-    needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
-    name: pjsip - ios
-    permissions:
-      contents: write
-    steps:
-      
-      - uses: actions/checkout@v7
-      
-      - name: Cache pjsip Built SDK
-        uses: actions/cache@v6
-        id: cache-libs
-        with:
-          path: ${{ github.workspace }}/pjsip-${{matrix.arch}}
-          key: pjsip-${{ env.PJSIP_VERSION }}${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
-
-      - name: Clone PJSIP
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ${{ github.workspace }}/lib
-          cd ${{ github.workspace }}/lib
-          git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git pjsip
-      
-      - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        with:
-          name: openssl-${{ matrix.arch }}
-          path: ${{ github.workspace }}/libs/ssl/
-      
-      - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        with:
-          name: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          path: ${{ github.workspace }}/libs/h264/
-      
-      - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        with:
-          name: opus-${{ matrix.arch }}
-          path: ${{ github.workspace }}/libs/opus/
-      
-      - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        with:
-          name: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          path: ${{ github.workspace }}/libs/bcg729/
-
-      - name: Validate Deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: libs
-        shell: pwsh
-        run: ls -R .
-          
-      - name: Install dependencies
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          brew install automake autoconf libtool pkg-config swig llvm
-
-      - name: Setup Xcode 26.3
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26.3'
- 
-      - name: Build pjsip
-        id: build-pj-ios
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          cp -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
-          mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
-          cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
-          cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
-          export SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
-          export IPHONESDK="${{ matrix.platform}}${SDKVERSION}.sdk" 
-          export DEVPATH="$(xcode-select -p)/Platforms/${{ matrix.platform }}.platform/Developer"
-          export SDKROOT="${DEVPATH}/SDKs/${{ matrix.platform }}.sdk"
-          export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
-
-          if [ "${{ matrix.arch }}" == "arm64" ]; then
-            export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS}"
-            export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS}"
-            export MIN_IOS=-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}
-          else
-            export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS} -O2 -m64"
-            export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS} -O2 -m64"
-            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
-          fi
-           
-          ARCH="-arch ${{ matrix.resolved_arch }}" ./configure-iphone \
-              --with-bcg729=${{ github.workspace }}/libs/bcg729 \
-              --with-ssl=${{ github.workspace }}/libs/ssl \
-              --with-opus=${{ github.workspace }}/libs/opus \
-              --with-openh264=${{ github.workspace }}/libs/h264
-          echo "FLAGS AFTER CONFIGURE:"
-          echo ""
-          echo "CFLAGS=${CFLAGS}"
-          echo "LDFLAGS=${LDFLAGS}"
-          # Deduplicar CFLAGS
-          export CFLAGS=$(echo "$CFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
-          # Deduplicar LDFLAGS
-          export LDFLAGS=$(echo "$LDFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
-          echo "FLAGS AFTER DEDUPLICATE:"
-          echo ""
-          echo "CFLAGS=${CFLAGS}"
-          echo "LDFLAGS=${LDFLAGS}"
-          
-          make dep
-          make
-
-          cd ./pjsip-apps/src/swig/csharp/pjsua2maui
-          cp -v ${{ github.workspace }}/res/pj/pjsua2maui/Makefile .
-
-          echo "Starting make iOS"
-          make
-          echo "Starting copy"
-          
-          mkdir -p ${{ github.workspace }}/merge
-          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
-          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
-          cp -v -f ${{ github.workspace }}/libs/ssl/lib/*.a ${{ github.workspace }}/merge
-          cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/merge
-          cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/merge
-          cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/merge
-          cp -v -f ./pjsua2maui/Platforms/iOS/lib/${{ matrix.resolved_arch }}/*.a ${{ github.workspace }}/merge
-          libtool -static -o ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib/libpjsua2.a ${{ github.workspace }}/merge/*.a
-          cp -v -f ./pjsua2maui/Platforms/iOS/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
-          
-        env:
-          BUILD_THREADS: $(sysctl -n hw.ncpu)
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: pjsip-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          path: ${{ github.workspace }}/pjsip-${{matrix.arch}}
-          overwrite: true
-       
-  bcg729-mac:
-    runs-on: macos-26
-    name: bcg729-mac
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [arm64, x86_64]
-        include:
-          - platform: MacOSX
-          - lib_name: bcg729
-          - sdk: macosx
-    steps:  
-      - name: Cache BCG729 Built SDK
-        id: cache-libs
-        uses: actions/cache@v6
-        with:
-          path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          key: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
-
-      - name: Clone BCG729
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          git clone --branch $BCG729_VERSION https://github.com/BelledonneCommunications/bcg729.git 
-
-      - name: Setup Xcode 26.3
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26.3'
-  
-      - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          brew install autoconf automake cmake libtool llvm nasm 
-        shell: sh
-
-      - name: Build BCG729 for MacCatalyst
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: bcg729
-        shell: sh
-        run: |
-          echo "-- Building BCG729 for iOS"
-          echo "-- Building arch ${{ matrix.arch }}"
-          xcode_dev_path=$(xcode-select -print-path)
-          os_platform="MacOSX"
-          sdk_path="${xcode_dev_path}/Platforms/${os_platform}.platform/Developer/SDKs/${os_platform}.sdk"
-          mkdir -p ../logs
-          mkdir -p ../../install
-
-          cmake .                                                               \
-            -DCMAKE_POLICY_VERSION_MINIMUM=3.5                                  \
-            -DCMAKE_BUILD_TYPE=Release                                          \
-            -DCMAKE_SYSTEM_NAME=Darwin                                          \
-            -DCMAKE_C_COMPILER=$(which clang)                                   \
-            -DCMAKE_MAKE_PROGRAM:PATH=$(which make)                             \
-            -DCMAKE_SKIP_INSTALL_RPATH=ON                                       \
-            -DCMAKE_C_FLAGS="-target ${{ matrix.arch }}-apple-ios15.0-macabi"   \
-            -DBUILD_SHARED_LIBS=OFF                                             \
-            -DENABLE_SHARED=OFF                                                 \
-            -DENABLE_STATIC=ON                                                  \
-            -DCMAKE_INSTALL_PREFIX=${{ env.BUILT_SDK_PATH }}                    \
-            -DCMAKE_OSX_SYSROOT="$sdk_path"                                     \
-            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}                        \
-            > ../logs/${{ matrix.lib_name }}-config-${{ matrix.arch }}.log 
-
-          make -j$(sysctl -n hw.logicalcpu) \
-            > ../logs/${{ matrix.lib_name }}-build-${{ matrix.arch }}.log 
-
-          make install \
-            > ../logs/${{ matrix.lib_name }}-install-${{ matrix.arch }}.log
-        env: 
-          BUILT_SDK_PATH:  ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-
-      - uses: actions/upload-artifact@v7
-        name: Upload error logs
-        if: failure()
-        with:
-          name: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk-logs
-          path: |
-            logs/*.log        
-
-      - uses: actions/upload-artifact@v7
-        name: Upload BCG ${{ matrix.arch }} artifact 
-        with:
-          name: ${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          path: |
-            ${{ env.BUILT_SDK_PATH }}/**/*
-            logs/*.log
-        env:
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
- 
-  openh264-mac:
-    runs-on: macos-26
-    name: openh264-mac
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [arm64, x86_64]
-        include:
-          - platform: MacOSX
-          - lib_name: h264
-          - sdk: macosx
-    steps:
-      - name: Cache H264 Built SDK
-        id: cache-libs
-        uses: actions/cache@v6
-        with:
-          path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          key: ${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
-      
-      - name: Clone OpenH264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          git clone --branch v2.3.0 https://github.com/cisco/openh264.git
-
-      - name: Setup Xcode 26.3
-        uses: maxim-lobanov/setup-xcode@v1
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        with:
-          xcode-version: '26.3'
-  
-      - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          brew install autoconf automake cmake libtool llvm nasm 
-        shell: sh
-
-      - name: Build OpenH264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        id: build
-        working-directory: openh264
-        run: |
-          mkdir -p ../logs
-          target_triple="${{ matrix.arch }}-apple-ios${{ env.MIN_MACOSX_VERSION }}-macabi"
-          version_min="-target ${target_triple}"        
-          
-          export OS="darwin"
-          sdk_path=$(xcrun --sdk ${{ matrix.sdk }} --show-sdk-path)
-          developer_path=$(xcode-select -p)
-
-          h264_makefile="Makefile"
-          h264_makefile_bak="Makefile.bak" 
-          h264_prefix="${{ env.BUILT_SDK_PATH }}"
-          
-          if [ "${{ matrix.arch }}" == "arm64" ]; then
-            export ARCH="arm64"
-            # SOCI=No disables production of dylib
-            EXTRA_MAKE_ARGS="USE_ASM=Yes SOCI=No"
-          else
-            export ARCH="x86_64"
-            # USE_ASM=No disables files include and search from x86/ folder
-            # SOCI=No disables production of dylib
-            EXTRA_MAKE_ARGS="USE_ASM=No SOCI=No"
-          fi
-          
-          echo "Building OpenH264 for ${{ matrix.arch }} (${{ matrix.platform }}, OS=$OS, SDK=${{ matrix.sdk }}, Target=$target_triple)"
-
-          cp "${h264_makefile}" "${h264_makefile_bak}"
-          sed -i.deleteme "s|^PREFIX=.*|PREFIX=${h264_prefix}|" "${h264_makefile}"
-          rm -f ${h264_makefile}.deleteme
-          
-          export CFLAGS="-arch ${{ matrix.arch }} ${version_min} -isysroot ${sdk_path}"
-          export LDFLAGS="-arch ${{ matrix.arch }} ${version_min} -isysroot ${sdk_path}"
-          export SYSROOT="${sdk_path}"
-
-          # Compilação aplicando as flags mapeadas
-          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No libopenh264.a > ../logs/${{ matrix.lib_name }}-config-${{ matrix.arch }}.log 2>&1 || exit 1
-
-          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No install-static install-headers > ../logs/${{ matrix.lib_name }}-install-${{ matrix.arch }}.log 2>&1 || exit 1
-
-          make ARCH=$ARCH $EXTRA_MAKE_ARGS SDK_MIN=${{ env.MIN_MACOSX_VERSION }} v=No clean > ../logs/${{ matrix.lib_name }}-clean-${{ matrix.arch }}.log 2>&1 || exit 1
-
-          mv "${h264_makefile_bak}" "${h264_makefile}"
-
-        shell: bash
-        env:
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-
-      - uses: actions/upload-artifact@v7
-        name: Upload error logs
-        if: failure()
-        with:
-          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
-          path: |
-            logs/*.log
-        env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-            
-      - uses: actions/upload-artifact@v7
-        with:
-          name: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          path: |
-            ${{ env.BUILT_SDK_PATH }}/**/*
-            logs/*.log
-        env: 
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
- 
   openssl-mac:
     runs-on: macos-26
-    name: openssl-mac
+    name: openssl - mac (${{ matrix.arch }})
     strategy:
       fail-fast: false
       matrix:
@@ -1343,537 +1054,9 @@ jobs:
             logs/*.log
         env:
           BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-      
-  opus-mac:
-    runs-on: macos-26
-    name: opus-mac
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [arm64, x86_64]
-        include:
-          - platform: MacOSX
-          - lib_name: opus   
-          - sdk: macosx 
-    steps:
-      
-      - name: Cache opus Built SDK
-        id: cache-libs
-        uses: actions/cache@v6
-        with:
-          path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          key: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
-
-      - name: Clone Opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          
-          git clone --branch v1.4 https://github.com/xiph/opus.git
-
-      - name: Setup Xcode 26.3
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26.3'
-  
-      - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          brew install nasm autoconf automake libtool 
-        shell: sh
-          
-      - name: Build Opus
-        id: build  # Adicionado o ID 'build' para que o '${{ steps.build.outputs.artifact }}' funcione no upload
-        working-directory: opus
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ../logs
-
-          opus_version="1.4"
-          opus_opt_cflags="-O3 -ffast-math -flto -g"
-          opus_opt_ldflags="-flto"
-          DEVELOPER=$(xcode-select -print-path)
-          SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
-          PLATFORM="MacOSX"
-          
-          mkdir -p "${{ env.BUILT_SDK_PATH }}/include"
-          mkdir -p "${{ env.BUILT_SDK_PATH }}/lib"
-
-          echo "-- Building Opus for ${{ matrix.arch }} on ${PLATFORM} (Mac Catalyst)"
-
-          if [ "${{ matrix.arch }}" == "arm64" ]; then
-            HOST="arm-apple-darwin"
-            TARGET="arm64-apple-ios15.0-macabi"
-            opus_opt_cflags="-O3 -ffast-math -flto -g -Wno-cast-align"
-          else
-            HOST="x86_64-apple-darwin"
-            TARGET="x86_64-apple-ios15.0-macabi"
-            opus_opt_cflags="-O3 -ffast-math -flto -g"
-          fi
-
-          ./autogen.sh
-
-          ISYSROOT="${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${SDKVERSION}.sdk"
-
-          CC="clang"                                                                                                          \
-          ./configure                                                                                                         \
-            --host=$HOST                                                                                                      \
-            --disable-shared                                                                                                  \
-            --with-pic                                                                                                        \
-            --disable-extra-programs                                                                                          \
-            --disable-doc                                                                                                     \
-            --enable-static                                                                                                   \
-            --enable-float-approx                                                                                             \
-            --prefix="${{ env.BUILT_SDK_PATH }}"                                                                                           \
-            LDFLAGS="${opus_opt_ldflags} -target $TARGET -isysroot ${ISYSROOT} -L${{ env.BUILT_SDK_PATH }}/lib"                            \
-            CFLAGS="${opus_opt_cflags} -target $TARGET -arch ${{ matrix.arch }} -isysroot ${ISYSROOT} -I${{ env.BUILT_SDK_PATH }}/include" \
-            > ../logs/opus-config-${{ matrix.arch }}.log 
-
-          make -j$(sysctl -n hw.logicalcpu) \
-            > ../logs/opus-build-${{ matrix.arch }}.log 
-
-          make install \
-            >> ../logs/opus-build-${{ matrix.arch }}.log 
-        env:
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-
-      - uses: actions/upload-artifact@v7
-        name: Upload error logs
-        if: failure()
-        with:
-          name: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}-logs
-          path: |
-            logs/*.log 
-          
-      - uses: actions/upload-artifact@v7
-        name: Upload opus artifact
-        with:
-          name: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          path: |
-            ${{ env.BUILT_SDK_PATH }}
-            logs/*.log
-        env:
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-      
-  pjsip-mac:
-    name: pjsip - mac 
-    runs-on: macos-26
-    needs: [bcg729-mac, openh264-mac, openssl-mac, opus-mac]
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [arm64, x86_64]
-        include:
-        - lib_name: pjsip
-        - platform: MacOSX
-        - sdk: macosx
-    steps:
-      - uses: actions/checkout@v7
-      
-      - name: Cache pjsip Built SDK
-        uses: actions/cache@v6
-        id: cache-libs
-        with:
-          path: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          key: ${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
-
-      - name: Clone PJSIP
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          git clone --branch $PJSIP_VERSION https://github.com/pjsip/pjproject.git
-
-      - name: Setup Xcode 26.3
-        uses: maxim-lobanov/setup-xcode@v1
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        with:
-          xcode-version: '26.3'
-  
-      - name: Install deps
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          brew install nasm autoconf automake libtool swig pkg-config llvm
-        shell: sh
-
-      - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        name: Download bcg729 macos
-        with:
-          name: ${{ env.BCG_SDK_NAME }}
-          path: ${{ github.workspace }}/libs
-        env:
-          BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-     
-      - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        name: Download H264 macos
-        with:
-          name: ${{ env.H264_SDK_NAME }}
-          path: ${{ github.workspace }}/libs
-        env:
-          H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-       
-      - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        name: Download SSL macos
-        with:
-          name: ${{ env.SSL_SDK_NAME }}
-          path: ${{ github.workspace }}/libs
-        env:
-          SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-      
-      - uses: actions/download-artifact@v8
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        name: Download opus macos (${{ matrix.arch }})
-        with:
-          name: ${{ env.OPUS_SDK_NAME }}
-          path: ${{ github.workspace }}/libs
-        env:
-          OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          
-      - name: Copy config_site.h to PJSIP
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          TARGET_CONFIG_DIR="pjproject/pjlib/include/pj"
-          mkdir -p "$TARGET_CONFIG_DIR"
-          cp "${{ github.workspace }}/res/pj/pjsua2maui/config_site.h" "$TARGET_CONFIG_DIR/config_site.h"
-    
-      - name: Inspect Dependencies Structure
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        run: |
-          echo "=== Library folders structure check ==="
-          ls  ${{ github.workspace }}/libs/${{ env.BCG_SDK_NAME }} && echo "bcg729 found"
-          ls  ${{ github.workspace }}/libs/${{ env.H264_SDK_NAME }} && echo "h264 found"
-          ls  ${{ github.workspace }}/libs/${{ env.OPUS_SDK_NAME }} && echo "opus  found"
-          ls  ${{ github.workspace }}/libs/${{ env.SSL_SDK_NAME }} && echo "ssl  found"
-          ls -R ${{ github.workspace }}/libs
-        env:
-          BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-      - name: Build 
-        id: build-pjsip-mac
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: pjproject
-        run: |
-          mkdir -p ../logs
-           
-          CATALYST_SYSTEM_INCLUDES="$SDKPATH/System/iOSSupport/usr/include"
-          export ARCH=${{ matrix.arch }}
-          export TARGET="${{ matrix.arch }}-apple-ios15.0-macabi"
-          export CC="clang -target $TARGET"
-          export CXX="clang++ -target $TARGET"
-          export SDKVERSION=${{ env.SDKVERSION }}
-          export MACOSXSDK="${{ matrix.platform}}${SDKVERSION}.sdk" 
-          export SDKPATH=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-path)
-          CATALYST_SYSTEM_FRAMEWORKS="$SDKPATH/System/iOSSupport/System/Library/Frameworks"
-          CATALYST_SYSTEM_INCLUDES="$SDKPATH/System/iOSSupport/usr/include"
-          export CFLAGS="${CFLAGS} -I${{ env.BCG_ROOT }}/include -I${{ env.H264_ROOT }}/include -I${{ env.SSL_ROOT }}/include -I${{ env.OPUS_ROOT }}/include "
-          export LDFLAGS="${LDFLAGS} -L${{ env.BCG_ROOT }}/lib -lbcg729 -L${{ env.H264_ROOT }}/lib -lopenh264 -L${{ env.SSL_ROOT }}/lib -lssl -lcrypto -L${{ env.OPUS_ROOT }}/lib -lopus"
-          if [[ '${{ matrix.arch }}' == 'arm64' ]]; then
-            export CFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS" 
-            export CXXFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
-            export LDFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
-          else
-            export CFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
-            export CXXFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
-            export LDFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
-          fi
-
-          ./configure                            \
-            --host=${{ matrix.arch }}-apple-darwin            \
-            --disable-shared                     \
-            --with-bcg729=${{ env.BCG_ROOT }}    \
-            --with-ssl=${{ env.SSL_ROOT }}       \
-            --with-opus=${{ env.OPUS_ROOT }}     \
-            --with-openh264=${{ env.H264_ROOT }} \
-            CFLAGS="$CFLAGS"                     \
-            LDFLAGS="$LDFLAGS"                   \
-            CXXFLAGS="$CXXFLAGS" > ../logs/pjsip-config-${{ matrix.arch }}.log || exit 1
-
-          echo "FLAGS AFTER CONFIGURE:"
-          echo "CFLAGS=${CFLAGS}"
-          echo "LDFLAGS=${LDFLAGS}"
-          
-          export CFLAGS=$(echo "$CFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
-          export LDFLAGS=$(echo "$LDFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
-
-          echo "starting make dep"
-
-          make dep > ../logs/pjsip-dep-${{ matrix.arch }}.log || exit 1 
-
-          echo 'Done make dep' >> ../logs/pjsip-dep-${{ matrix.arch }}.log
-
-          echo "starting make"
-
-          make lib > ../logs/pjsip-build-${{ matrix.arch }}.log || exit 1
-
-          echo 'Done make lib' >> ../logs/pjsip-build-${{ matrix.arch }}.log
-
-          cd ./pjsip-apps/src/swig/csharp/pjsua2maui/
-          
-          cp -v -f ${{ github.workspace}}/res/pj/pjsua2maui/Makefile . 
-
-          echo "starting make mac"
-
-          make -j$(sysctl -n hw.logicalcpu) > ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log || exit 1
-          
-          echo 'Done make mac' >> ${{ github.workspace }}/logs/pjsip-swig-${{ matrix.arch }}.log
-           
-          mkdir -p "${{ env.BUILT_SDK_PATH }}/lib"
-          mkdir -p "${{ env.BUILT_SDK_PATH }}/cs" 
-
-          cp -v -f ${{ env.BCG_ROOT }}/lib/*.a . 
-          cp -v -f ${{ env.H264_ROOT }}/lib/*.a .
-          cp -v -f ${{ env.OPUS_ROOT }}/lib/*.a .
-          cp -v -f ${{ env.SSL_ROOT }}/lib/*.a .
-          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/lib/${{ matrix.arch }}/libpjsua2.a .
-          
-          libtool -static -o "${{ env.BUILT_SDK_PATH }}/lib/libpjsua2.a" ./*.a
-          
-          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cs "${{ env.BUILT_SDK_PATH }}/cs/"
-
-        shell: bash
-        env:
-          BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BCG_ROOT: ${{ github.workspace }}/libs/bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          H264_ROOT: ${{ github.workspace }}/libs/h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          OPUS_ROOT: ${{ github.workspace }}/libs/opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          SSL_ROOT: ${{ github.workspace }}/libs/ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          BUILT_SDK_PATH:  ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-
-      - uses: actions/upload-artifact@v7
-        name: Upload error logs
-        if: steps.cache-libs.outputs.cache-hit != 'true' && failure()  
-        with:
-          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
-          path: | 
-            logs/*.log
-            pjproject/*.log
-        env:
-          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-
-      - uses: actions/upload-artifact@v7
-        name: Upload pjsip artifact
-        with:
-          name: ${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-          path: |
-            ${{ env.BUILT_SDK_PATH }}
-        env:
-          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
-   
-  bcg729-win:
-    name: bcg729-win (${{ matrix.arch }})
-    runs-on: windows-2022
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x64, arm64]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-  
-      - name: Cache BCG729 Built SDK
-        id: cache-libs
-        uses: actions/cache@v6
-        with:
-          path: ${{ github.workspace }}/deps/bcg729
-          key: bcg729-${{ env.BCG729_VERSION }}-win-${{ matrix.arch }}
-    
-      - name: Setup MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: ${{ matrix.arch }}
-
-      - name: Setup CMake
-        uses: lukka/get-cmake@latest
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-
-      - name: Verify Compiler
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: cmd
-        run: |
-            echo Visual Studio environment loaded for ${{ matrix.arch }}
-            where cl
-            where msbuild
-
-      - name: Clone BCG729
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-            git clone --branch "${env:BCG729_VERSION}" --depth 1 https://github.com/BelledonneCommunications/bcg729.git bcg729
-            
-      - name: Remove Legacy MSVC Headers (ARM64 Only)
-        if: matrix.arch == 'ARM64' && steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        working-directory: bcg729
-        run: |
-          if (Test-Path "include/MSVC") {
-            Remove-Item -Path "include/MSVC" -Recurse -Force
-            Write-Host "Removed old MSVC implementation in order to use the new available from Win SDK 10.0.26100.0" -ForegroundColor Green
-          }
-
-      - name: Build bcg729
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: cmd
-        working-directory: bcg729
-        run: |
-          cmake -S . ^
-                -B build ^
-                -G "Visual Studio 17 2022" ^
-                -A ${{ matrix.arch }} ^
-                -DBUILD_SHARED_LIBS=OFF ^
-                -DCMAKE_SYSTEM_VERSION="10.0.26100.0" ^
-                -DCMAKE_POLICY_VERSION_MINIMUM='3.5' ^
-                -DCMAKE_INSTALL_PREFIX=%CD%\..\deps\bcg729\
-
-          cmake --build build --config Release --target INSTALL          
-
-      - name: Normalize artifacts
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-            $target = "${env:INSTALL_DIR}\bcg729\${{ matrix.arch }}"
-
-            New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
-            New-Item -ItemType Directory -Force -Path "$target\include\bcg729" | Out-Null
-
-            Get-ChildItem bcg729/build -Recurse -Filter *.lib |
-            Copy-Item -Destination "$target\lib" -Force
-
-            Get-ChildItem bcg729/include -Recurse -Filter *.h |
-            Copy-Item -Destination "$target\include\bcg729" -Force
-
-      - name: List generated files
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-            Get-ChildItem "${env:INSTALL_DIR}\bcg729" -Recurse
- 
-      - name: Upload BCG729 artifacts 
-        uses: actions/upload-artifact@v4
-        with:
-          name: bcg729-win-${{ matrix.arch }}
-          path: deps/bcg729/**/*
-  
-  openh264-win:
-    name: openh264-win (${{ matrix.arch }})
-    runs-on: windows-2022
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x64, ARM64]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7 
-
-      - name: Cache H264 Built SDK
-        id: cache-libs
-        uses: actions/cache@v6
-        with:
-          path: install/openh264/
-          key: h264-${{ env.OPENH264_VERSION }}-win-${{ matrix.arch }}
-    
-      - name: Setup MSVC
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          # Se for ARM64, usa o cross-compiler (roda em x64, gera ARM64)
-          # Se for x64, usa o compilador nativo x64
-          arch: ${{ matrix.arch == 'ARM64' && 'x64_arm64' || 'x64' }}
-
-      - name: Setup NASM
-        if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'x64'
-        uses: ilammy/setup-nasm@v1
-
-      - name: Create directories
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path "${env:NUGET_ARTIFACTS}" | Out-Null
-          New-Item -ItemType Directory -Force -Path "${env:LOGS_DIR}" | Out-Null
-          New-Item -ItemType Directory -Force -Path "${env:INSTALL_DIR}" | Out-Null
-
-      - name: Clone OpenH264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          git clone `
-            --branch "${env:OPENH264_VERSION}" `
-            --depth 1 `
-            https://github.com/cisco/openh264.git `
-            openh264
-
-      - name: Build OpenH264
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: cmd
-        working-directory: openh264
-        run: |
-          :: Define as variáveis corretas com base na arquitetura da matrix
-          if "${{ matrix.arch }}"=="ARM64" (
-              set "ARCH_FLAG=arm64"
-              set "ASM_FLAG=USE_ASM=No"
-          ) else (
-              set "ARCH_FLAG=x86_64"
-              set "ASM_FLAG="
-          )
-
-          :: Executa o build usando NMake/Make do ambiente MSVC
-          make OS=msvc ARCH=%ARCH_FLAG% BUILDTYPE=Release ENABLE64BIT=Yes DEBUGSYMBOLS=False %ASM_FLAG%
-
-          if %ERRORLEVEL% neq 0 (
-              exit /b %ERRORLEVEL%
-          )
-
-      - name: Prepare artifact structure
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          $target = "install/openh264/${{ matrix.arch }}"
-
-          New-Item -ItemType Directory -Force -Path "$target\bin" | Out-Null
-          New-Item -ItemType Directory -Force -Path "$target\lib" | Out-Null
-          New-Item -ItemType Directory -Force -Path "$target\include\wels" | Out-Null
-
-      - name: Collect static libraries
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          $target = "install/openh264/${{ matrix.arch }}/lib"
-
-          Get-ChildItem openh264 -Recurse -Filter *.lib |
-            Copy-Item -Destination $target -Force
-
-      - name: Collect headers
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          $target = "install/openh264/${{ matrix.arch }}/include/wels"
-
-          Get-ChildItem openh264/codec/api/wels -Filter *.h |
-            Copy-Item -Destination $target -Force
-
-      - name: List generated files
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          Get-ChildItem "install/openh264" -Recurse
-
-      - name: Upload OpenH264 artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: openh264-win-${{ matrix.arch }}
-          path: |
-            install/openh264/${{ matrix.arch }}/**/*
 
   openssl-win:
-    name: openssl-win (${{ matrix.arch }})
+    name: openssl - win (${{ matrix.arch }})
     runs-on: windows-2022
     strategy:
       fail-fast: false
@@ -1980,14 +1163,298 @@ jobs:
 
       - name: Upload OpenSSL artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: openssl-win-${{ matrix.arch }}
           path: |
             install/openssl/${{ matrix.arch }}/**/*
 
+  opus-android:
+    name: opus - android
+    runs-on: ubuntu-latest   
+    steps:  
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        
+      - name: Cache opus Built SDK
+        id: cache-libs
+        uses: actions/cache@v6
+        with:
+          path:  ${{ github.workspace }}/opus-output
+          key: opus-${{ env.OPUS_VERSION }}-android
+
+      - name: Clone Opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ${{ github.workspace }}/lib
+          cd ${{ github.workspace }}/lib          
+          git clone --branch v1.4 https://github.com/xiph/opus.git opus
+
+      - name: Create Output Directory
+        run: mkdir -p ${{ github.workspace }}/opus-output
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+
+      - name: Build Docker Image
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          docker build -t opus-builder ${{ github.workspace }}/res/docker/opus
+          
+      - name: Run Docker Container
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: docker run --name opus-build opus-builder
+        
+      - name: Extract Artifacts from Container
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: | 
+          docker cp opus-build:/root/outputs/ ${{ github.workspace }}/opus-output
+
+      - name: Upload opus Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: opus-android
+          path: ${{ github.workspace }}/opus-output 
+          overwrite: true
+
+  opus-ios:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, arm64, arm64s]
+        include:
+          - arch: arm64
+            resolved_arch: arm64
+            platform: iPhoneOS
+          - arch: arm64s
+            resolved_arch: arm64
+            platform: iPhoneSimulator
+          - arch: x86_64
+            resolved_arch: x86_64
+            platform: iPhoneSimulator
+    runs-on: macos-26
+    name: opus - ios (${{ matrix.arch }}) 
+    permissions:
+      contents: write
+    steps:
+     
+    - name: Cache opus Built SDK
+      id: cache-libs
+      uses: actions/cache@v6
+      with:
+        path: ${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
+        key: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+
+    - name: Clone Opus
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p ${{ github.workspace }}/lib
+        cd ${{ github.workspace }}/lib
+        git clone --branch v1.4 https://github.com/xiph/opus.git opus
+
+    - name: Setup Xcode 26.3
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '26.3'
+ 
+    - name: Install deps
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      run: |
+        brew install nasm autoconf automake libtool 
+      shell: sh
+         
+    - name: Build opus
+      id: build
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      run: |
+        opus_version="1.4"
+        opus_opt_cflags="-O3 -ffast-math -flto -g"
+        opus_opt_ldflags="-flto"
+        DEVELOPER=$(xcode-select -print-path)
+        SDKVERSION=$(xcrun -sdk ${{ matrix.arch == 'arm64' && 'iphoneos' || 'iphonesimulator' }} --show-sdk-version)
+        PLATFORM=${{ matrix.platform }}
+        TARGETDIR="${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk"
+
+        mkdir -p "${TARGETDIR}/include"
+        mkdir -p "${TARGETDIR}/lib"
+
+        echo "artifact=${TARGETDIR}" >> "$GITHUB_OUTPUT"
+        echo "-- Building Opus for ${{ matrix.arch }} on ${PLATFORM}"
+
+        cd "${{ env.OPUS_PATH }}"
+
+        ./autogen.sh
+ 
+        if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
+          HOST="x86_64-apple-darwin" 
+          opus_opt_cflags="-O3 -ffast-math -flto -g -Wno-cast-align"
+        else
+          HOST="arm-apple-darwin" 
+          opus_opt_cflags="-O3 -ffast-math -flto -g"
+        fi
+        version_min=$([[ "${{ matrix.arch }}" == "arm64" ]] && echo "-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}" || echo "-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}")
+        ARCH="${{ matrix.resolved_arch }}"
+        
+        ./configure \
+          --enable-float-approx \
+          --disable-shared \
+          --enable-static \
+          --with-pic \
+          --disable-extra-programs \
+          --disable-doc \
+          --host=${HOST} \
+          --prefix="${TARGETDIR}" \
+          LDFLAGS="${opus_opt_ldflags} -fPIE ${version_min} -L${TARGETDIR}/lib" \
+          CFLAGS="${opus_opt_cflags} -arch ${ARCH} -fPIE ${version_min} -I${TARGETDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk"
+
+        make -j${{ env.BUILD_THREADS }}
+        make install 
+      shell: sh
+      env:
+        CONFIG_DISABLE_BITCODE: true
+        DEVELOPER: $(xcode-select -print-path)
+        IOS_SDKVERSION: $(xcrun -sdk iphoneos --show-sdk-version)
+        BUILD_THREADS: $(sysctl -n hw.ncpu)
+
+    - name: Patch Opus .pc for arm64s
+      if: matrix.arch == 'arm64s' && steps.cache-libs.outputs.cache-hit != 'true'
+      run: |
+        opus_build_dir=$(find "${{ github.workspace }}/opus/build/" -type d -name "iPhoneSimulator*-arm64.sdk" | head -n 1)
+        pc_file=$(find "$opus_build_dir/lib/pkgconfig" -name 'opus.pc' | head -n 1)
+
+        if [ -f "$pc_file" ]; then
+          install_prefix="${{ github.workspace }}/libs/opus"
+          sed -i'' -e "s|^prefix=.*|prefix=${install_prefix}|" "$pc_file"
+          sed -i'' -e "s|^exec_prefix=.*|exec_prefix=${install_prefix}|" "$pc_file"
+          sed -i'' -e "s|^libdir=.*|libdir=${install_prefix}/lib|" "$pc_file"
+          sed -i'' -e "s|^includedir=.*|includedir=${install_prefix}/include|" "$pc_file"
+          sed -i'' -e "s|^Cflags=.*|Cflags=-I${install_prefix}/include/opus|" "$pc_file"
+          echo "Patched Opus pkg-config file for PJSIP:"
+          cat "$pc_file"
+        else
+          echo "Opus .pc file not found in $opus_build_dir"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: opus-${{ matrix.arch }}
+        path: ${{ github.workspace }}/opus/build/${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.resolved_arch }}.sdk
+        overwrite: true
+
+  opus-mac:
+    runs-on: macos-26
+    name: opus - mac (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+          - platform: MacOSX
+          - lib_name: opus   
+          - sdk: macosx 
+    steps:
+      
+      - name: Cache opus Built SDK
+        id: cache-libs
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}-${{ env.SDKVERSION }}-${{ matrix.arch }}
+
+      - name: Clone Opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          
+          git clone --branch v1.4 https://github.com/xiph/opus.git
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install nasm autoconf automake libtool 
+        shell: sh
+          
+      - name: Build Opus
+        id: build  # Adicionado o ID 'build' para que o '${{ steps.build.outputs.artifact }}' funcione no upload
+        working-directory: opus
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ../logs
+
+          opus_version="1.4"
+          opus_opt_cflags="-O3 -ffast-math -flto -g"
+          opus_opt_ldflags="-flto"
+          DEVELOPER=$(xcode-select -print-path)
+          SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
+          PLATFORM="MacOSX"
+          
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/include"
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/lib"
+
+          echo "-- Building Opus for ${{ matrix.arch }} on ${PLATFORM} (Mac Catalyst)"
+
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            HOST="arm-apple-darwin"
+            TARGET="arm64-apple-ios15.0-macabi"
+            opus_opt_cflags="-O3 -ffast-math -flto -g -Wno-cast-align"
+          else
+            HOST="x86_64-apple-darwin"
+            TARGET="x86_64-apple-ios15.0-macabi"
+            opus_opt_cflags="-O3 -ffast-math -flto -g"
+          fi
+
+          ./autogen.sh
+
+          ISYSROOT="${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${SDKVERSION}.sdk"
+
+          CC="clang"                                                                                                          \
+          ./configure                                                                                                         \
+            --host=$HOST                                                                                                      \
+            --disable-shared                                                                                                  \
+            --with-pic                                                                                                        \
+            --disable-extra-programs                                                                                          \
+            --disable-doc                                                                                                     \
+            --enable-static                                                                                                   \
+            --enable-float-approx                                                                                             \
+            --prefix="${{ env.BUILT_SDK_PATH }}"                                                                                           \
+            LDFLAGS="${opus_opt_ldflags} -target $TARGET -isysroot ${ISYSROOT} -L${{ env.BUILT_SDK_PATH }}/lib"                            \
+            CFLAGS="${opus_opt_cflags} -target $TARGET -arch ${{ matrix.arch }} -isysroot ${ISYSROOT} -I${{ env.BUILT_SDK_PATH }}/include" \
+            > ../logs/opus-config-${{ matrix.arch }}.log 
+
+          make -j$(sysctl -n hw.logicalcpu) \
+            > ../logs/opus-build-${{ matrix.arch }}.log 
+
+          make install \
+            >> ../logs/opus-build-${{ matrix.arch }}.log 
+        env:
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: failure()
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}-logs
+          path: |
+            logs/*.log 
+          
+      - uses: actions/upload-artifact@v7
+        name: Upload opus artifact
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: |
+            ${{ env.BUILT_SDK_PATH }}
+            logs/*.log
+        env:
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name }}-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
   opus-win:
-    name: opus-win (${{ matrix.arch }})
+    name: opus - win (${{ matrix.arch }})
     runs-on: windows-2022
     strategy:
       fail-fast: false
@@ -2095,12 +1562,532 @@ jobs:
 
       - name: Upload Opus artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: opus-win-${{ matrix.arch }}
           path: |
             install/opus/${{ matrix.arch }}/**/*
+                 
+  pjsip-android:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
+      fail-fast: false
+    needs: [bcg729-android, openh264-android, openssl-android, opus-android]
+    name: pjsip - android
+    permissions:
+      contents: write
+
+    steps: 
+    - uses: actions/checkout@v7 
+      with:
+        submodules: true
+
+    - name: Cache opus Built SDK
+      id: cache-libs
+      uses: actions/cache@v6
+      with:
+        path: ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}
+        key: pjsip-${{ env.PJSIP_VERSION }}-android-${{ matrix.arch }}
+
+    - uses: actions/setup-java@v6
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        check-latest: true
+      
+    - name: Setup Android SDK e NDK
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      uses: android-actions/setup-android@v4
+      with:
+        cmdline-tools-version: 11076708
+        # Removemos o pacote 'tools' e adicionamos o NDK diretamente aqui
+        packages: 'platforms;android-28 platform-tools build-tools;34.0.0 ndk;28.0.12433566'
+    
+    - name: Setup ENV
+      run: |
+        echo "ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/28.0.12433566" >> $GITHUB_ENV
+    - name: Debug NDK
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        ls -R ${{ env.ANDROID_NDK_ROOT }}
+      env: 
+        ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
+
+    - name: Prepare Environment
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      run: |
+        cd ${{ github.workspace }}
+        sudo mkdir -p /home/runner/libpjsua2 
+        
+        DEPS="unzip git curl bzip2 binutils make autoconf openssl \
+          libssl-dev libopus0 libpcre3 libpcre3-dev build-essential nasm python3 libstdc++6 \
+          libpthread-stubs0-dev \
+          libc6-dev"
+        sudo sh -c "dpkg --add-architecture i386; apt-get update  && apt-get install -y ${DEPS}"
+        
+        curl -L "https://github.com/swig/swig/archive/refs/tags/v${SWIG_VERSION}.tar.gz" \
+          -o /tmp/swig.tar.gz
+        tar -xzf /tmp/swig.tar.gz -C /tmp
+        cd "/tmp/swig-${SWIG_VERSION}"
+        ./autogen.sh
+        ./configure --prefix=/usr/local
+        make -j"$(nproc)"
+        sudo make install
+        hash -r
+        swig -version
+        
+    - uses: actions/download-artifact@v8
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      with:
+        name: openssl-android
+        path: ${{ github.workspace }}/output/openssl
+      
+    - uses: actions/download-artifact@v8
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      with:
+        name: openh264-android
+        path: ${{ github.workspace }}/output/openh264/
+        
+    - uses: actions/download-artifact@v8
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      with:
+        name: opus-android
+        path: ${{ github.workspace }}/output/opus/
+        
+    - uses: actions/download-artifact@v8
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      with:
+        name: bcg729-android
+        path: ${{ github.workspace }}/output/bcg729/
+       
+    - name: Create config_site.h
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      run: |
+        echo "Creating config site file for Android ..."
+        cp -v ${{ github.workspace }}/res/pj/android/config_site.h ${{ env.CONFIG_SITE_PATH }}
+        cp -v ${{ github.workspace }}/res/pj/pjsua2maui/Makefile ${{ env.PJSIP_PATH }}/pjsip-apps/src/swig/csharp/pjsua2maui
+
+    - name: Build
+      if: steps.cache-libs.outputs.cache-hit != 'true'
+      id: build-pj
+      run: |
+        cd ${{ env.PJSIP_PATH }}
+        mkdir -p ${{ env.PJSIP_TMP_PATH }} 
+        cp -r * ${{ env.PJSIP_TMP_PATH }}
+        cd  ${{ env.PJSIP_TMP_PATH }}
+        echo "Configuring for ${{ matrix.arch }}"
+        APP_PLATFORM=android-${{ env.TARGET_ANDROID_API }} TARGET_ABI=${{ matrix.arch }} ./configure-android --use-ndk-cflags --with-ssl=${{ env.OPENSSL_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-openh264=${{ env.OPENH264_BUILD_OUT_PATH }}/libs/${{ matrix.arch }} --with-opus=${{ env.OPUS_BUILD_OUT_PATH }}/${{ matrix.arch }} --with-bcg729=${{ env.BCG729_BUILD_OUT_PATH }}/libs/${{ matrix.arch}}
+        echo "Make dep"
+        make dep
+        echo ""
+        echo "make"
+        make
+        cd ${{ env.PJSUA_BASE_DIR }}/csharp/pjsua2maui
+        make
+
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
+        mkdir -p ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/cpp
+
+        shopt -s globstar && cp ${{ github.workspace }}/output/**/libs/${{ matrix.arch }}/**/*.so ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib
+        cp -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*.so ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib/ 
+        cp -v ${{ env.PJSUA_BASE_DIR }}/csharp/pjsua2maui/pjsua2maui/Platforms/Android/org/pjsip/*.java ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
+        cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }}/*.cs ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
+        cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }}/*.cpp ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/cpp
+        cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }}/*.h ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/cpp
+        cp -v ${{ env.CONFIG_SITE_PATH }} ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/cpp
+         
+    - name: Upload pjsip artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: pjsip-${{ env.PJSIP_VERSION }}-android-${{ matrix.arch }}
+        path: ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}
+ 
+    env:
+      OPENSSL_LIB_PATH: ${{ github.workspace }}/output/openssl/libs/
+      OPENh264_LIB_PATH: ${{ github.workspace }}/output/openh264/libs/
+      OPUS_LIB_PATH: ${{ github.workspace }}/output/opus/libs/
+      BCG729_LIB_PATH: ${{ github.workspace }}/output/bcg729/libs/
+      PJSIP_TMP_PATH: /tmp/pjsip
+      CONFIG_SITE_PATH: ${{ github.workspace }}/lib/pjproject/pjlib/include/pj/config_site.h
+      PJSUA_GENERATED_CSHARP_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/Platforms/Android/pjsua2 
+      PJSUA_GENERATED_SO_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/Platforms/Android/lib
+      PJSUA_BASE_DIR: /tmp/pjsip/pjsip-apps/src/swig
+      TARGET_ANDROID_API: 28
+      OPENSSL_BUILD_OUT_PATH: ${{ github.workspace }}/output/openssl
+      OPENH264_BUILD_OUT_PATH: ${{ github.workspace}}/output/openh264
+      OPUS_BUILD_OUT_PATH: ${{ github.workspace }}/output/opus/outputs
+      BCG729_BUILD_OUT_PATH: ${{ github.workspace }}/output/bcg729
+
+  pjsip-ios:
+    strategy:
+      matrix:
+        arch: [x86_64, arm64, arm64s]
+        include:
+        - arch: arm64
+          resolved_arch: arm64
+          sdk: iphoneos
+          platform: iPhoneOS
+        - arch: arm64s
+          resolved_arch: arm64
+          sdk: iphonesimulator
+          platform: iPhoneSimulator
+        - arch: x86_64
+          resolved_arch: x86_64
+          sdk: iphonesimulator
+          platform: iPhoneSimulator
+      fail-fast: false
+    runs-on: macos-26
+    needs: [bcg729-ios, openh264-ios, openssl-ios, opus-ios]
+    name: pjsip - ios
+    permissions:
+      contents: write
+    steps:
+      
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Cache pjsip Built SDK
+        uses: actions/cache@v6
+        id: cache-libs
+        with:
+          path: ${{ github.workspace }}/pjsip-${{matrix.arch}}
+          key: pjsip-${{ env.PJSIP_VERSION }}${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
+
+      - uses: actions/download-artifact@v8
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        with:
+          name: openssl-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/ssl/
+      
+      - uses: actions/download-artifact@v8
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        with:
+          name: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: ${{ github.workspace }}/libs/h264/
+      
+      - uses: actions/download-artifact@v8
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        with:
+          name: opus-${{ matrix.arch }}
+          path: ${{ github.workspace }}/libs/opus/
+      
+      - uses: actions/download-artifact@v8
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        with:
+          name: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: ${{ github.workspace }}/libs/bcg729/
+
+      - name: Validate Deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: libs
+        shell: pwsh
+        run: ls -R .
+          
+      - name: Install dependencies
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install automake autoconf libtool pkg-config swig llvm
+
+      - name: Setup Xcode 26.3
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+ 
+      - name: Build pjsip
+        id: build-pj-ios
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          cp -f ${{ github.workspace }}/res/pj/ios/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+          mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
+          cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
+          cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjproject
+          export SDKVERSION=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-version)
+          export IPHONESDK="${{ matrix.platform}}${SDKVERSION}.sdk" 
+          export DEVPATH="$(xcode-select -p)/Platforms/${{ matrix.platform }}.platform/Developer"
+          export SDKROOT="${DEVPATH}/SDKs/${{ matrix.platform }}.sdk"
+          export SDKPATH="${DEVPATH}/SDKs/${IPHONESDK}" 
+
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS}"
+            export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS}"
+            export MIN_IOS=-miphoneos-version-min=${{ env.MIN_IOS_VERSION }}
+          else
+            export CFLAGS=" -arch ${{ matrix.resolved_arch }} ${CFLAGS} -O2 -m64"
+            export LDFLAGS="-arch ${{ matrix.resolved_arch }} ${LDFLAGS} -O2 -m64"
+            export MIN_IOS="-mios-simulator-version-min=${{ env.MIN_IOS_VERSION }}"
+          fi
+           
+          ARCH="-arch ${{ matrix.resolved_arch }}" ./configure-iphone \
+              --with-bcg729=${{ github.workspace }}/libs/bcg729 \
+              --with-ssl=${{ github.workspace }}/libs/ssl \
+              --with-opus=${{ github.workspace }}/libs/opus \
+              --with-openh264=${{ github.workspace }}/libs/h264
+          echo "FLAGS AFTER CONFIGURE:"
+          echo ""
+          echo "CFLAGS=${CFLAGS}"
+          echo "LDFLAGS=${LDFLAGS}"
+          # Deduplicar CFLAGS
+          export CFLAGS=$(echo "$CFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
+          # Deduplicar LDFLAGS
+          export LDFLAGS=$(echo "$LDFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
+          echo "FLAGS AFTER DEDUPLICATE:"
+          echo ""
+          echo "CFLAGS=${CFLAGS}"
+          echo "LDFLAGS=${LDFLAGS}"
+          
+          make dep
+          make
+
+          cd ./pjsip-apps/src/swig/csharp/pjsua2maui
+          cp -v ${{ github.workspace }}/res/pj/pjsua2maui/Makefile .
+
+          echo "Starting make iOS"
+          make
+          echo "Starting copy"
+          
+          mkdir -p ${{ github.workspace }}/merge
+          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib
+          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+          mkdir -p ${{ github.workspace }}/pjsip-${{matrix.arch}}/cpp
+          cp -v -f ${{ github.workspace }}/libs/ssl/lib/*.a ${{ github.workspace }}/merge
+          cp -v -f ${{ github.workspace }}/libs/opus/lib/*.a ${{ github.workspace }}/merge
+          cp -v -f ${{ github.workspace }}/libs/bcg729/lib/*.a ${{ github.workspace }}/merge
+          cp -v -f ${{ github.workspace }}/libs/h264/lib/*.a ${{ github.workspace }}/merge
+          cp -v -f ./pjsua2maui/Platforms/iOS/lib/${{ matrix.resolved_arch }}/*.a ${{ github.workspace }}/merge
+          libtool -static -o ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib/libpjsua2.a ${{ github.workspace }}/merge/*.a
+          cp -v -f ./pjsua2maui/Platforms/iOS/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+          cp -v -f ./pjsua2maui/Platforms/iOS/pjsua2/*.cpp ${{ github.workspace }}/pjsip-${{matrix.arch}}/cpp
+          cp -v -f ./pjsua2maui/Platforms/iOS/pjsua2/*.h ${{ github.workspace }}/pjsip-${{matrix.arch}}/cpp
+          cp -v -f ${{ github.workspace }}/res/pj/ios/config_site.h ${{ github.workspace }}/pjsip-${{matrix.arch}}/cpp
+          
+        env:
+          BUILD_THREADS: $(sysctl -n hw.ncpu)
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: pjsip-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: ${{ github.workspace }}/pjsip-${{matrix.arch}}
+          overwrite: true
+
+  pjsip-mac:
+    name: pjsip - mac 
+    runs-on: macos-26
+    needs: [bcg729-mac, openh264-mac, openssl-mac, opus-mac]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm64, x86_64]
+        include:
+        - lib_name: pjsip
+        - platform: MacOSX
+        - sdk: macosx
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+      - name: Cache pjsip Built SDK
+        uses: actions/cache@v6
+        id: cache-libs
+        with:
+          path: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          key: ${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}
+
+      - name: Setup Xcode 26.3
+        uses: maxim-lobanov/setup-xcode@v1
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        with:
+          xcode-version: '26.3'
+  
+      - name: Install deps
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          brew install nasm autoconf automake libtool swig pkg-config llvm
+        shell: sh
+
+      - uses: actions/download-artifact@v8
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        name: Download bcg729 macos
+        with:
+          name: ${{ env.BCG_SDK_NAME }}
+          path: ${{ github.workspace }}/libs
+        env:
+          BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
      
+      - uses: actions/download-artifact@v8
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        name: Download H264 macos
+        with:
+          name: ${{ env.H264_SDK_NAME }}
+          path: ${{ github.workspace }}/libs
+        env:
+          H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+       
+      - uses: actions/download-artifact@v8
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        name: Download SSL macos
+        with:
+          name: ${{ env.SSL_SDK_NAME }}
+          path: ${{ github.workspace }}/libs
+        env:
+          SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+      
+      - uses: actions/download-artifact@v8
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        name: Download opus macos (${{ matrix.arch }})
+        with:
+          name: ${{ env.OPUS_SDK_NAME }}
+          path: ${{ github.workspace }}/libs
+        env:
+          OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          
+      - name: Copy config_site.h to PJSIP
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          TARGET_CONFIG_DIR="lib/pjproject/pjlib/include/pj"
+          cp "${{ github.workspace }}/res/pj/maccatalyst/config_site.h" "$TARGET_CONFIG_DIR/config_site.h"
+    
+      - name: Inspect Dependencies Structure
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        run: |
+          echo "=== Library folders structure check ==="
+          ls  ${{ github.workspace }}/libs/${{ env.BCG_SDK_NAME }} && echo "bcg729 found"
+          ls  ${{ github.workspace }}/libs/${{ env.H264_SDK_NAME }} && echo "h264 found"
+          ls  ${{ github.workspace }}/libs/${{ env.OPUS_SDK_NAME }} && echo "opus  found"
+          ls  ${{ github.workspace }}/libs/${{ env.SSL_SDK_NAME }} && echo "ssl  found"
+          ls -R ${{ github.workspace }}/libs
+        env:
+          BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+     
+      - name: Build 
+        id: build-pjsip-mac
+        if: steps.cache-libs.outputs.cache-hit != 'true'
+        working-directory: lib/pjproject
+        run: |
+          mkdir -p ../logs
+           
+          CATALYST_SYSTEM_INCLUDES="$SDKPATH/System/iOSSupport/usr/include"
+          export ARCH=${{ matrix.arch }}
+          export TARGET="${{ matrix.arch }}-apple-ios15.0-macabi"
+          export CC="clang -target $TARGET"
+          export CXX="clang++ -target $TARGET"
+          export SDKVERSION=${{ env.SDKVERSION }}
+          export MACOSXSDK="${{ matrix.platform}}${SDKVERSION}.sdk" 
+          export SDKPATH=$(xcrun -sdk ${{ matrix.sdk }} --show-sdk-path)
+          CATALYST_SYSTEM_FRAMEWORKS="$SDKPATH/System/iOSSupport/System/Library/Frameworks"
+          CATALYST_SYSTEM_INCLUDES="$SDKPATH/System/iOSSupport/usr/include"
+          export CFLAGS="${CFLAGS} -I${{ env.BCG_ROOT }}/include -I${{ env.H264_ROOT }}/include -I${{ env.SSL_ROOT }}/include -I${{ env.OPUS_ROOT }}/include "
+          export LDFLAGS="${LDFLAGS} -L${{ env.BCG_ROOT }}/lib -lbcg729 -L${{ env.H264_ROOT }}/lib -lopenh264 -L${{ env.SSL_ROOT }}/lib -lssl -lcrypto -L${{ env.OPUS_ROOT }}/lib -lopus"
+          if [[ '${{ matrix.arch }}' == 'arm64' ]]; then
+            export CFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS" 
+            export CXXFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export LDFLAGS="-arch arm64 -target arm64-apple-ios15.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
+          else
+            export CFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export CXXFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH -fPIC ${CXXFLAGS} -isystem $CATALYST_SYSTEM_INCLUDES -iframework $CATALYST_SYSTEM_FRAMEWORKS"
+            export LDFLAGS="-arch x86_64 -target x86_64-apple-ios15.0-macabi -isysroot $SDKPATH ${LDFLAGS} -F$CATALYST_SYSTEM_FRAMEWORKS"
+          fi
+
+          ./configure                            \
+            --host=${{ matrix.arch }}-apple-darwin            \
+            --disable-shared                     \
+            --with-bcg729=${{ env.BCG_ROOT }}    \
+            --with-ssl=${{ env.SSL_ROOT }}       \
+            --with-opus=${{ env.OPUS_ROOT }}     \
+            --with-openh264=${{ env.H264_ROOT }} \
+            CFLAGS="$CFLAGS"                     \
+            LDFLAGS="$LDFLAGS"                   \
+            CXXFLAGS="$CXXFLAGS" > ../logs/pjsip-config-${{ matrix.arch }}.log || exit 1
+
+          echo "FLAGS AFTER CONFIGURE:"
+          echo "CFLAGS=${CFLAGS}"
+          echo "LDFLAGS=${LDFLAGS}"
+          
+          export CFLAGS=$(echo "$CFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
+          export LDFLAGS=$(echo "$LDFLAGS" | tr ' ' '\n' | awk '!seen[$0]++' | tr '\n' ' ')
+
+          echo "starting make dep"
+
+          make dep > ../logs/pjsip-dep-${{ matrix.arch }}.log || exit 1 
+
+          echo 'Done make dep' >> ../logs/pjsip-dep-${{ matrix.arch }}.log
+
+          echo "starting make"
+
+          make lib > ../logs/pjsip-build-${{ matrix.arch }}.log || exit 1
+
+          echo 'Done make lib' >> ../logs/pjsip-build-${{ matrix.arch }}.log
+
+          cd ./pjsip-apps/src/swig/csharp/pjsua2maui/
+          
+          cp -v -f ${{ github.workspace}}/res/pj/pjsua2maui/Makefile . 
+
+          echo "starting make mac"
+
+          make -j$(sysctl -n hw.logicalcpu) > ${{ github.workspace }}/lib/logs/pjsip-swig-${{ matrix.arch }}.log || exit 1
+          
+          echo 'Done make mac' >> ${{ github.workspace }}/lib/logs/pjsip-swig-${{ matrix.arch }}.log
+           
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/lib"
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/cs" 
+          mkdir -p "${{ env.BUILT_SDK_PATH }}/cpp" 
+
+          cp -v -f ${{ env.BCG_ROOT }}/lib/*.a . 
+          cp -v -f ${{ env.H264_ROOT }}/lib/*.a .
+          cp -v -f ${{ env.OPUS_ROOT }}/lib/*.a .
+          cp -v -f ${{ env.SSL_ROOT }}/lib/*.a .
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/lib/${{ matrix.arch }}/libpjsua2.a .
+          
+          libtool -static -o "${{ env.BUILT_SDK_PATH }}/lib/libpjsua2.a" ./*.a
+          
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cs "${{ env.BUILT_SDK_PATH }}/cs/"
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cpp "${{ env.BUILT_SDK_PATH }}/cpp/"
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.h "${{ env.BUILT_SDK_PATH }}/cpp/"
+          cp "${{ github.workspace }}/res/pj/maccatalyst/config_site.h" "${{ env.BUILT_SDK_PATH }}/cpp/"
+
+        shell: bash
+        env:
+          BCG_SDK_NAME: bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          H264_SDK_NAME: h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          OPUS_SDK_NAME: opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          SSL_SDK_NAME: ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BCG_ROOT: ${{ github.workspace }}/libs/bcg729-${{ env.BCG729_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          H264_ROOT: ${{ github.workspace }}/libs/h264-${{ env.OPENH264_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          OPUS_ROOT: ${{ github.workspace }}/libs/opus-${{ env.OPUS_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          SSL_ROOT: ${{ github.workspace }}/libs/ssl-${{ env.OPENSSL_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          BUILT_SDK_PATH:  ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - uses: actions/upload-artifact@v7
+        name: Upload error logs
+        if: steps.cache-libs.outputs.cache-hit != 'true' && failure()  
+        with:
+          name: ${{ matrix.lib_name }}-${{ env.SDK_SUFFIX }}-logs
+          path: | 
+            lib/logs/*.log
+            lib/pjproject/*.log
+        env:
+          SDK_SUFFIX: ${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+
+      - uses: actions/upload-artifact@v7
+        name: Upload pjsip artifact
+        with:
+          name: ${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+          path: |
+            ${{ env.BUILT_SDK_PATH }}
+        env:
+          BUILT_SDK_PATH: ${{ github.workspace }}/${{ matrix.lib_name}}-${{ env.PJSIP_VERSION }}-${{ matrix.platform }}${{ env.SDKVERSION }}-${{ matrix.arch }}.sdk
+    
   pjsip-win:
     name: pjsip - win (${{ matrix.arch }})
     runs-on: windows-2022
@@ -2111,6 +2098,8 @@ jobs:
         arch: [x64, arm64]
     steps: 
       - uses: actions/checkout@v7
+        with: 
+          submodules: true
 
       - name: Cache pjsip Built SDK
         id: cache-libs
@@ -2129,6 +2118,102 @@ jobs:
         uses: ilammy/setup-nasm@v1
         if: steps.cache-libs.outputs.cache-hit != 'true'
              
+      - name: Install SWIG 4.5.1
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $SwigVersion = '4.5.1'
+          $SwigRoot = "$env:RUNNER_TEMP\swig"
+          $SwigArchive = "$env:RUNNER_TEMP\swigwin-$SwigVersion.zip"
+          $SwigUrl = "https://downloads.sourceforge.net/project/swig/swigwin/swigwin-$SwigVersion/swigwin-$SwigVersion.zip"
+
+          # Download SWIG from SourceForge.
+          curl.exe `
+            --fail `
+            --location `
+            --retry 3 `
+            --retry-all-errors `
+            --output $SwigArchive `
+            $SwigUrl
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to download SWIG $SwigVersion. curl exit code: $LASTEXITCODE"
+          }
+
+          if (-not (Test-Path $SwigArchive)) {
+            throw "SWIG archive was not downloaded."
+          }
+
+          # Validate that the downloaded file is a valid ZIP archive.
+          $Zip = $null
+
+          try {
+            $Zip = [System.IO.Compression.ZipFile]::OpenRead($SwigArchive)
+
+            if ($Zip.Entries.Count -eq 0) {
+              throw "The downloaded SWIG archive is empty."
+            }
+          }
+          finally {
+            if ($null -ne $Zip) {
+              $Zip.Dispose()
+            }
+          }
+
+          # Extract the archive into a clean temporary directory.
+          $ExtractedRoot = "$env:RUNNER_TEMP\swigwin-$SwigVersion"
+
+          if (Test-Path $ExtractedRoot) {
+            Remove-Item $ExtractedRoot -Recurse -Force
+          }
+
+          Expand-Archive `
+            -Path $SwigArchive `
+            -DestinationPath $env:RUNNER_TEMP `
+            -Force
+
+          if (-not (Test-Path "$ExtractedRoot\swig.exe")) {
+            throw "SWIG executable was not found at '$ExtractedRoot\swig.exe'."
+          }
+
+          # Replace our dedicated installation.
+          if (Test-Path $SwigRoot) {
+            Remove-Item $SwigRoot -Recurse -Force
+          }
+
+          Move-Item -Path $ExtractedRoot -Destination $SwigRoot
+
+          $SwigBin = "$SwigRoot\swig.exe"
+
+          # Prioritize SWIG 4.5.1 for this step and all subsequent steps.
+          $env:PATH = "$SwigRoot;$env:PATH"
+          Add-Content -Path $env:GITHUB_PATH -Value $SwigRoot
+
+          # Verify the exact executable and version.
+          $ResolvedSwig = Get-Command swig.exe -ErrorAction Stop
+
+          Write-Host "Resolved SWIG: $($ResolvedSwig.Source)"
+
+          if ($ResolvedSwig.Source -ne $SwigBin) {
+            throw "Unexpected SWIG executable: $($ResolvedSwig.Source)"
+          }
+
+          $VersionOutput = & $SwigBin -version 2>&1
+
+          if ($LASTEXITCODE -ne 0) {
+            $VersionOutput | Write-Host
+            throw "SWIG execution failed."
+          }
+
+          $VersionOutput | Write-Host
+
+          if (($VersionOutput -join "`n") -notmatch 'SWIG Version 4\.5\.1') {
+            throw "Expected SWIG 4.5.1, but the executable reported a different version."
+          }
+
+          Write-Host "SWIG 4.5.1 installed and verified successfully."
+
       - name: Validate SWIG
         shell: pwsh
         run: |
@@ -2154,28 +2239,28 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download OpenSSL
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: openssl-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
           path: deps/openssl
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download Opus
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: opus-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
           path: deps/opus
         if: steps.cache-libs.outputs.cache-hit != 'true'
    
       - name: Download BCG729
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: bcg729-win-${{ matrix.arch }}
           path: deps/bcg729
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Download OpenH264
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: openh264-win-${{ matrix.arch == 'x64' && 'x64' || 'ARM64' }}
           path: deps/openh264
@@ -2188,39 +2273,13 @@ jobs:
         run: |
             Get-ChildItem . -Recurse
 
-      - name: Clone PJSIP
-        shell: pwsh
-        run: |
-          git clone --branch "${env:PJSIP_VERSION}" --depth 1 https://github.com/pjsip/pjproject.git pjproject
-        if: steps.cache-libs.outputs.cache-hit != 'true'
-
       - name: Create config_site.h
         shell: pwsh
-        run: |
-          $config = @"
-          #include <pj/config_site_sample.h>
-          #define PJ_HAS_IPV6                       1
-          #define PJ_HAS_SSL_SOCK                   1
-          #define PJ_SSL_SOCK_IMP                   PJ_SSL_SOCK_IMP_OPENSSL
-          #define PJSIP_HAS_TLS_TRANSPORT           1
-          #define PJMEDIA_AUDIO_DEV_HAS_PORTAUDIO   0
-          #define PJMEDIA_HAS_VIDEO                 1
-          #define PJMEDIA_HAS_OPENH264_CODEC        1
-          #define PJMEDIA_HAS_OPUS_CODEC            1
-          #define PJMEDIA_HAS_BCG729                1
-          #define PJ_DLL                            1
-          #define PJ_EXPORTING                      1
-          #define PJ_EXPORT_SPECIFIER               __declspec(dllexport)
-          #define PJ_IMPORT_SPECIFIER               __declspec(dllimport)
-
-          "@
-
-          New-Item -ItemType Directory -Force -Path "pjproject/pjlib/include/pj" | Out-Null
-          Set-Content -Path "pjproject/pjlib/include/pj/config_site.h" -Value $config
+        run: cp -v ${{ github.workspace }}\res\pj\windows\config_site.h ${{ github.workspace }}\lib\pjproject\pjlib\include\pj\config_site.h
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Patch SWIG C# vcxproj linker settings
-        working-directory: pjproject
+        working-directory: lib/pjproject
         shell: pwsh
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
@@ -2317,7 +2376,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
+            $projects = Get-ChildItem lib/pjproject -Recurse -Filter *.vcxproj
 
             foreach ($proj in $projects)
             {
@@ -2342,7 +2401,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'arm64'
         shell: pwsh
         run: |
-            $projects = Get-ChildItem pjproject -Recurse -Filter *.vcxproj
+            $projects = Get-ChildItem lib/pjproject -Recurse -Filter *.vcxproj
 
             foreach ($proj in $projects)
             {
@@ -2382,7 +2441,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $proj = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+            $proj = "lib\pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
 
             [xml]$xml = Get-Content $proj
 
@@ -2413,7 +2472,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $proj = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+            $proj = "lib\pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
 
             [xml]$xml = Get-Content $proj
 
@@ -2478,7 +2537,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $projectFile = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+            $projectFile = "lib\pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
 
             $oldNs = 'pjsua2xamarin.pjsua2'
             $newNs = 'libpjsua2.maui'
@@ -2491,7 +2550,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-            $projectFile = "pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
+            $projectFile = "lib\pjproject\pjsip-apps\build\swig_csharp_pjsua2.vcxproj"
 
             $oldNs = '-c++ -csharp'
             $newNs = '-c++ -csharp -doxygen'
@@ -2503,7 +2562,7 @@ jobs:
       - name: Patch Windows SDK Tool Path for ARM64 Cross-Compile
         if: steps.cache-libs.outputs.cache-hit != 'true' && matrix.arch == 'arm64'
         shell: pwsh
-        working-directory: pjproject
+        working-directory: lib/pjproject
         run: |
           Write-Host "=== Fixing Windows SDK Tool Paths for ARM64 Cross-Compilation ==="
           
@@ -2551,10 +2610,29 @@ jobs:
               Write-Error "  -> Target PropertyGroup could not be found in vcxproj XML structure."
           }
 
+      - name: Verify SWIG 4.5.1
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $Swig = Get-Command swig.exe -ErrorAction Stop
+
+          Write-Host "SWIG executable: $($Swig.Source)"
+
+          if ($Swig.Source -notlike "$env:RUNNER_TEMP\swig\*") {
+            throw "Unexpected SWIG executable: $($Swig.Source)"
+          }
+
+          & swig.exe -version
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "SWIG verification failed."
+          }
+
       - name: Build 
         shell: pwsh
         if: steps.cache-libs.outputs.cache-hit != 'true'
-        working-directory: pjproject
+        working-directory: lib/pjproject
         run: |
           # Include Path Mapping from third party libraries
           $DepsDir    = "${env:GITHUB_WORKSPACE}/deps"
@@ -2627,21 +2705,25 @@ jobs:
         working-directory: src
         shell: pwsh
         run: | 
+          New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\cpp" | Out-Null
           New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\pjsua2" | Out-Null
           New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\lib\${{ matrix.arch }}" | Out-Null
 
-          if (Test-Path "${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\") {
+          if (Test-Path "${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\") {
             Write-Host "Copying pjsip dll"
-            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
+            Copy-Item ${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
             Write-Host "Copying pjsip managed c# classes"
-            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2.win\pjsua2" -Verbose
+            Copy-Item ${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2.win\pjsua2" -Verbose
+            Copy-Item ${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\*.cpp ".\libpjsua2.win\cpp" -Verbose
+            Copy-Item ${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\*.h ".\libpjsua2.win\cpp" -Verbose
+            Copy-Item ${{ github.workspace }}\res\pj\windows\config_site.h ".\libpjsua2.win\cpp" -Verbose
           }
           
           Get-ChildItem . -Recurse
           
 
       - name: Upload PJSIP artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pjsip-${{ env.PJSIP_VERSION }}-Win-${{ matrix.arch }}
           path: ${{ github.workspace }}\src\libpjsua2.win\*
@@ -2690,16 +2772,24 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/cpp
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/iOS/cpp
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/MacCatalyst/cpp
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Windows/cpp
 
           # Move managed classes to projects directory
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86/java/*.java ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/org/pjsip
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86/csharp/*.cs ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2
+          cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86/cpp/*.* ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/cpp
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-x86_64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2
+          cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-x86_64.sdk/cpp/*.* ${{ github.workspace }}/src/libpjsua2maui/Platforms/iOS/cpp
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2
+          cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk/cpp/*.* ${{ github.workspace }}/src/libpjsua2maui/Platforms/MacCatalyst/cpp
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2
+          cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/cpp/*.* ${{ github.workspace }}/src/libpjsua2maui/Platforms/Windows/cpp
 
       - name: Synchronize generated SWIG sources
         shell: bash
@@ -2710,9 +2800,13 @@ jobs:
           CHANGES=$(git status --porcelain \
             src/libpjsua2maui/Platforms/Android/org/pjsip/ \
             src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Android/cpp/ \
             src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/iOS/cpp/ \
             src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/ \
-            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/)
+            src/libpjsua2maui/Platforms/MacCatalyst/cpp/ \
+            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Windows/cpp/)
           
           # 2. Condicional: se a variável estiver vazia, não há diff
           if [ -z "$CHANGES" ]; then
@@ -2728,9 +2822,13 @@ jobs:
           git add \
             src/libpjsua2maui/Platforms/Android/org/pjsip/ \
             src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Android/cpp/ \
             src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/iOS/cpp/ \
             src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/ \
-            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/
+            src/libpjsua2maui/Platforms/MacCatalyst/cpp/ \
+            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Windows/cpp/
           
           git commit -m "feat: Update generated SWIG bindings"
           git push origin HEAD:${{ github.head_ref }}
@@ -2871,19 +2969,23 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: bash
         run: |
+          mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/cpp/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/org/pjsip/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-arm/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-x86/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-x86_64/native/"
+          mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/cpp/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/runtimes/ios-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/runtimes/iossimulator-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/runtimes/iossimulator-x64/native/"
+          mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/cpp/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/runtimes/maccatalyst-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/runtimes/maccatalyst-x64/native/"
+          mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/cpp/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/runtimes/win-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/runtimes/win-x64/native/"
@@ -2891,9 +2993,13 @@ jobs:
           # Move managed classes to projects directory
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-android-x86/java/"*.java "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/org/pjsip/"
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-android-x86/csharp/"*.cs "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/"
+          cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-android-x86/cpp/"*.* "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/cpp/"
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-iPhoneSimulator${SDKVERSION}-x86_64.sdk/cs/"*.cs "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/"
+          cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-iPhoneSimulator${SDKVERSION}-x86_64.sdk/cpp/"*.* "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/cpp/"
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-MacOSX${SDKVERSION}-x86_64.sdk/cs/"*.cs "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/"
+          cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-MacOSX${SDKVERSION}-x86_64.sdk/cpp/"*.* "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/cpp/"
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-Win-x64/pjsua2/"*.cs "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/"
+          cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-Win-x64/cpp/"*.* "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/cpp/"
 
           # Move android libs to packaging directory
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-android-armeabi-v7a/lib/lib"*.so "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-arm/native/"
@@ -2982,14 +3088,15 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
 
-      # - name: Push to GitHub Packages
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   working-directory: ${{ github.workspace }}/nupkg/
-      #   shell: bash
-      #   run: |
-      #     dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
-      #       --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-      #       --api-key "${{ secrets.GH_TOKEN }}" \
-      #       --skip-duplicate
-      #   env: 
-      #     VERSION: ${{ env.VERSION }}
+      - name: Push to GitHub Packages
+        if: startsWith(github.ref, 'refs/tags/')
+        working-directory: ${{ github.workspace }}/nupkg/
+        shell: bash
+        run: |
+          dotnet nuget push libpjsua2maui.${{ env.VERSION }}.nupkg \
+            --source "https://nuget.pkg.github.com/${{ env.USERNAME }}/index.json" \
+            --api-key "${{ secrets.GH_TOKEN }}" \
+            --skip-duplicate
+        env: 
+          USERNAME: ${{ secrets.GH_USERNAME }}
+          VERSION: ${{ env.VERSION }}

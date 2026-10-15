@@ -2113,101 +2113,73 @@ jobs:
         uses: ilammy/setup-nasm@v1
         if: steps.cache-libs.outputs.cache-hit != 'true'
              
-      - name: Install SWIG 4.5.1
+      - name: Install SWIG 
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
 
-          $SwigVersion = '4.5.1'
-          $SwigUrl = "https://github.com/swig/swig/releases/download/v$SwigVersion/swigwin-$SwigVersion.zip"
           $SwigRoot = "$env:RUNNER_TEMP\swig"
+          $SwigArchive = "$env:RUNNER_TEMP\swigwin-${{ env.SWIG_VERSION }}.zip"
+          $SwigUrl = "https://sourceforge.net/projects/swig/files/swigwin/swigwin-${{ env.SWIG_VERSION }}/swigwin-${{ env.SWIG_VERSION }}.zip/download"
 
-          # Find the SWIG currently available on the runner.
-          $ExistingSwig = Get-Command swig.exe -ErrorAction SilentlyContinue
-
-          if ($null -ne $ExistingSwig) {
-            Write-Host "Existing SWIG:"
-            Write-Host "  $($ExistingSwig.Source)"
-
-            $ExistingSwigDirectory = Split-Path $ExistingSwig.Source -Parent
-
-            # Remove the existing SWIG directory from the current process PATH.
-            $PathEntries = $env:PATH -split ';' |
-              Where-Object {
-                $_ -and
-                $_.TrimEnd('\') -ine $ExistingSwigDirectory.TrimEnd('\')
-              }
-
-            $env:PATH = $PathEntries -join ';'
-
-            Write-Host "Removed existing SWIG directory from PATH:"
-            Write-Host "  $ExistingSwigDirectory"
-          }
-          else {
-            Write-Host "No existing SWIG installation was found on PATH."
-          }
-
-          # Download SWIG 4.5.1.
+          # Download the official Windows distribution.
           Invoke-WebRequest `
             -Uri $SwigUrl `
-            -OutFile "$env:RUNNER_TEMP\swig.zip"
+            -OutFile $SwigArchive `
+            -MaximumRedirection 10
 
+          if (-not (Test-Path $SwigArchive)) {
+            throw "SWIG archive download failed."
+          }
+
+          # Extract the distribution.
           Expand-Archive `
-            -Path "$env:RUNNER_TEMP\swig.zip" `
+            -Path $SwigArchive `
             -DestinationPath $env:RUNNER_TEMP `
             -Force
 
-          $Extracted = Join-Path $env:RUNNER_TEMP "swigwin-$SwigVersion"
+          $Extracted = Join-Path $env:RUNNER_TEMP "swigwin-${{ env.SWIG_VERSION }}"
 
-          if (-not (Test-Path $Extracted)) {
-            throw "SWIG $SwigVersion was not extracted to the expected location."
+          if (-not (Test-Path "$Extracted\swig.exe")) {
+            throw "SWIG executable was not found in the extracted archive."
           }
 
+          # Replace any previous installation in our dedicated directory.
           if (Test-Path $SwigRoot) {
-            Remove-Item `
-              -Path $SwigRoot `
-              -Recurse `
-              -Force
+            Remove-Item -Path $SwigRoot -Recurse -Force
           }
 
-          Move-Item `
-            -Path $Extracted `
-            -Destination $SwigRoot
+          Move-Item -Path $Extracted -Destination $SwigRoot
 
           $SwigBin = Join-Path $SwigRoot 'swig.exe'
 
           if (-not (Test-Path $SwigBin)) {
-            throw "SWIG executable was not found at '$SwigBin'."
+            throw "SWIG executable was not installed correctly."
           }
 
-          # Put SWIG 4.5.1 first in the PATH for this step and subsequent steps.
+          # Prioritize our installation in this step.
           $env:PATH = "$SwigRoot;$env:PATH"
 
-          # Persist the PATH for subsequent GitHub Actions steps.
+          # Prioritize our installation in subsequent GitHub Actions steps.
           $SwigRoot | Out-File `
             -FilePath $env:GITHUB_PATH `
             -Encoding utf8 `
             -Append
 
-          # Verify the executable actually selected by PATH.
+          # Verify which executable will be used.
           $ResolvedSwig = Get-Command swig.exe -ErrorAction Stop
 
-          Write-Host ''
-          Write-Host 'Resolved SWIG:'
-          Write-Host "  $($ResolvedSwig.Source)"
+          Write-Host "Resolved SWIG: $($ResolvedSwig.Source)"
 
           if ($ResolvedSwig.Source -ne $SwigBin) {
-            throw "The resolved SWIG executable is not SWIG 4.5.1."
+            throw "Unexpected SWIG executable: $($ResolvedSwig.Source)"
           }
-
-          Write-Host ''
-          Write-Host 'SWIG version:'
 
           & swig.exe -version
 
           if ($LASTEXITCODE -ne 0) {
-            throw "SWIG $SwigVersion verification failed."
-          }      
+            throw "SWIG verification failed."
+          }     
       
       - name: Validate SWIG
         shell: pwsh

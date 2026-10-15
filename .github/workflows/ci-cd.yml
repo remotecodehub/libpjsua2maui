@@ -316,24 +316,7 @@ jobs:
       if: steps.cache-libs.outputs.cache-hit != 'true'
       run: |
         echo "Creating config site file for Android ..."
-        echo "#define PJ_CONFIG_ANDROID                 1"                       > ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_HAS_G7221_CODEC           1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_AUDIO_DEV_HAS_ANDROID_JNI 0"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_AUDIO_DEV_HAS_OPENSL      1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJSIP_AUTH_AUTO_SEND_NEXT         0"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Changing PJSIP_MAX_PKT_LEN to 6000"
-        echo "#define PJSIP_MAX_PKT_LEN                 6000"                    >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Enabling BCG729 in config_site"
-        echo "#define PJMEDIA_HAS_BCG729                1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Enabling h264 and Video support in config_site"
-        echo "#define PJMEDIA_HAS_VIDEO                 1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJMEDIA_HAS_OPENH264_CODEC        1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "Enabling Opus in config_site"
-        echo "#define PJMEDIA_HAS_OPUS_CODEC            1"                       >> ${{ env.CONFIG_SITE_PATH }} 
-        echo "Enabling SSL in config_site"
-        echo "#define PJ_HAS_SSL_SOCK                   1"                       >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#define PJ_SSL_SOCK_IMP                   PJ_SSL_SOCK_IMP_OPENSSL" >> ${{ env.CONFIG_SITE_PATH }}
-        echo "#include <pj/config_site_sample.h>"                                >> ${{ env.CONFIG_SITE_PATH }}
+        cp -v ${{ github.workspace }}/res/pj/android/config_site.h ${{ env.CONFIG_SITE_PATH }}
         cp -v ${{ github.workspace }}/res/pj/pjsua2maui/Makefile ${{ env.PJSIP_PATH }}/pjsip-apps/src/swig/csharp/pjsua2maui
 
     - name: Build
@@ -363,6 +346,9 @@ jobs:
         cp -v ${{ env.PJSUA_GENERATED_SO_DIR }}/${{ matrix.arch }}/*.so ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/lib/ 
         cp -v ${{ env.PJSUA_BASE_DIR }}/csharp/pjsua2maui/pjsua2maui/Platforms/Android/org/pjsip/*.java ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/java
         cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }}/*.cs ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/csharp
+        cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }}/*.cpp ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/cpp
+        cp -v ${{ env.PJSUA_GENERATED_CSHARP_DIR }}/*.h ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/cpp
+        cp -v ${{ env.CONFIG_SITE_PATH }} ${{ env.PJSIP_BUILD_OUT_PATH }}/pjsip-${{ env.PJSIP_VERSION }}-android-${{matrix.arch}}/cpp
          
     - name: Upload pjsip artifacts
       uses: actions/upload-artifact@v7
@@ -376,7 +362,7 @@ jobs:
       OPUS_LIB_PATH: ${{ github.workspace }}/output/opus/libs/
       BCG729_LIB_PATH: ${{ github.workspace }}/output/bcg729/libs/
       PJSIP_TMP_PATH: /tmp/pjsip
-      CONFIG_SITE_PATH: ${{ github.workspace }}/lib/pjsip/pjlib/include/pj/config_site.h
+      CONFIG_SITE_PATH: ${{ github.workspace }}/lib/pjproject/pjlib/include/pj/config_site.h
       PJSUA_GENERATED_CSHARP_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/Platforms/Android/pjsua2 
       PJSUA_GENERATED_SO_DIR: /tmp/pjsip/pjsip-apps/src/swig/csharp/pjsua2maui/pjsua2maui/Platforms/Android/lib
       PJSUA_BASE_DIR: /tmp/pjsip/pjsip-apps/src/swig
@@ -949,7 +935,7 @@ jobs:
         id: build-pj-ios
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
-          cp -f ${{ github.workspace }}/res/pj/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
+          cp -f ${{ github.workspace }}/res/pj/ios/config_site.h ${{ env.PJSIP_PATH }}/pjlib/include/pj/config_site.h
           mkdir -p ~/pjsip_build/bundle/${{ matrix.arch }}
           cp -r ${{ env.PJSIP_PATH }} ~/pjsip_build/bundle/${{ matrix.arch }}
           cd ~/pjsip_build/bundle/${{ matrix.arch }}/pjsip
@@ -1008,6 +994,9 @@ jobs:
           cp -v -f ./pjsua2maui/Platforms/iOS/lib/${{ matrix.resolved_arch }}/*.a ${{ github.workspace }}/merge
           libtool -static -o ${{ github.workspace }}/pjsip-${{matrix.arch}}/lib/libpjsua2.a ${{ github.workspace }}/merge/*.a
           cp -v -f ./pjsua2maui/Platforms/iOS/pjsua2/*.cs ${{ github.workspace }}/pjsip-${{matrix.arch}}/cs
+          cp -v -f ./pjsua2maui/Platforms/iOS/pjsua2/*.cpp ${{ github.workspace }}/pjsip-${{matrix.arch}}/cpp
+          cp -v -f ./pjsua2maui/Platforms/iOS/pjsua2/*.h ${{ github.workspace }}/pjsip-${{matrix.arch}}/cpp
+          cp -v -f ${{ github.workspace }}/res/pj/ios/config_site.h ${{ github.workspace }}/pjsip-${{matrix.arch}}/cpp
           
         env:
           BUILD_THREADS: $(sysctl -n hw.ncpu)
@@ -1522,8 +1511,7 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         run: |
           TARGET_CONFIG_DIR="lib/pjproject/pjlib/include/pj"
-          # mkdir -p "$TARGET_CONFIG_DIR"
-          cp "${{ github.workspace }}/res/pj/pjsua2maui/config_site.h" "$TARGET_CONFIG_DIR/config_site.h"
+          cp "${{ github.workspace }}/res/pj/maccatalyst/config_site.h" "$TARGET_CONFIG_DIR/config_site.h"
     
       - name: Inspect Dependencies Structure
         if: steps.cache-libs.outputs.cache-hit != 'true'
@@ -1622,6 +1610,9 @@ jobs:
           libtool -static -o "${{ env.BUILT_SDK_PATH }}/lib/libpjsua2.a" ./*.a
           
           cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cs "${{ env.BUILT_SDK_PATH }}/cs/"
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.cpp "${{ env.BUILT_SDK_PATH }}/cpp/"
+          cp -v -f ./pjsua2maui/Platforms/MacCatalyst/pjsua2/*.h "${{ env.BUILT_SDK_PATH }}/cpp/"
+          cp "${{ github.workspace }}/res/pj/maccatalyst/config_site.h" "${{ env.BUILT_SDK_PATH }}/cpp/"
 
         shell: bash
         env:
@@ -1746,7 +1737,7 @@ jobs:
             Get-ChildItem "${env:INSTALL_DIR}\bcg729" -Recurse
  
       - name: Upload BCG729 artifacts 
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bcg729-win-${{ matrix.arch }}
           path: deps/bcg729/**/*
@@ -1857,7 +1848,7 @@ jobs:
 
       - name: Upload OpenH264 artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: openh264-win-${{ matrix.arch }}
           path: |
@@ -1971,7 +1962,7 @@ jobs:
 
       - name: Upload OpenSSL artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: openssl-win-${{ matrix.arch }}
           path: |
@@ -2086,7 +2077,7 @@ jobs:
 
       - name: Upload Opus artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: opus-win-${{ matrix.arch }}
           path: |
@@ -2183,27 +2174,7 @@ jobs:
 
       - name: Create config_site.h
         shell: pwsh
-        run: |
-          $config = @"
-          #include <pj/config_site_sample.h>
-          #define PJ_HAS_IPV6                       1
-          #define PJ_HAS_SSL_SOCK                   1
-          #define PJ_SSL_SOCK_IMP                   PJ_SSL_SOCK_IMP_OPENSSL
-          #define PJSIP_HAS_TLS_TRANSPORT           1
-          #define PJMEDIA_AUDIO_DEV_HAS_PORTAUDIO   0
-          #define PJMEDIA_HAS_VIDEO                 1
-          #define PJMEDIA_HAS_OPENH264_CODEC        1
-          #define PJMEDIA_HAS_OPUS_CODEC            1
-          #define PJMEDIA_HAS_BCG729                1
-          #define PJ_DLL                            1
-          #define PJ_EXPORTING                      1
-          #define PJ_EXPORT_SPECIFIER               __declspec(dllexport)
-          #define PJ_IMPORT_SPECIFIER               __declspec(dllimport)
-
-          "@
-
-          New-Item -ItemType Directory -Force -Path "lib/pjproject/pjlib/include/pj" | Out-Null
-          Set-Content -Path "lib/pjproject/pjlib/include/pj/config_site.h" -Value $config
+        run: cp -v ${{ github.workspace }}\res\pj\windows\config_site.h ${{ github.workspace }}\lib\pjproject\pjlib\include\pj\config_site.h
         if: steps.cache-libs.outputs.cache-hit != 'true'
 
       - name: Patch SWIG C# vcxproj linker settings
@@ -2618,18 +2589,21 @@ jobs:
           New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\pjsua2" | Out-Null
           New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\src\libpjsua2.win\lib\${{ matrix.arch }}" | Out-Null
 
-          if (Test-Path "${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\") {
+          if (Test-Path "${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\") {
             Write-Host "Copying pjsip dll"
-            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
+            Copy-Item ${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\pjsua2.dll ".\libpjsua2.win\lib\${{ matrix.arch }}" -Recurse -Force -Verbose
             Write-Host "Copying pjsip managed c# classes"
-            Copy-Item ${{ github.workspace }}\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2.win\pjsua2" -Verbose
+            Copy-Item ${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\*.cs ".\libpjsua2.win\pjsua2" -Verbose
+            Copy-Item ${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\*.cpp ".\libpjsua2.win\cpp" -Verbose
+            Copy-Item ${{ github.workspace }}\lib\pjproject\pjsip-apps\src\swig\csharp\output\*.h ".\libpjsua2.win\cpp" -Verbose
+            Copy-Item ${{ github.workspace }}\res\pj\windows\config_site.h ".\libpjsua2.win\cpp" -Verbose
           }
           
           Get-ChildItem . -Recurse
           
 
       - name: Upload PJSIP artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pjsip-${{ env.PJSIP_VERSION }}-Win-${{ matrix.arch }}
           path: ${{ github.workspace }}\src\libpjsua2.win\*
@@ -2678,16 +2652,24 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/org/pjsip
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/cpp
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/iOS/cpp
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/MacCatalyst/cpp
           mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2
+          mkdir -p ${{ github.workspace }}/src/libpjsua2maui/Platforms/Windows/cpp
 
           # Move managed classes to projects directory
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86/java/*.java ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/org/pjsip
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86/csharp/*.cs ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2
+          cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-android-x86/cpp/*.* ${{ github.workspace }}/src/libpjsua2maui/Platforms/Android/cpp
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-x86_64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2
+          cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-iPhoneSimulator${{ env.SDKVERSION }}-x86_64.sdk/cpp/*.* ${{ github.workspace }}/src/libpjsua2maui/Platforms/iOS/cpp
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk/cs/*.cs ${{ github.workspace }}/src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2
+          cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-MacOSX${{ env.SDKVERSION }}-x86_64.sdk/cpp/*.* ${{ github.workspace }}/src/libpjsua2maui/Platforms/MacCatalyst/cpp
           cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/pjsua2/*.cs ${{ github.workspace }}/src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2
+          cp -v ${{ env.ARTIFACTS }}/pjsip-${{ env.PJSIP_VERSION }}-Win-x64/cpp/*.* ${{ github.workspace }}/src/libpjsua2maui/Platforms/Windows/cpp
 
       - name: Synchronize generated SWIG sources
         shell: bash
@@ -2698,9 +2680,13 @@ jobs:
           CHANGES=$(git status --porcelain \
             src/libpjsua2maui/Platforms/Android/org/pjsip/ \
             src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Android/cpp/ \
             src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/iOS/cpp/ \
             src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/ \
-            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/)
+            src/libpjsua2maui/Platforms/MacCatalyst/cpp/ \
+            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Windows/cpp/)
           
           # 2. Condicional: se a variável estiver vazia, não há diff
           if [ -z "$CHANGES" ]; then
@@ -2716,9 +2702,13 @@ jobs:
           git add \
             src/libpjsua2maui/Platforms/Android/org/pjsip/ \
             src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Android/cpp/ \
             src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/iOS/cpp/ \
             src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/ \
-            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/
+            src/libpjsua2maui/Platforms/MacCatalyst/cpp/ \
+            src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/ \
+            src/libpjsua2maui/Platforms/Windows/cpp/
           
           git commit -m "feat: Update generated SWIG bindings"
           git push origin HEAD:${{ github.head_ref }}
@@ -2859,19 +2849,23 @@ jobs:
         if: steps.cache-libs.outputs.cache-hit != 'true'
         shell: bash
         run: |
+          mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/cpp/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/org/pjsip/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-arm/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-x86/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-x86_64/native/"
+          mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/cpp/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/runtimes/ios-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/runtimes/iossimulator-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/runtimes/iossimulator-x64/native/"
+          mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/cpp/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/runtimes/maccatalyst-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/runtimes/maccatalyst-x64/native/"
+          mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/cpp/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/runtimes/win-arm64/native/"
           mkdir -p "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/runtimes/win-x64/native/"
@@ -2879,9 +2873,13 @@ jobs:
           # Move managed classes to projects directory
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-android-x86/java/"*.java "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/org/pjsip/"
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-android-x86/csharp/"*.cs "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/pjsua2maui/pjsua2/"
+          cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-android-x86/cpp/"*.* "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/cpp/"
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-iPhoneSimulator${SDKVERSION}-x86_64.sdk/cs/"*.cs "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/pjsua2maui/pjsua2/"
+          cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-iPhoneSimulator${SDKVERSION}-x86_64.sdk/cpp/"*.* "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/iOS/cpp/"
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-MacOSX${SDKVERSION}-x86_64.sdk/cs/"*.cs "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/pjsua2maui/pjsua2/"
+          cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-MacOSX${SDKVERSION}-x86_64.sdk/cpp/"*.* "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/MacCatalyst/cpp/"
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-Win-x64/pjsua2/"*.cs "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/pjsua2maui/pjsua2/"
+          cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-Win-x64/cpp/"*.* "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Windows/cpp/"
 
           # Move android libs to packaging directory
           cp -v "$ARTIFACTS/pjsip-${PJSIP_VERSION}-android-armeabi-v7a/lib/lib"*.so "$GITHUB_WORKSPACE/src/libpjsua2maui/Platforms/Android/runtimes/android-arm/native/"

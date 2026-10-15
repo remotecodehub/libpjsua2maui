@@ -102,6 +102,10 @@ also MacCatalyst (arm64, x86_64) and Windows (x64, ARM64) as well.
 
 		<!-- Sources C# -->
 		<None Include="**/*.cs" Pack="true" PackagePath="src/%(RecursiveDir)" />
+		
+		<!-- Sources CPP -->
+		<None Include="**/*.cpp" Pack="true" PackagePath="src/%(RecursiveDir)" />
+		<None Include="**/*.h" Pack="true" PackagePath="src/%(RecursiveDir)" />
 
 		<!-- Licenças de Terceiros -->
 		<None Include="../third_party/bcg729/LICENSE.txt" Pack="true" PackagePath="third_party_notice/bcg729/" />

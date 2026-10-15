@@ -2113,6 +2113,102 @@ jobs:
         uses: ilammy/setup-nasm@v1
         if: steps.cache-libs.outputs.cache-hit != 'true'
              
+      - name: Install SWIG 4.5.1
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $SwigVersion = '4.5.1'
+          $SwigUrl = "https://github.com/swig/swig/releases/download/v$SwigVersion/swigwin-$SwigVersion.zip"
+          $SwigRoot = "$env:RUNNER_TEMP\swig"
+
+          # Find the SWIG currently available on the runner.
+          $ExistingSwig = Get-Command swig.exe -ErrorAction SilentlyContinue
+
+          if ($null -ne $ExistingSwig) {
+            Write-Host "Existing SWIG:"
+            Write-Host "  $($ExistingSwig.Source)"
+
+            $ExistingSwigDirectory = Split-Path $ExistingSwig.Source -Parent
+
+            # Remove the existing SWIG directory from the current process PATH.
+            $PathEntries = $env:PATH -split ';' |
+              Where-Object {
+                $_ -and
+                $_.TrimEnd('\') -ine $ExistingSwigDirectory.TrimEnd('\')
+              }
+
+            $env:PATH = $PathEntries -join ';'
+
+            Write-Host "Removed existing SWIG directory from PATH:"
+            Write-Host "  $ExistingSwigDirectory"
+          }
+          else {
+            Write-Host "No existing SWIG installation was found on PATH."
+          }
+
+          # Download SWIG 4.5.1.
+          Invoke-WebRequest `
+            -Uri $SwigUrl `
+            -OutFile "$env:RUNNER_TEMP\swig.zip"
+
+          Expand-Archive `
+            -Path "$env:RUNNER_TEMP\swig.zip" `
+            -DestinationPath $env:RUNNER_TEMP `
+            -Force
+
+          $Extracted = Join-Path $env:RUNNER_TEMP "swigwin-$SwigVersion"
+
+          if (-not (Test-Path $Extracted)) {
+            throw "SWIG $SwigVersion was not extracted to the expected location."
+          }
+
+          if (Test-Path $SwigRoot) {
+            Remove-Item `
+              -Path $SwigRoot `
+              -Recurse `
+              -Force
+          }
+
+          Move-Item `
+            -Path $Extracted `
+            -Destination $SwigRoot
+
+          $SwigBin = Join-Path $SwigRoot 'swig.exe'
+
+          if (-not (Test-Path $SwigBin)) {
+            throw "SWIG executable was not found at '$SwigBin'."
+          }
+
+          # Put SWIG 4.5.1 first in the PATH for this step and subsequent steps.
+          $env:PATH = "$SwigRoot;$env:PATH"
+
+          # Persist the PATH for subsequent GitHub Actions steps.
+          $SwigRoot | Out-File `
+            -FilePath $env:GITHUB_PATH `
+            -Encoding utf8 `
+            -Append
+
+          # Verify the executable actually selected by PATH.
+          $ResolvedSwig = Get-Command swig.exe -ErrorAction Stop
+
+          Write-Host ''
+          Write-Host 'Resolved SWIG:'
+          Write-Host "  $($ResolvedSwig.Source)"
+
+          if ($ResolvedSwig.Source -ne $SwigBin) {
+            throw "The resolved SWIG executable is not SWIG 4.5.1."
+          }
+
+          Write-Host ''
+          Write-Host 'SWIG version:'
+
+          & swig.exe -version
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "SWIG $SwigVersion verification failed."
+          }      
+      
       - name: Validate SWIG
         shell: pwsh
         run: |
@@ -2507,6 +2603,25 @@ jobs:
               Write-Host "  -> XML successfully patched with RcToolPath."
           } else {
               Write-Error "  -> Target PropertyGroup could not be found in vcxproj XML structure."
+          }
+
+      - name: Verify SWIG 4.5.1
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $Swig = Get-Command swig.exe -ErrorAction Stop
+
+          Write-Host "SWIG executable: $($Swig.Source)"
+
+          if ($Swig.Source -notlike "$env:RUNNER_TEMP\swig\*") {
+            throw "Unexpected SWIG executable: $($Swig.Source)"
+          }
+
+          & swig.exe -version
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "SWIG verification failed."
           }
 
       - name: Build 
